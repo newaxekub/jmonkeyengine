@@ -48,7 +48,7 @@ import com.jme.util.export.OutputCapsule;
  * Three coloured arrows, one pointing along each axis.
  * 
  * @author Joshua Slack
- * @version $Revision$, $Date$
+ * @version $Revision: 1.4 $, $Date$
  */
 public class AxisRods extends Node {
 

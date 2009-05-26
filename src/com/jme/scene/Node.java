@@ -161,8 +161,11 @@ public class Node extends Spatial implements Serializable, Savable {
                     children = Collections.synchronizedList(new ArrayList<Spatial>(1));  
                 }
                 children.add(child);
-                logger.log(Level.INFO, "Child \"{0}\" attached to this node \"{1}\"", 
-                            new String[] {child.getName(), getName()});
+                if (logger.isLoggable(Level.INFO)) {
+                    logger.info("Child (" + child.getName()
+                            + ") attached to this" + " node (" + getName()
+                            + ")");
+                }
             }
         }
         
@@ -193,8 +196,11 @@ public class Node extends Spatial implements Serializable, Savable {
                     children = Collections.synchronizedList(new ArrayList<Spatial>(1));  
                 }
                 children.add(index, child);
-                logger.log(Level.INFO, "Child \"{0}\" attached to this node \"{1}\"", 
-                        new String[] {child.getName(), getName()});
+                if (logger.isLoggable(Level.INFO)) {
+                    logger.info("Child (" + child.getName()
+                            + ") attached to this" + " node (" + getName()
+                            + ")");
+                }
             }
         }
 

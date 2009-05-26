@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -45,7 +46,7 @@ import com.jme.util.geom.BufferUtils;
 
 /**
  * <code>FragmentProgramState</code>
- * @version $Id$
+ * @version $Id: FragmentProgramState.java,v 1.8 2007/08/14 15:00:48 rherlitz Exp $
  */
 public abstract class FragmentProgramState extends RenderState {
 
@@ -187,7 +188,7 @@ public abstract class FragmentProgramState extends RenderState {
         program = capsule.readByteBuffer("program", null);
     }
     
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return FragmentProgramState.class;
     }
 }

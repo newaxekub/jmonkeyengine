@@ -1,17 +1,19 @@
 package com.jme.light;
 
-import junit.framework.TestCase;
+import java.util.logging.Logger;
 
 import com.jme.bounding.BoundingSphere;
 import com.jme.math.Vector3f;
 import com.jme.scene.Node;
 import com.jme.scene.shape.Sphere;
+import junit.framework.TestCase;
 
 /**
- * Tests for LightState related stuff.
+ * Tests for LightState relatet stuff.
  */
-@SuppressWarnings("deprecation")
 public class LightManagementTest extends TestCase {
+    private static final Logger logger = Logger
+            .getLogger(LightManagementTest.class.getName());
     
     /**
      * Test the LightStateCreator.quickSort.

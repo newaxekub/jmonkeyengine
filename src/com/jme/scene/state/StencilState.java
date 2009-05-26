@@ -34,6 +34,7 @@ package com.jme.scene.state;
 
 import java.io.IOException;
 
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -51,7 +52,7 @@ import com.jme.util.export.OutputCapsule;
  * 
  * @author Mark Powell
  * @author Joshua Slack - two sided, wrap, enums, etc.
- * @version $Id$
+ * @version $Id: $
  */
 public abstract class StencilState extends RenderState {
 
@@ -633,7 +634,7 @@ public abstract class StencilState extends RenderState {
         stencilOpZPassBack = capsule.readEnum("stencilOpZPassBack", StencilOperation.class, StencilOperation.Keep);
     }
 
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return StencilState.class;
     }
 

@@ -40,7 +40,7 @@ import com.jme.scene.geometryinstancing.instance.GeometryInstanceAttributes;
  * <code>GeometryBatchInstanceAttributes</code> specifies the attributes for a
  * <code>GeometryBatchInstance</code>
  *
- * @author Patrik LindegrÃ©n
+ * @author Patrik Lindegrén
  */
 public class GeometryBatchInstanceAttributes
         extends GeometryInstanceAttributes {

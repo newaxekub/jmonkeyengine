@@ -62,11 +62,11 @@ import java.util.Properties;
  * The defaults can also be changed programmatically instead of
  * declaratively, of course.  See BaseGame.java for examples of that.
  * 
- * @author Blaine Simpson (blaine dot simpson at admc dot com)
+ * @author Blaine Simpson
  * @see GameSettings
  * @see com.jme.app.BaseGame
  * @since jME 2.0
- * @version $Revision$, $Date$
+ * @version $Revision$
  * 
  * @see GameSettings
  */

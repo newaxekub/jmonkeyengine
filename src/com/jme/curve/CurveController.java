@@ -49,7 +49,7 @@ import com.jme.util.export.OutputCapsule;
  * curve), the orientation precision defines how accurate the orientation of the
  * spatial will be.
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: CurveController.java,v 1.14 2007/02/04 14:37:56 sunsett Exp $
  */
 public class CurveController extends Controller {
     private static final long serialVersionUID = 1L;
@@ -214,10 +214,6 @@ public class CurveController extends Controller {
                 return;
             }
         }
-    }
-    
-    public void reset() {
-    	this.currentTime = 0;
     }
     
     public void write(JMEExporter e) throws IOException {

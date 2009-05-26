@@ -58,7 +58,7 @@ public class TransformQuaternion implements Serializable, Savable, Cloneable {
     private Vector3f scale=new Vector3f(1,1,1);
 
     /**
-     * Sets this rotation to the given Quaternion value by copying.
+     * Sets this rotation to the given Quaternion value.
      * @param rot The new rotation for this matrix.
      */
     public void setRotationQuaternion(Quaternion rot) {
@@ -66,7 +66,7 @@ public class TransformQuaternion implements Serializable, Savable, Cloneable {
     }
 
     /**
-     * Sets this translation to the given value by copying.
+     * Sets this translation to the given value.
      * @param trans The new translation for this matrix.
      */
     public void setTranslation(Vector3f trans) {
@@ -82,7 +82,7 @@ public class TransformQuaternion implements Serializable, Savable, Cloneable {
     }
 
     /**
-     * Sets this scale to the given value by copying.
+     * Sets this scale to the given value.
      * @param scale The new scale for this matrix.
      */
     public void setScale(Vector3f scale) {
@@ -247,32 +247,5 @@ public class TransformQuaternion implements Serializable, Savable, Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
-    }
-
-    @Override
-    public int hashCode() {
-        return rot.hashCode() * 2 + translation.hashCode() * 3
-            + scale.hashCode() * 5;
-    }
-
-    @Override
-    public boolean equals(Object oIn) {
-        if (oIn == null) return false;
-        if (oIn.getClass() != TransformQuaternion.class) return false;
-        TransformQuaternion o = (TransformQuaternion) oIn;
-        return rot.equals(o.rot) && translation.equals(o.translation)
-                && scale.equals(o.scale);
-    }
-
-    /**
-     * <code>toString</code> returns the string representation of this object.
-     * It is simply a toString() call of the rotational matrix and the translational vector
-     * @return the string representation of this object.
-     */
-    public String toString() {
-        return TransformQuaternion.class.getName() + " [\n"+
-                rot.toString() + ":" +
-                translation.toString() + ":" +
-                scale.toString() + "\n]";
     }
 }

@@ -51,7 +51,7 @@ import com.jme.input.lwjgl.LWJGLMouseInput;
  * {@link #addListener(MouseInputListener)}. Handling of events is done inside the
  * {@link #update} method.
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: MouseInput.java,v 1.25 2007/08/16 13:19:09 rherlitz Exp $
  */
 public abstract class MouseInput extends Input {
 
@@ -85,7 +85,7 @@ public abstract class MouseInput extends Input {
      *
      * @return currently selected provider
      */
-    public static Class<?> getProvider() {
+    public static Class getProvider() {
         return provider;
     }
 

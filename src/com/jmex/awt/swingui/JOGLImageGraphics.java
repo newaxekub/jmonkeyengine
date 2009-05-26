@@ -83,9 +83,7 @@ class JOGLImageGraphics extends ImageGraphicsBaseImpl {
         final GLU glu = new GLU();
         boolean updateChildren = false;
         synchronized ( dirty ) {
-            if (!tx.isIdentity()) {
-                dirty.setBounds(getImageBounds());
-            } else if ( !dirty.isEmpty() && isExpandDirtyRegion()) {
+            if ( !dirty.isEmpty() ) {
                 dirty.grow( 2, 2 ); // to prevent antialiasing problems
             }
             Rectangle2D.intersect( dirty, getImageBounds(), dirty );

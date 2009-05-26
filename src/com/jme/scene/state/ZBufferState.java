@@ -34,6 +34,7 @@ package com.jme.scene.state;
 
 import java.io.IOException;
 
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -47,7 +48,7 @@ import com.jme.util.export.OutputCapsule;
  * 
  * @author Mark Powell
  * @author Joshua Slack
- * @version $Id$
+ * @version $Id: ZBufferState.java,v 1.8 2006/11/16 17:02:15 nca Exp $
  */
 public abstract class ZBufferState extends RenderState {
 
@@ -182,7 +183,7 @@ public abstract class ZBufferState extends RenderState {
         writable = capsule.readBoolean("writable", true);
     }
 
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return ZBufferState.class;
     }
 }

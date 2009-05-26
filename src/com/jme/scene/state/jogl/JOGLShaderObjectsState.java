@@ -327,7 +327,9 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
                     if (programID != -1) {
                         gl.glUseProgramObjectARB(programID);
 
-                        for (ShaderVariable shaderVariable : shaderAttributes.values()) {
+                        for (int i = shaderAttributes.size(); --i >= 0;) {
+                            ShaderVariable shaderVariable =
+                                    shaderAttributes.get(i);
                             if (shaderVariable.needsRefresh) {
                                 JOGLShaderUtil.updateAttributeLocation(
                                         shaderVariable, programID);
@@ -337,7 +339,9 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
                                     .updateShaderAttribute(shaderVariable);
                         }
 
-                        for (ShaderVariable shaderVariable : shaderUniforms.values()) {
+                        for (int i = shaderUniforms.size(); --i >= 0;) {
+                            ShaderVariable shaderVariable =
+                                    shaderUniforms.get(i);
                             if (shaderVariable.needsRefresh) {
                                 JOGLShaderUtil.updateUniformLocation(
                                         shaderVariable, programID);
@@ -381,13 +385,6 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
      */
     @Override
     public void checkUniformSizeLimits() {
-    }
-
-    /**
-     * @see com.jme.scene.state.GLSLShaderObjectsState#cleanup()
-     */
-    @Override
-    public void cleanup() {
     }
 
 }

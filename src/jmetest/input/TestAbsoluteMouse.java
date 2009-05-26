@@ -72,7 +72,7 @@ public class TestAbsoluteMouse extends SimpleGame {
         TextureState cursor = display.getRenderer().createTextureState();
         cursor.setEnabled(true);
         cursor.setTexture(TextureManager.loadTexture(TestAbsoluteMouse.class
-                .getClassLoader().getResource("jmetest/data/cursor/testcursor.png"),
+                .getClassLoader().getResource("jmetest/data/cursor/test.PNG"),
                 Texture.MinificationFilter.BilinearNearestMipMap,
                 Texture.MagnificationFilter.Bilinear));
         mouse.setRenderState(cursor);

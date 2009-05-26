@@ -72,7 +72,7 @@ import com.jme.util.WeakIdentityCache;
  * @author Mark Powell
  * @author Gregg Patton
  * @author Joshua Slack - Optimizations, Headless rendering, RenderContexts, AWT integration
- * @version $Id$
+ * @version $Id: LWJGLDisplaySystem.java,v 1.54 2007/09/11 15:52:25 nca Exp $
  */
 public class LWJGLDisplaySystem extends DisplaySystem {
     private static final Logger logger = Logger.getLogger(LWJGLDisplaySystem.class.getName());
@@ -360,19 +360,21 @@ public class LWJGLDisplaySystem extends DisplaySystem {
         int match_freq = -1;
         for (int i = 0; i < modes.length; i++) {
             if (modes[i].getWidth() != width) {
-                logger.log(Level.FINE, "DisplayMode {0}: Width != {1}", new Object[] {modes[i], width});
+                logger.fine("DisplayMode " + modes[i] + ": Width != " + width);
                 continue;
             }
             if (modes[i].getHeight() != height) {
-                logger.log(Level.FINE, "DisplayMode {0}: Height != {1}", new Object[] {modes[i], height});
+                logger.fine("DisplayMode " + modes[i] + ": Height != "
+                                + height);
                 continue;
             }
             if (bpp != 0 && modes[i].getBitsPerPixel() != bpp) { // should pick based on best match here too
-                logger.log(Level.FINE, "DisplayMode {0}: Bits per pixel != {1}", new Object[] {modes[i], bpp});
+                logger.fine("DisplayMode " + modes[i] + ": Bits per pixel != "
+                        + bpp);
                 continue;
             }
             if (best_match == -1) {
-                logger.log(Level.FINE, "DisplayMode {0}: Match! ", modes[i]);
+                logger.fine("DisplayMode " + modes[i] + ": Match! ");
                 best_match = i;
                 match_freq = modes[i].getFrequency();
             } else {
@@ -381,7 +383,7 @@ public class LWJGLDisplaySystem extends DisplaySystem {
                     ( cur_freq == freq ||        // Current is perfect match
                       match_freq < cur_freq ) )  //      or is higher freq
                 {
-                    logger.log(Level.FINE, "DisplayMode {0}: Better match!", modes[i]);
+                    logger.fine("DisplayMode " + modes[i] + ": Better match!");
                     best_match = i;
                     match_freq = cur_freq;
                 }
@@ -391,7 +393,7 @@ public class LWJGLDisplaySystem extends DisplaySystem {
         if (best_match == -1)
             return null; // none found;
         else {
-            logger.log(Level.INFO, "Selected DisplayMode: {0}", modes[best_match]);
+            logger.info("Selected DisplayMode: " + modes[best_match]);
             return modes[best_match];
         }
     }

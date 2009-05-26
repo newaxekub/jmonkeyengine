@@ -34,6 +34,7 @@ package com.jme.scene.state;
 
 import java.io.IOException;
 
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -45,7 +46,7 @@ import com.jme.util.export.OutputCapsule;
  * flat provides no smoothing.  If this state is not enabled, Smooth is used.
  * 
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: ShadeState.java,v 1.7 2006/11/16 17:02:15 nca Exp $
  */
 public abstract class ShadeState extends RenderState {
 
@@ -132,7 +133,7 @@ public abstract class ShadeState extends RenderState {
                 ShadeMode.Smooth);
     }
 
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return ShadeState.class;
     }
 }

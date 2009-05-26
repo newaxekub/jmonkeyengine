@@ -44,7 +44,7 @@ import com.jme.input.KeyInputListener;
  * <code>AWTKeyInput</code>
  *
  * @author Joshua Slack
- * @version $Revision$
+ * @version $Revision: 1.13 $
  */
 public class AWTKeyInput extends KeyInput implements KeyListener {
     private static final Logger logger = Logger.getLogger(AWTKeyInput.class.getName());

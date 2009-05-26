@@ -18,8 +18,6 @@
     </security>
 
     <resources>
-      <!-- Why are jme-audio.jar and jme-swt.jar missing here?
-           Is that on purpose or is this list obsolete?  -->
         <jar href="lwjgl.jar"/>
         <jar href="jme.jar"/>
         <jar href="jme-awt.jar"/>
@@ -32,7 +30,6 @@
         <jar href="jme-scene.jar"/>
         <jar href="jme-sound.jar"/>
         <jar href="jme-terrain.jar"/>
-        <jar href="jme-ogrexml.jar"/>
         <jar href="jme-ui.jar"/>
     </resources>
 

@@ -32,7 +32,6 @@
 package com.jme.animation;
 
 import java.io.IOException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme.image.Texture;
@@ -84,9 +83,9 @@ public class TextureKeyframeController extends Controller {
 	
 	public void addData(float[] times, Matrix4f[] transforms, int[] interp) {
 		if(times.length != transforms.length) {
-			logger.log(Level.WARNING, "Invalid texture keyframe information."
+			logger.warning("Invalid texture keyframe information."
                     + " Times and transforms are not of same length."
-                    + " [{0} != {1}", new Integer[] {times.length, transforms.length});
+                    + " [" + times.length + " != " + transforms.length);
 			return;
 		}
 		

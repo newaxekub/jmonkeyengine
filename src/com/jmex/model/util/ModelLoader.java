@@ -62,7 +62,6 @@ import com.jme.util.GameTaskQueueManager;
 import com.jme.util.export.Savable;
 import com.jme.util.export.binary.BinaryExporter;
 import com.jme.util.export.binary.BinaryImporter;
-import com.jme.util.export.xml.XMLImporter;
 import com.jme.util.resource.ResourceLocatorTool;
 import com.jme.util.resource.SimpleResourceLocator;
 import com.jmex.game.StandardGame;
@@ -277,7 +276,6 @@ public class ModelLoader {
     private static Map<String, ModelLoaderCallable> loaders = new HashMap<String, ModelLoaderCallable>();
 
     static {
-        loaders.put( "XML", new XMLCallable() );
         loaders.put( "DAE", new DAECallable() );
         loaders.put( "JME", new JMECallable() );
 //              Note that .OBJ Ambient colors are multiplied. I would strongly suggest making them black.
@@ -337,13 +335,6 @@ public class ModelLoader {
         public JMECallable() { super( null, null ); }
         public Node call() throws Exception {
             return (Node) BinaryImporter.getInstance().load( getURL() );
-        }
-    }
-    
-    private static class XMLCallable extends ModelLoaderCallable {
-        public XMLCallable() { super( null, null ); }
-        public Node call() throws Exception {
-            return (Node) XMLImporter.getInstance().load( getURL() );
         }
     }
 

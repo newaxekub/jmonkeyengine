@@ -36,9 +36,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme.input.InputSystem;
-import com.jme.system.GameSettings;
-import com.jme.system.PropertiesGameSettings;
 import com.jme.util.Timer;
+import com.jme.system.GameSettings;
 
 /**
  * A game that tracks time between frames.
@@ -175,9 +174,10 @@ public abstract class VariableTimestepGame extends AbstractGame {
     protected abstract void cleanup();
 
   /**
+   * TODO:  Implement
    * @see AbstractGame#getNewSettings
    */
   protected GameSettings getNewSettings() {
-      return new PropertiesGameSettings("properties.cfg");
+      return null;
   }
 }

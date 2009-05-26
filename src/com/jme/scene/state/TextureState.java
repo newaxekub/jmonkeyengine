@@ -39,6 +39,7 @@ import java.util.logging.Logger;
 
 import com.jme.image.Image;
 import com.jme.image.Texture;
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.TextureManager;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
@@ -57,7 +58,7 @@ import com.jme.util.export.OutputCapsule;
  * @author Joshua Slack
  * @author Tijl Houtbeckers - TextureID cache / Shader texture units
  * @author Vekas Arpad - Shader Texture units
- * @version $Id$
+ * @version $Id: TextureState.java,v 1.43 2007/10/05 22:39:48 nca Exp $
  */
 public abstract class TextureState extends RenderState {
     private static final Logger logger = Logger.getLogger(TextureState.class
@@ -272,8 +273,6 @@ public abstract class TextureState extends RenderState {
 
         texture.set(index, null);
         idCache[index] = 0;
-        resetFirstLast();
-        setNeedsRefresh(true);
         return true;
     }
 
@@ -288,8 +287,6 @@ public abstract class TextureState extends RenderState {
 
         texture.set(textureUnit, null);
         idCache[textureUnit] = 0;
-        resetFirstLast();
-        setNeedsRefresh(true);
         return true;
 
     }

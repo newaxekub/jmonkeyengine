@@ -51,7 +51,7 @@ import com.jme.util.TextureManager;
  * <code>TestLightState</code>
  * 
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: TestBumpMapping.java,v 1.9 2007/08/21 20:10:03 nca Exp $
  */
 public class TestBumpMapping extends SimpleGame {
     
@@ -121,7 +121,7 @@ public class TestBumpMapping extends SimpleGame {
 
 		Texture tex2 = TextureManager.loadTexture(
 				TestBumpMapping.class.getClassLoader().getResource(
-						"jmetest/data/texture/decalimage.png"),
+						"jmetest/data/texture/Decal.PNG"),
 				Texture.MinificationFilter.Trilinear, Texture.MagnificationFilter.Bilinear, 0.0f, true);
 		tex2.setApply(Texture.ApplyMode.Combine);
 		tex2.setWrap(Texture.WrapMode.Repeat);

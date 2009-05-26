@@ -53,7 +53,7 @@ import com.jme.util.export.Savable;
  * @author Mark Powell
  * @author Joshua Slack
  * @author Jack Lindamood (javadoc only)
- * @version $Id$
+ * @version $Id: RenderState.java,v 1.31 2006/11/19 00:41:36 renanse Exp $
  */
 public abstract class RenderState implements Savable {
 
@@ -112,10 +112,7 @@ public abstract class RenderState implements Savable {
         ColorMask(true),
         
         /** The value returned by getType() for ClipState. */
-        Clip(true),
-        
-        /** The value returned by getType() for StippleState. */
-        Stipple(true);
+        Clip(true);
         
         /**
          * <p>
@@ -154,7 +151,6 @@ public abstract class RenderState implements Savable {
          * <li>VertexProgram: true</li>
          * <li>Wireframe: false</li>
          * <li>ZBuffer: true</li>\
-         * <li>Stipple: true</li>\
          * </ul>
          */
         private boolean quickCompare = false;

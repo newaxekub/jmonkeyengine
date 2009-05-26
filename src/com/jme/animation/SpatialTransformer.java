@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme.math.Quaternion;
@@ -216,13 +215,13 @@ public class SpatialTransformer extends Controller {
         if (newBeginTime < 0
                 || newBeginTime > keyframes
                         .get(keyframes.size() - 1).time) {
-            logger.log(Level.WARNING, "Attempt to set invalid begintime:{0}", newBeginTime);
+            logger.warning("Attempt to set invalid begintime:" + newBeginTime);
             return;
         }
         if (newEndTime < 0
                 || newEndTime > keyframes
                         .get(keyframes.size() - 1).time) {
-            logger.log(Level.WARNING, "Attempt to set invalid endtime:{0}", newEndTime);
+            logger.warning("Attempt to set invalid endtime:" + newEndTime);
             return;
         }
         setMinTime(newBeginTime);

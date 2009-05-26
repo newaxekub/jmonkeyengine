@@ -64,7 +64,7 @@ import com.jme.util.geom.BufferUtils;
  * just a demo of one way to update the instaces, it should not be done every
  * frame.
  *
- * @author Patrik LindegrÃ©n
+ * @author Patrik Lindegrén
  */
 public class TestGeometryInstancing extends SimplePassGame {
 

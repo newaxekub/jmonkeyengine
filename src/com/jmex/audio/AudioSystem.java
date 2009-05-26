@@ -41,7 +41,7 @@ import com.jmex.audio.openal.OpenALSystem;
  * com.jmex.audio package.
  * 
  * @author Joshua Slack
- * @version $Id$
+ * @version $Id: AudioSystem.java,v 1.4 2007/08/27 00:18:13 renanse Exp $
  */
 public abstract class AudioSystem {
 
@@ -68,7 +68,6 @@ public abstract class AudioSystem {
     public abstract void update();
     public abstract AudioTrack createAudioTrack(URL resource, boolean stream);
     public abstract AudioTrack createAudioTrack(String resource, boolean stream);
-    public abstract void releaseTrack(AudioTrack track);
     
     public void mute() {
         muted = true;

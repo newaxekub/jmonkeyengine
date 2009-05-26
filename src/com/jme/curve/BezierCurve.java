@@ -49,7 +49,7 @@ import com.jme.util.geom.BufferUtils;
  * where 0 is the first control point and 1 is the second control point.
  * 
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: BezierCurve.java,v 1.19 2006/05/11 19:40:52 nca Exp $
  */
 public class BezierCurve extends Curve {
 
@@ -162,12 +162,15 @@ public class BezierCurve extends Curve {
 
 		//calculate tangent
 		Vector3f point = getPoint(time);
-		Vector3f tangent = point.subtract(getPoint(time + precision)).normalizeLocal();
+		Vector3f tangent = point.subtract(getPoint(time + precision));
+		tangent = tangent.normalize();
 		//calculate normal
 		Vector3f tangent2 = getPoint(time - precision).subtract(point);
-		Vector3f normal = tangent.cross(tangent2).normalizeLocal();
+		Vector3f normal = tangent.cross(tangent2);
+		normal = normal.normalize();
 		//calculate binormal
-		Vector3f binormal = tangent.cross(normal).normalizeLocal();
+		Vector3f binormal = tangent.cross(normal);
+		binormal = binormal.normalize();
 
 		rotation.setColumn(0, tangent);
 		rotation.setColumn(1, normal);
@@ -195,13 +198,16 @@ public class BezierCurve extends Curve {
 		Matrix3f rotation = new Matrix3f();
 
 		//calculate tangent
-		Vector3f tangent = getPoint(time).subtract(getPoint(time + precision)).normalizeLocal();
+		Vector3f tangent = getPoint(time).subtract(getPoint(time + precision));
+		tangent = tangent.normalize();
 
 		//calculate binormal
-		Vector3f binormal = tangent.cross(up).normalizeLocal();
+		Vector3f binormal = tangent.cross(up);
+		binormal = binormal.normalize();
 
 		//calculate normal
-		Vector3f normal = binormal.cross(tangent).normalizeLocal();
+		Vector3f normal = binormal.cross(tangent);
+		normal = normal.normalize();
 
 		rotation.setColumn(0, tangent);
 		rotation.setColumn(1, normal);

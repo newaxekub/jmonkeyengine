@@ -39,7 +39,7 @@ import com.jme.scene.TriMesh;
  * <code>GeometryBatchCreator</code> is a container class for
  * <code>GeometryInstances</code>.
  *
- * @author Patrik LindegrÃ©n
+ * @author Patrik Lindegrén
  */
 public class GeometryBatchCreator {
     protected ArrayList<GeometryInstance> instances;

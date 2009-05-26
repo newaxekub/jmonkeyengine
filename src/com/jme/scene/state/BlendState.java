@@ -50,7 +50,7 @@ import com.jme.util.export.OutputCapsule;
  * 
  * @author Mark Powell
  * @author Joshua Slack
- * @version $Id$
+ * @version $Id: BlendState.java,v 1.9 2007/08/02 22:05:39 nca Exp $
  */
 public abstract class BlendState extends RenderState {
 
@@ -694,7 +694,7 @@ public abstract class BlendState extends RenderState {
         constantColor = (ColorRGBA) capsule.readSavable("constantColor", null);
     }
 
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return BlendState.class;
     }
 

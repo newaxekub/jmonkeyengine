@@ -69,7 +69,7 @@ import com.jmex.terrain.util.ProceduralTextureGenerator;
  * <code>TestThirdPersonController</code>
  * 
  * @author Joshua Slack
- * @version $Revision$
+ * @version $Revision: 1.21 $
  */
 public class TestThirdPersonController extends SimpleGame {
     private static final Logger logger = Logger

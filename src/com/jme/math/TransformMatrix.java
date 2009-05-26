@@ -92,7 +92,7 @@ public class TransformMatrix  implements Serializable, Savable, Cloneable {
     }
 
     /**
-     * <code>set</code> copies the contents of a given matrix to this
+     * <code>set</code> transfers the contents of a given matrix to this
      * matrix. If a null matrix is supplied, this matrix is set to the
      * identity matrix.
      * @param matrix the matrix to copy.
@@ -111,8 +111,8 @@ public class TransformMatrix  implements Serializable, Savable, Cloneable {
     /**
      *
      * <code>set</code> defines the values of the matrix based on a supplied
-     * <code>Quaternion</code> (which it does not modify).
-     * It should be noted that all previous values will be overridden.
+     * <code>Quaternion</code>. It should be noted that all previous values
+     * will be overridden.
      * @param quaternion the quaternion to create a rotational matrix from.
      */
     public void set(Quaternion quaternion) {
@@ -378,10 +378,10 @@ public class TransformMatrix  implements Serializable, Savable, Cloneable {
      * @return the string representation of this object.
      */
     public String toString() {
-        return TransformMatrix.class.getName() + " [\n"+
+        return "com.jme.math.TransformMatrix\n[\n"+
                 rot.toString() + ":" +
                 translation.toString() + ":" +
-                scale.toString() + "\n]";
+                scale.toString();
     }
 
     /**
@@ -405,7 +405,7 @@ public class TransformMatrix  implements Serializable, Savable, Cloneable {
 
     /**
      * <code>set</code> changes this matrix's rotational and translational components
-     * to that represented by the given parameters, by copying.
+     * to that represented by the given parameters
      * @param rotation The new rotaiton
      * @param translation The new translation
      */
@@ -415,7 +415,7 @@ public class TransformMatrix  implements Serializable, Savable, Cloneable {
     }
 
     /**
-     * Sets this TransformMatrix's scale to the given scale (x,y,z), by copying.
+     * Sets this TransformMatrix's scale to the given scale (x,y,z)
      * @param scale The new scale
      */
     public void setScale(Vector3f scale) {
@@ -484,20 +484,6 @@ public class TransformMatrix  implements Serializable, Savable, Cloneable {
     }
 
     @Override
-    public int hashCode() {
-        return rot.hashCode() * 2 + translation.hashCode() * 3
-            + scale.hashCode() * 5;
-    }
-
-    @Override
-    public boolean equals(Object oIn) {
-        if (oIn.getClass() != TransformMatrix.class) return false;
-        TransformMatrix o = (TransformMatrix) oIn;
-        return rot.equals(o.rot) && translation.equals(o.translation)
-                && scale.equals(o.scale);
-    }
-
-    @Override
     public TransformMatrix clone() {
         try {
             TransformMatrix tm = (TransformMatrix) super.clone();
@@ -510,3 +496,4 @@ public class TransformMatrix  implements Serializable, Savable, Cloneable {
         }
     }
 }
+

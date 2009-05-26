@@ -49,8 +49,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.jme.image.Texture;
+import com.jme.renderer.Renderer;
 import com.jme.scene.state.RenderState;
 import com.jme.scene.state.TextureState;
+import com.jme.system.DisplaySystem;
 import com.jme.util.TextureKey;
 import com.jme.util.TextureManager;
 import com.jme.util.export.InputCapsule;
@@ -496,15 +498,15 @@ public class DOMInputCapsule implements InputCapsule {
     }
 
     public short readShort(String name, short defVal) throws IOException {
-        String attribute = currentElem.getAttribute(name);
-        if (attribute == null || attribute.length() == 0) { return defVal; }
+        short ret = defVal;
         try {
-            return Short.parseShort(attribute);
-        } catch (NumberFormatException e) {
-            IOException ex = new IOException("error parsing " + name);
+            ret = Short.parseShort(currentElem.getAttribute(name));
+        } catch (Exception e) {
+            IOException ex = new IOException();
             ex.initCause(e);
             throw ex;
         }
+        return ret;
     }
 
     public short[] readShortArray(String name, short[] defVal) throws IOException {
@@ -828,10 +830,6 @@ public class DOMInputCapsule implements InputCapsule {
             ret = (TextureState) readSavableFromCurrentElem(null);
             //Renderer r = DisplaySystem.getDisplaySystem().getRenderer();
             Savable[] savs = readSavableArray("texture", new Texture[0]);
-            // TODO:  Investigate why both readSavableFromCurentElem(null)
-            // and readSavableArray("texture", new TExture[0]) both resolve
-            // the texture file resource.  Who know what other work they
-            // duplicate.
             for (int i = 0; i < savs.length; i++) {
                 Texture t = (Texture) savs[i];
                 TextureKey tKey = t.getTextureKey();
@@ -848,6 +846,7 @@ public class DOMInputCapsule implements InputCapsule {
     private Savable[] readRenderStateList(Element fromElement, Savable[] defVal) {
         Savable[] ret = defVal;
         try {
+            Renderer r = DisplaySystem.getDisplaySystem().getRenderer();
             int size = RenderState.StateType.values().length;
             Savable[] tmp = new Savable[size];
             currentElem = findFirstChildElement(fromElement);
@@ -1128,7 +1127,7 @@ public class DOMInputCapsule implements InputCapsule {
             tmp.flip();
             ret = tmp;
         } catch (Exception e) {
-            IOException ex = new IOException("error reading " + name);
+            IOException ex = new IOException();
             ex.initCause(e);
             throw ex;
         }

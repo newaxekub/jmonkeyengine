@@ -52,7 +52,7 @@ import com.jme.util.export.OutputCapsule;
  * disabled.
  * 
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: LightNode.java,v 1.10 2006/07/20 14:23:26 nca Exp $
  */
 public class LightNode extends Node {
 

@@ -34,6 +34,7 @@ package com.jme.scene.state;
 
 import java.io.IOException;
 
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -58,7 +59,7 @@ import com.jme.util.export.OutputCapsule;
  * @author Joshua Slack
  * @author Jack Lindamood (javadoc only)
  * @author Tijl Houtbeckers (added flipped culling mode)
- * @version $Id$
+ * @version $Id: CullState.java,v 1.12 2007/03/06 15:16:35 nca Exp $
  */
 public abstract class CullState extends RenderState {
 
@@ -154,7 +155,7 @@ public abstract class CullState extends RenderState {
         polygonWind = capsule.readEnum("polygonWind", PolygonWind.class, PolygonWind.CounterClockWise);
     }
 
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return CullState.class;
     }
 }

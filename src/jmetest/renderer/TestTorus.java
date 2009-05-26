@@ -50,7 +50,7 @@ import com.jme.util.TextureManager;
  * <code>TestTorus</code>
  * 
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: TestTorus.java,v 1.21 2007/08/21 19:25:11 nca Exp $
  */
 public class TestTorus extends SimpleGame {
     

@@ -33,7 +33,6 @@
 package com.jme.scene.state.lwjgl.shader;
 
 import java.nio.ByteBuffer;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.lwjgl.opengl.ARBShaderObjects;
@@ -53,7 +52,6 @@ import com.jme.util.shader.uniformtypes.ShaderVariableInt4;
 import com.jme.util.shader.uniformtypes.ShaderVariableMatrix2;
 import com.jme.util.shader.uniformtypes.ShaderVariableMatrix3;
 import com.jme.util.shader.uniformtypes.ShaderVariableMatrix4;
-import com.jme.util.shader.uniformtypes.ShaderVariableMatrix4Array;
 import com.jme.util.shader.uniformtypes.ShaderVariablePointerByte;
 import com.jme.util.shader.uniformtypes.ShaderVariablePointerFloat;
 import com.jme.util.shader.uniformtypes.ShaderVariablePointerInt;
@@ -91,8 +89,6 @@ public class LWJGLShaderUtil {
             updateShaderUniform((ShaderVariableMatrix3) shaderVariable);
         } else if (shaderVariable instanceof ShaderVariableMatrix4) {
             updateShaderUniform((ShaderVariableMatrix4) shaderVariable);
-        } else if (shaderVariable instanceof ShaderVariableMatrix4Array){
-            updateShaderUniform((ShaderVariableMatrix4Array) shaderVariable);
         } else {
             logger.warning("updateShaderUniform: Unknown shaderVariable type!");
         }
@@ -117,8 +113,8 @@ public class LWJGLShaderUtil {
                     .glGetUniformLocationARB(programID, nameBuf);
 
             if (variable.variableID == -1) {
-                logger.log(Level.SEVERE, "Shader uniform [{0}]"
-                        + " could not be located in shader", variable.name);
+                logger.severe("Shader uniform [" + variable.name
+                        + "] could not be located in shader");
             }
         }
     }
@@ -191,13 +187,6 @@ public class LWJGLShaderUtil {
                 shaderUniform.rowMajor, shaderUniform.matrixBuffer);
     }
 
-    private static void updateShaderUniform(
-            ShaderVariableMatrix4Array shaderUniform) {
-        shaderUniform.matrixBuffer.rewind();
-        ARBShaderObjects.glUniformMatrix4ARB(shaderUniform.variableID,
-                shaderUniform.rowMajor, shaderUniform.matrixBuffer);
-    }
-
     /**
      * Update variableID for attribute shadervariable if needed.
      *
@@ -217,8 +206,8 @@ public class LWJGLShaderUtil {
                     .glGetAttribLocationARB(programID, nameBuf);
             
             if (variable.variableID == -1) {
-                logger.log(Level.SEVERE, "Shader attribute [{0}]" 
-                        + " could not be located in shader", variable.name);
+                logger.severe("Shader attribute [" + variable.name
+                        + "] could not be located in shader");
             }
         }
     }

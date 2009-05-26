@@ -42,7 +42,7 @@ import com.jme.math.Vector3f;
  * <code>ThirdPersonBackwardAction</code>
  * 
  * @author Joshua Slack
- * @version $Revision$
+ * @version $Revision: 1.6 $
  */
 public class ThirdPersonBackwardAction extends KeyInputAction {
 

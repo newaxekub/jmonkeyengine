@@ -61,7 +61,7 @@ import com.jme.system.DisplaySystem;
  * 
  * @author Mark Powell
  * @author Joshua Slack - reworked for StateRecords.
- * @version $Id$
+ * @version $Id: LWJGLLightState.java,v 1.30 2007/09/14 20:53:54 nca Exp $
  */
 public class LWJGLLightState extends LightState {
     private static final long serialVersionUID = 1L;
@@ -380,12 +380,12 @@ public class LWJGLLightState extends LightState {
         // From OpenGL Docs:
         // The light position is transformed by the contents of the current top
         // of the ModelView matrix stack when you specify the light position
-        // with a call to glLightfv(GL_LIGHT_POSITION,Â…). If you later change
+        // with a call to glLightfv(GL_LIGHT_POSITION,…). If you later change
         // the ModelView matrix, such as when the view changes for the next
         // frame, the light position isn't automatically retransformed by the
         // new contents of the ModelView matrix. If you want to update the
-        // lightÂ’s position, you must again specify the light position with a
-        // call to glLightfv(GL_LIGHT_POSITION,Â…).
+        // light’s position, you must again specify the light position with a
+        // call to glLightfv(GL_LIGHT_POSITION,…).
         
         //XXX: This is a hack until we get a better lighting model up
         Matrix4f modelViewMatrix = ((AbstractCamera) DisplaySystem
@@ -415,12 +415,12 @@ public class LWJGLLightState extends LightState {
         // From OpenGL Docs:
         // The light position is transformed by the contents of the current top
         // of the ModelView matrix stack when you specify the light position
-        // with a call to glLightfv(GL_LIGHT_POSITION,Â…). If you later change
+        // with a call to glLightfv(GL_LIGHT_POSITION,…). If you later change
         // the ModelView matrix, such as when the view changes for the next
         // frame, the light position isn't automatically retransformed by the
         // new contents of the ModelView matrix. If you want to update the
-        // lightÂ’s position, you must again specify the light position with a
-        // call to glLightfv(GL_LIGHT_POSITION,Â…).
+        // light’s position, you must again specify the light position with a
+        // call to glLightfv(GL_LIGHT_POSITION,…).
         record.lightBuffer.clear();
         record.lightBuffer.put(directionX);
         record.lightBuffer.put(directionY);

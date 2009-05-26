@@ -58,7 +58,6 @@ import com.jme.scene.state.RenderState;
 import com.jme.scene.state.ShadeState;
 import com.jme.scene.state.StateRecord;
 import com.jme.scene.state.StencilState;
-import com.jme.scene.state.StippleState;
 import com.jme.scene.state.TextureState;
 import com.jme.scene.state.VertexProgramState;
 import com.jme.scene.state.WireframeState;
@@ -86,7 +85,7 @@ import com.jme.system.JmeException;
  * @see com.jme.system.DisplaySystem
  * @author Mark Powell
  * @author Tijl Houtbeckers (added VBO delete methods)
- * @version $Id$
+ * @version $Id: Renderer.java,v 1.72 2007/09/14 20:53:52 nca Exp $
  */
 public abstract class Renderer {
 
@@ -293,14 +292,6 @@ public abstract class Renderer {
      */
     public abstract ColorMaskState createColorMaskState();
 
-    /**
-     * Retrieves the stipple state object for the proper renderer.
-     * 
-     * @return The <code>StippleState</code> object that can make use of the
-     *         proper renderer.
-     */
-    public abstract StippleState createStippleState();
-    
     /**
      * <code>setBackgroundColor</code> sets the color of window. This color
      * will be shown for any pixel that is not set via typical rendering
@@ -738,8 +729,6 @@ public abstract class Renderer {
                 return createWireframeState();
             case ZBuffer:
                 return createZBufferState();
-            case Stipple:
-            	return createStippleState();
             default:
                 return null;
         }

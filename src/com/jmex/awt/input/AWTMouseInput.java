@@ -61,7 +61,7 @@ import com.jme.input.MouseInputListener;
  * <code>AWTMouseInput</code>
  * 
  * @author Joshua Slack
- * @version $Revision$
+ * @version $Revision: 1.17 $
  */
 public class AWTMouseInput extends MouseInput implements MouseListener, MouseWheelListener, MouseMotionListener {
 

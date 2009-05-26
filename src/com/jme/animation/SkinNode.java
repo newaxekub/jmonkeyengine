@@ -542,9 +542,7 @@ public class SkinNode extends Node implements Savable, BoneChangeListener {
     
     @SuppressWarnings("unchecked")
     public void removeGeometry(int geomIndex) {
-    	if (geomIndex >= cache.length)
-    		return;
-        ArrayList<BoneInfluence>[][] newCache = new ArrayList[skins.getQuantity()-1][];
+        ArrayList<BoneInfluence>[][] newCache = new ArrayList[skins.getQuantity()][];
         for (int x = 0; x < cache.length-1; x++) {
             if (x < geomIndex)
                 newCache[x] = cache[x];

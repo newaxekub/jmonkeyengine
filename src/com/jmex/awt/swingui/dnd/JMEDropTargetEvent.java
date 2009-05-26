@@ -34,24 +34,20 @@ package com.jmex.awt.swingui.dnd;
 
 import java.awt.Point;
 import java.awt.datatransfer.Transferable;
-import java.util.EventObject;
 
 /**
  * @author Galun
  */
-public class JMEDropTargetEvent extends EventObject {
-	
-	private static final long serialVersionUID = 1L;
-	private Point point;
+public class JMEDropTargetEvent {
+
+    private Point point;
     private int action;
     private boolean accepted;
     private boolean completed;
     private JMEDragAndDrop dnd;
 
-    
-     JMEDropTargetEvent(Object source, Point point, int action, JMEDragAndDrop dnd ) {
-        super(source);
-    	this.point = point;
+    JMEDropTargetEvent( Point point, int action, JMEDragAndDrop dnd ) {
+        this.point = point;
         this.action = action;
         this.dnd = dnd;
     }

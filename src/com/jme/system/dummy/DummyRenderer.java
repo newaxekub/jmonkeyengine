@@ -65,7 +65,6 @@ import com.jme.scene.state.MaterialState;
 import com.jme.scene.state.ShadeState;
 import com.jme.scene.state.StateRecord;
 import com.jme.scene.state.StencilState;
-import com.jme.scene.state.StippleState;
 import com.jme.scene.state.TextureState;
 import com.jme.scene.state.VertexProgramState;
 import com.jme.scene.state.WireframeState;
@@ -79,7 +78,7 @@ import com.jme.system.JmeException;
  * read/write jME. It is <b>NOT </b> to be used for rendering as it won't do
  * anything at all.
  * 
- * @version $Id$
+ * @version $Id: $
  */
 public final class DummyRenderer extends Renderer {
 
@@ -341,10 +340,6 @@ public final class DummyRenderer extends Renderer {
 			@Override
 			protected void sendToGL(ByteBuffer vertexByteBuffer, ByteBuffer fragmentByteBuffer) {
 			}
-
-            @Override
-            public void cleanup() {
-            }
         };
     }
 
@@ -393,21 +388,6 @@ public final class DummyRenderer extends Renderer {
         };
     }
 
-    
-    @Override
-    public StippleState createStippleState() {
-    	return new StippleState() {
-    		private static final long serialVersionUID = 1L;
-    		@Override
-    		public void apply() {
-    		}
-    		@Override
-    		public StateRecord createStateRecord() {
-    			return null;
-    		}
-    	};
-    }
-    
     @Override
     public void setBackgroundColor(ColorRGBA c) {
     }

@@ -46,7 +46,7 @@ import com.jme.util.geom.BufferUtils;
  * <code>ColorMipMapGenerator</code>
  *
  * @author Joshua Slack
- * @version $Revision$
+ * @version $Revision: 1.4 $
  *
  */
 public class ColorMipMapGenerator {

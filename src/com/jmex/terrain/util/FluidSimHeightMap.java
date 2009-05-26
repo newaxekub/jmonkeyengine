@@ -43,9 +43,9 @@ import com.jme.system.JmeException;
 * rubbery fluid enabling to fine tune the generated heightmap using a number
 * of parameters.
 * 
-* @author Frederik BÃ¼lthoff
+* @author Frederik Bülthoff
 * @see <a href="http://www.gamedev.net/reference/articles/article2001.asp">Terrain Generation Using Fluid Simulation</a>
-* @version $Id$
+* @version $Id: FluidSimHeightMap.java,v 1.4 2007/08/02 23:16:21 nca Exp $
 * 
 */
 public class FluidSimHeightMap extends AbstractHeightMap {

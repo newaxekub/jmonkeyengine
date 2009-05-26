@@ -47,7 +47,7 @@ import com.jme.util.TextureManager;
  * <code>TestEnvMap</code>
  * 
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: TestEnvMap.java,v 1.11 2006/03/08 16:29:21 renanse Exp $
  */
 public class TestEnvMap extends SimpleGame {
 

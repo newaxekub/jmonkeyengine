@@ -35,6 +35,7 @@ package com.jme.scene.state;
 import java.io.IOException;
 
 import com.jme.renderer.ColorRGBA;
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -47,7 +48,7 @@ import com.jme.util.export.OutputCapsule;
  * 
  * @author Mark Powell
  * @author Joshua Slack
- * @version $Id$
+ * @version $Id: FogState.java,v 1.9 2007/09/21 15:45:29 nca Exp $
  */
 public abstract class FogState extends RenderState {
 

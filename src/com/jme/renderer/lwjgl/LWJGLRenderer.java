@@ -40,7 +40,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
@@ -90,7 +89,6 @@ import com.jme.scene.state.RenderState;
 import com.jme.scene.state.ShadeState;
 import com.jme.scene.state.StateRecord;
 import com.jme.scene.state.StencilState;
-import com.jme.scene.state.StippleState;
 import com.jme.scene.state.TextureState;
 import com.jme.scene.state.VertexProgramState;
 import com.jme.scene.state.WireframeState;
@@ -106,7 +104,6 @@ import com.jme.scene.state.lwjgl.LWJGLMaterialState;
 import com.jme.scene.state.lwjgl.LWJGLShadeState;
 import com.jme.scene.state.lwjgl.LWJGLShaderObjectsState;
 import com.jme.scene.state.lwjgl.LWJGLStencilState;
-import com.jme.scene.state.lwjgl.LWJGLStippleState;
 import com.jme.scene.state.lwjgl.LWJGLTextureState;
 import com.jme.scene.state.lwjgl.LWJGLVertexProgramState;
 import com.jme.scene.state.lwjgl.LWJGLWireframeState;
@@ -130,7 +127,7 @@ import com.jme.util.stat.StatType;
  * @author Mark Powell - initial implementation, and more.
  * @author Joshua Slack - Further work, Optimizations, Headless rendering
  * @author Tijl Houtbeckers - Small optimizations and improved VBO
- * @version $Id$
+ * @version $Id: LWJGLRenderer.java,v 1.149 2008/04/21 03:14:33 renanse Exp $
  */
 public class LWJGLRenderer extends Renderer {
     private static final Logger logger = Logger.getLogger(LWJGLRenderer.class
@@ -187,8 +184,8 @@ public class LWJGLRenderer extends Renderer {
         this.width = width;
         this.height = height;
 
-        logger.log(Level.INFO, "LWJGLRenderer created. W: {0} H: {1}\tVersion: {2}"
-                , new Object[] {width, height, org.lwjgl.Sys.getVersion()} );
+        logger.info( "LWJGLRenderer created. W:  " + width + "H: " + height + 
+                "\tVersion: " + org.lwjgl.Sys.getVersion() );
 
         capabilities = GLContext.getCapabilities();
 
@@ -412,18 +409,6 @@ public class LWJGLRenderer extends Renderer {
         return new LWJGLColorMaskState();
     }
 
-
-    /**
-     * <code>createStippleState</code> returns a new LWJGLStippleState
-     * object as a regular StippleState.
-     * 
-     * @return a StippleState object.
-     */
-    @Override
-    public StippleState createStippleState() {
-    	return new LWJGLStippleState();
-    }
-    
     /**
      * <code>setBackgroundColor</code> sets the OpenGL clear color to the
      * color specified.
@@ -629,7 +614,7 @@ public class LWJGLRenderer extends Renderer {
             throw new JmeException("Screenshot filename cannot be null");
         }
         File out = new File(filename + ".png");
-        logger.log(Level.INFO, "Taking screenshot: {0}", out.getAbsolutePath());
+        logger.info("Taking screenshot: " + out.getAbsolutePath() );
 
         // Create a pointer to the image info and create a buffered image to
         // hold it.
@@ -998,8 +983,8 @@ public class LWJGLRenderer extends Renderer {
             // cards.
             IntBuffer indices = tris.getIndexBuffer();
             if (indices == null) {
-                logger.log(Level.SEVERE, "missing indices on geometry object: {0}",
-                 tris.toString());
+                logger.severe("missing indices on geometry object: "
+                        + tris.toString());
             } else {
                 indices.rewind();
                 indices.limit(tris.getMaxIndex());

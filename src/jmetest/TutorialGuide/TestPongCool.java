@@ -636,8 +636,7 @@ public class TestPongCool extends SimplePassGame {
 		ts.setTexture(t1, ts.getNumberOfSetTextures());
 	}
 
-	@SuppressWarnings("unused")
-    private TextureState createSplatTextureState(String texture, String alpha) {
+	private TextureState createSplatTextureState(String texture, String alpha) {
 		TextureState ts = display.getRenderer().createTextureState();
 
 		Texture t0 = TextureManager.loadTexture(TestPongCool.class
@@ -656,8 +655,7 @@ public class TestPongCool extends SimplePassGame {
 		return ts;
 	}
 
-	@SuppressWarnings("unused")
-    private TextureState createLightmapTextureState(String texture) {
+	private TextureState createLightmapTextureState(String texture) {
 		TextureState ts = display.getRenderer().createTextureState();
 
 		Texture t0 = TextureManager.loadTexture(TestPongCool.class
@@ -755,8 +753,7 @@ public class TestPongCool extends SimplePassGame {
 		texBuf.put(textureScale + x).put(textureScale + y);
 	}
 
-	@SuppressWarnings("unused")
-    private void initSpatial(Spatial spatial) {
+	private void initSpatial(Spatial spatial) {
 		ZBufferState buf = display.getRenderer().createZBufferState();
 		buf.setEnabled(true);
 		buf.setFunction(ZBufferState.TestFunction.LessThanOrEqualTo);
@@ -782,8 +779,7 @@ public class TestPongCool extends SimplePassGame {
 		return sound;
 	}
 
-	@SuppressWarnings("unused")
-    private AudioTrack getSFX(URL resource) {
+	private AudioTrack getSFX(URL resource) {
 		// Create a non-streaming, looping, positional sound clip.
 		AudioTrack sound = AudioSystem.getSystem().createAudioTrack(resource, false);
 		sound.setType(TrackType.POSITIONAL);

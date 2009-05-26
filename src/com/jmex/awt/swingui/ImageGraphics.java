@@ -44,11 +44,6 @@ import com.jme.system.lwjgl.LWJGLDisplaySystem;
  * This abstract class provides methods to paint on a {@link com.jme.image.Image} via the awt {@link Graphics2D}.
  */
 public abstract class ImageGraphics extends Graphics2D {
-	
-	/**
-	 * if true, dirty region grow by 2x2 to prevent antialiasing problem
-	 */
-	private boolean expandDirtyRegion = true;
 
     /**
      * @param width of the image
@@ -122,19 +117,4 @@ public abstract class ImageGraphics extends Graphics2D {
      * @return true if image/texture needs update
      */
     public abstract boolean isDirty();
-    
-    
-    /**
-     * @param expand if true, dirty region grow by 2x2 to prevent antialiasing problem
-     */
-    public void setExpandDirtyRegion(boolean expand) {
-    	expandDirtyRegion = expand;
-    }
-    
-    /**
-     * @return if true, dirty region grow by 2x2 to prevent antialiasing problem
-     */
-    public boolean isExpandDirtyRegion() {
-    	return expandDirtyRegion;
-    }
 }

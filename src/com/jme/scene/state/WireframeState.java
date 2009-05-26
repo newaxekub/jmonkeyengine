@@ -34,6 +34,7 @@ package com.jme.scene.state;
 
 import java.io.IOException;
 
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -46,7 +47,7 @@ import com.jme.util.export.OutputCapsule;
  * 
  * @author Mark Powell
  * @author Joshua Slack
- * @version $Id$
+ * @version $Id: WireframeState.java,v 1.12 2006/11/16 17:02:15 nca Exp $
  */
 public abstract class WireframeState extends RenderState {
 
@@ -175,7 +176,7 @@ public abstract class WireframeState extends RenderState {
         antialiased = capsule.readBoolean("antialiased", false);
     }
 
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return WireframeState.class;
     }
 }

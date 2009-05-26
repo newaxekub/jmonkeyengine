@@ -44,8 +44,7 @@ import com.jme.scene.Spatial;
  * @author Matthew D. Hicks
  */
 public class CameraController extends Controller {
-    private static final long serialVersionUID = 1L;
-    private Spatial spatial;
+	private Spatial spatial;
 	private Camera camera;
 	private GameControl control;
 	private List<CameraPerspective> perspectives;

@@ -35,6 +35,7 @@ package com.jme.scene.state;
 import java.io.IOException;
 
 import com.jme.renderer.ColorRGBA;
+import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -49,7 +50,7 @@ import com.jme.util.export.OutputCapsule;
  * @author Mark Powell
  * @author Joshua Slack - Material Face and Performance enhancements
  * @author Three Rings - contributed color material
- * @version $Id$
+ * @version $Id: MaterialState.java,v 1.16 2007/09/21 15:45:29 nca Exp $
  */
 public abstract class MaterialState extends RenderState {
     
@@ -334,7 +335,7 @@ public abstract class MaterialState extends RenderState {
         materialFace = capsule.readEnum("materialFace", MaterialFace.class, defaultMaterialFace);
     }
     
-    public Class<?> getClassTag() {
+    public Class getClassTag() {
         return MaterialState.class;
     }
 }

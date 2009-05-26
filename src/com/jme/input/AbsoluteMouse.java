@@ -50,7 +50,7 @@ import com.jme.input.action.InputActionEvent;
  *
  * @author Mark Powell
  * @author Gregg Patton
- * @version $Id$
+ * @version $Id: AbsoluteMouse.java,v 1.26 2007/04/03 14:30:22 nca Exp $
  */
 public class AbsoluteMouse extends Mouse {
 

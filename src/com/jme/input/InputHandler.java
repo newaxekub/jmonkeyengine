@@ -39,7 +39,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme.input.action.InputAction;
@@ -66,7 +65,7 @@ import com.jme.input.util.SyntheticButton;
  * @author Mark Powell
  * @author Jack Lindamood - (javadoc only)
  * @author Irrisor - revamp
- * @version $Id$
+ * @version $Id: InputHandler.java,v 1.44 2007/08/02 22:55:27 nca Exp $
  */
 public class InputHandler {
     private static final Logger logger = Logger.getLogger(InputHandler.class.getName());
@@ -273,7 +272,8 @@ public class InputHandler {
             if ( device != null ) {
                 InputHandlerDevice oldDevice = devicesMap.put( device.getName(), device );
                 if ( oldDevice != null && oldDevice != device ) {
-                    logger.log(Level.WARNING, "InputHandlerDevice name '{0}' used twice!", device.getName());
+                    logger.warning("InputHandlerDevice name '" + device.getName()
+                            + "' used twice!");
                 }
             }
         }

@@ -51,7 +51,7 @@ import com.jmex.effects.particles.Particle.Status;
  * geometric data.
  * 
  * @author Joshua Slack
- * @version $Id$
+ * @version $Id: ParticleMesh.java,v 1.11 2007/02/05 16:49:42 nca Exp $
  */
 public class ParticleMesh extends ParticleSystem {
 

@@ -55,7 +55,7 @@ import com.jme.scene.Spatial;
  * be controlled similar to games such as Zelda Windwaker and Mario 64, etc.
  * 
  * @author <a href="mailto:josh@renanse.com">Joshua Slack</a>
- * @version $Revision$
+ * @version $Revision: 1.30 $
  */
 
 public class ThirdPersonHandler extends InputHandler {

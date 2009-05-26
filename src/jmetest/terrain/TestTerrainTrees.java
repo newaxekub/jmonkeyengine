@@ -55,7 +55,7 @@ import com.jmex.terrain.util.ProceduralTextureGenerator;
  * <code>TestTerrain</code>
  *
  * @author Mark Powell
- * @version $Id$
+ * @version $Id: TestTerrainTrees.java,v 1.15 2006/05/12 21:29:21 nca Exp $
  */
 public class TestTerrainTrees extends SimpleGame {
 
