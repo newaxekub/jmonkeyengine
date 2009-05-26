@@ -68,9 +68,15 @@ import com.jme.scene.state.RenderState;
 import com.jme.scene.state.TextureState;
 import com.jme.system.DisplaySystem;
 import com.jme.util.export.Savable;
+import com.jme.util.export.binary.BinaryExporter;
 import com.jme.util.export.binary.BinaryImporter;
 import com.jme.util.geom.BufferUtils;
 import com.jme.util.resource.ResourceLocatorTool;
+import java.io.File;
+import java.lang.ref.SoftReference;
+import java.util.Map.Entry;
+import java.util.Set;
+
 
 /**
  * <code>TextureManager</code> provides static methods for building a
@@ -85,7 +91,7 @@ final public class TextureManager {
     private static final Logger logger = Logger.getLogger(TextureManager.class
             .getName());
 
-    private static HashMap<TextureKey, Texture> m_tCache = new HashMap<TextureKey, Texture>();
+    private static SavableHashMap<TextureKey, SoftReference<Texture>> m_tCache = new SavableHashMap<TextureKey, SoftReference<Texture>>();
     private static HashMap<String, ImageLoader> loaders = new HashMap<String, ImageLoader>();
     private static ArrayList<Integer> cleanupStore = new ArrayList<Integer>();
 
@@ -404,7 +410,7 @@ final public class TextureManager {
         if (TextureState.getDefaultTexture() == null
                 || (t != TextureState.getDefaultTexture() && t.getImage() != TextureState
                         .getDefaultTextureImage())) {
-            m_tCache.put(t.getTextureKey(), t);
+            m_tCache.put(t.getTextureKey(), new SoftReference(t));
         }
     }
 
@@ -790,9 +796,13 @@ final public class TextureManager {
         Texture next;
         while (it.hasNext()) {
             key = it.next();
-            next = m_tCache.get(key);
-            if (texture.equals(next)) {
-                return releaseTexture(key);
+            SoftReference<Texture> s = m_tCache.get(key);
+            if (s!=null) {
+                next = s.get();
+                // TODO s.get is null we can remove the key
+                if (texture.equals(next)) {
+                    return releaseTexture(key);
+                }
             }
         }
         return false;
@@ -826,9 +836,11 @@ final public class TextureManager {
     }
 
     public static void registerForCleanup(TextureKey textureKey, int textureId) {
-        Texture t = m_tCache.get(textureKey);
-        if (t != null) {
-            t.setTextureId(textureId);
+        SoftReference<Texture> tRef = m_tCache.get(textureKey);
+        if (tRef != null) {
+            Texture t = tRef.get();
+            if (t!=null)
+                t.setTextureId(textureId);
         }
 
         cleanupStore.add(textureId);
@@ -863,13 +875,17 @@ final public class TextureManager {
     }
 
     public static Texture findCachedTexture(TextureKey textureKey) {
-        return m_tCache.get(textureKey);
+        SoftReference<Texture> s = m_tCache.get(textureKey);
+        if (s==null)
+            return null;
+        return s.get();
     }
 
     public static void preloadCache(Renderer r) {
         TextureState ts = r.createTextureState();
-        for (Texture t : m_tCache.values()) {
-            if (t.getTextureKey().location != null) {
+        for (SoftReference<Texture> s : m_tCache.values()) {
+            Texture t = s.get();
+            if (t!=null && t.getTextureKey().location != null) {
                 ts.setTexture(t);
                 ts.load(0);
             }
@@ -882,5 +898,23 @@ final public class TextureManager {
 
     public static boolean isCreateOnHeap() {
         return createOnHeap;
+    }
+
+    public static void writeCache(File location) throws IOException
+    {
+        BinaryExporter exporter = new BinaryExporter();
+        exporter.save(m_tCache, location);
+    }
+
+    public static void readCache(File location) throws IOException
+    {
+        BinaryImporter importer = new BinaryImporter();
+        m_tCache = (SavableHashMap<TextureKey, SoftReference<Texture>>) importer.load(location);
+    }
+
+    public static void readCache(URL location) throws IOException
+    {
+        BinaryImporter importer = new BinaryImporter();
+        m_tCache = (SavableHashMap<TextureKey, SoftReference<Texture>>) importer.load(location);
     }
 }

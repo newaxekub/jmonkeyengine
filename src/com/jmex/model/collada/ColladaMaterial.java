@@ -56,6 +56,7 @@ public class ColladaMaterial {
     
     RenderState[] stateList;
     ArrayList<Controller> controllerList;
+    String shaderFlag = null;
     
 
     public ColladaMaterial() {
@@ -88,6 +89,14 @@ public class ColladaMaterial {
 
     public RenderState getState(RenderState.StateType type) {
         return stateList[type.ordinal()];
+    }
+    
+    public void setShaderFlag(String flag) {
+        shaderFlag = flag;
+    }
+    
+    public String getShaderFlag() {
+        return (shaderFlag);
     }
     
     public MagnificationFilter getMagFilterConstant() {

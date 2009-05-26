@@ -6,6 +6,7 @@ import java.nio.IntBuffer;
 import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
 import com.jme.scene.TriMesh;
+import com.jme.scene.SharedMesh;
 
 public class TangentBinormalGenerator {
 
@@ -62,8 +63,14 @@ public class TangentBinormalGenerator {
             }
         }
 
-        mesh.setTangentBuffer(tangents);
-        mesh.setBinormalBuffer(binormals);
+        if (mesh instanceof SharedMesh) {
+            SharedMesh sm = (SharedMesh)mesh;
+            sm.getTarget().setTangentBuffer(tangents);
+            sm.getTarget().setBinormalBuffer(binormals);
+        } else {
+            mesh.setTangentBuffer(tangents);
+            mesh.setBinormalBuffer(binormals);
+        }
     }
 
     private static void computeTriangleTangentSpace(Vector3f tangent,

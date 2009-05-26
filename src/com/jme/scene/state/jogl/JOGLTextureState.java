@@ -623,7 +623,7 @@ public class JOGLTextureState extends TextureState {
                                                         .getGLDataFormat(image
                                                                 .getFormat()),
                                                 width, height, hasBorder ? 1
-                                                        : 0, data.limit(), data); // TODO Check <size>
+                                                        : 0, mipSizes[m], data); // TODO Check <size>
                             } else {
                                 gl.glTexImage2D(GL.GL_TEXTURE_2D, m,
                                         TextureStateRecord
@@ -645,7 +645,7 @@ public class JOGLTextureState extends TextureState {
                                                 TextureStateRecord
                                                         .getGLDataFormat(image
                                                                 .getFormat()),
-                                                width, hasBorder ? 1 : 0, data.limit(), data); // TODO Check <size>
+                                                width, hasBorder ? 1 : 0, mipSizes[m], data); // TODO Check <size>
                             } else {
                                 gl.glTexImage1D(GL.GL_TEXTURE_1D, m,
                                         TextureStateRecord
@@ -668,7 +668,7 @@ public class JOGLTextureState extends TextureState {
                                                         .getGLDataFormat(image
                                                                 .getFormat()),
                                                 width, height, depth,
-                                                hasBorder ? 1 : 0, data.limit(), data); // TODO Check <size>
+                                                hasBorder ? 1 : 0, mipSizes[m], data); // TODO Check <size>
                             } else {
                                 gl.glTexImage3D(GL.GL_TEXTURE_3D, m,
                                         TextureStateRecord
@@ -695,7 +695,7 @@ public class JOGLTextureState extends TextureState {
                                                                 .getGLDataFormat(image
                                                                         .getFormat()),
                                                         width, height,
-                                                        hasBorder ? 1 : 0, data.limit(), data); // TODO Check <size>
+                                                        hasBorder ? 1 : 0, mipSizes[m], data); // TODO Check <size>
                                     } else {
                                         gl.glTexImage2D(
                                                 getGLCubeMapFace(face), m,

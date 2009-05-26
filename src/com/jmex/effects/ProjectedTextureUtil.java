@@ -29,34 +29,51 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package com.jmex.effects;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+//import org.lwjgl.opengl.GL11;
+//import org.lwjgl.util.glu.GLU;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.GL;
+
 import com.jme.image.Texture;
+import com.jme.math.FastMath;
 import com.jme.math.Matrix4f;
 import com.jme.math.Vector3f;
-import com.jme.renderer.AbstractCamera;
-import com.jme.renderer.Renderer;
+import com.jme.scene.state.jogl.records.RendererRecord;
 import com.jme.system.DisplaySystem;
-
-
+import com.jme.util.geom.BufferUtils;
 
 /**
  * <code>ProjectedTextureUtil</code>
  * 
  * @author Rikard Herlitz (MrCoder)
- * 
- * @author Joshua Ellen (basixs)
- * [1-16-2009] - Abstracted, removed direct calls to openGL
- * 
  */
 public class ProjectedTextureUtil {
-
-    private static AbstractCamera camera = null;
     private static Matrix4f lightProjectionMatrix = new Matrix4f();
     private static Matrix4f lightViewMatrix = new Matrix4f();
-    private static Matrix4f biasMatrix = new Matrix4f( 0.5f, 0.0f, 0.0f, 0.0f,
+    private static Matrix4f biasMatrix = new Matrix4f(0.5f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.5f, 0.5f, 0.5f,
-            1.0f ); // bias from [-1, 1] to [0, 1]
+            1.0f); // bias from [-1, 1] to [0, 1]
+
+	/**
+	 * Sets the provided texture up for projection use
+	 * @param texture Texture to use for projection
+	 * @param wrapMode Wrapping mode
+	 * @param combineMode Combine mode
+	public static void setupProjectedTexture( Texture texture, Texture.WrapMode wrapMode, Texture.CombinerFunctionRGB combineMode ) {
+		texture.setEnvironmentalMapMode( Texture.EnvironmentalMapMode.EyeLinear );
+
+		texture.setApply( Texture.ApplyMode.Combine );
+		texture.setCombineSrc0RGB( Texture.CombinerSource.CurrentTexture );
+		texture.setCombineOp0RGB( Texture.CombinerOperandRGB.SourceColor );
+		texture.setCombineSrc1RGB( Texture.CombinerSource.Previous );
+		texture.setCombineOp1RGB( Texture.CombinerOperandRGB.SourceColor );
+		texture.setCombineScaleRGB( Texture.CombinerScale.One );
 
     /**
      * Updated texture matrix on the provided texture
@@ -76,104 +93,148 @@ public class ProjectedTextureUtil {
      * @param aim
      *            Projector look at position
      */
-    public static void updateProjectedTexture( Texture texture, float fov,
+    public static void updateProjectedTexture(Texture texture, float fov,
             float aspect, float near, float far, Vector3f pos, Vector3f aim,
-            Vector3f up ) {
-
-        matrixLookAt( pos, aim, up, lightViewMatrix );
-        matrixProjection( fov, aspect, near, far, lightProjectionMatrix );
-
+            Vector3f up) {
+        matrixPerspective(fov, aspect, near, far, lightProjectionMatrix);
+        matrixLookAt(pos, aim, up, lightViewMatrix);
         texture.getMatrix().set(
-                lightViewMatrix.multLocal( lightProjectionMatrix ).multLocal(
-                biasMatrix ) ).transposeLocal();
+                lightViewMatrix.multLocal(lightProjectionMatrix).multLocal(
+                        biasMatrix)).transposeLocal();
     }
 
-    /**
-     * Populates a <code>Matrix4f</code> with the proper look at transformations
-     * from the ModelView matrix.
-     * @param location the 'Where' in result matrix
-     * @param at the 'At' in the result matrix
-     * @param up the world up
-     * @param result the altered <code>Matrix4f</code>
-     */
-    public static void matrixLookAt( Vector3f location, Vector3f at,
-            Vector3f up, Matrix4f result ) {
+    // UTILS
+    private static final FloatBuffer tmp_FloatBuffer = BufferUtils
+            .createFloatBuffer(16);
+    private static Vector3f localDir = new Vector3f();
+    private static Vector3f localLeft = new Vector3f();
+    private static Vector3f localUp = new Vector3f();
 
-        checkCamera();
+    private static IntBuffer matrixModeBuffer = BufferUtils.createIntBuffer(16);
+    private static int savedMatrixMode = 0;
+    private static GLU glu = new GLU();
 
-        camera.setLocation( location );
-        camera.lookAt( at, up );
-
-        result.set( camera.getModelViewMatrix() );
+    private static void saveMatrixMode() {
+        GL gl = glu.getCurrentGL();
+        
+        matrixModeBuffer.rewind();
+        gl.glGetIntegerv(GL.GL_MATRIX_MODE, matrixModeBuffer);
+        savedMatrixMode = matrixModeBuffer.get(0);
     }
 
-    /**
-     * Populates a <code>Matrix4f</code> with the proper frustum transformations
-     * from the ModelView matrix.
-     * @param fovY the Field of View
-     * @param aspect the aspect ratio 
-     * @param near the near plane of the frustum
-     * @param far the far frame of the frustum
-     * @param result the altered <code>Matrix4f</code>
-     */
-    public static void matrixPerspective( float fovY, float aspect,
-            float near, float far, Matrix4f result ) {
-
-        checkCamera();
-
-        camera.setFrustumPerspective( fovY, aspect, near, far );
-
-        result.set( camera.getModelViewMatrix() );
+    private static void restoreMatrixMode() {
+        RendererRecord matRecord = (RendererRecord) DisplaySystem
+                .getDisplaySystem().getCurrentContext().getRendererRecord();
+        matRecord.switchMode(savedMatrixMode);
     }
 
-    /**
-     * Populates a <code>Matrix4f</code> with the proper frustum transformations
-     * from the Projection matrix.
-     * @param fovY the Field of View
-     * @param aspect the aspect ratio 
-     * @param near the near plane of the frustum
-     * @param far the far frame of the frustum
-     * @param result the altered <code>Matrix4f</code>
-     */
-    public static void matrixProjection( float fovY, float aspect, float near,
-            float far, Matrix4f result ) {
+    public static void matrixLookAt(Vector3f location, Vector3f at,
+            Vector3f up, Matrix4f result) {
+        GL gl = glu.getCurrentGL();
+                
+        localDir.set(at).subtractLocal(location).normalizeLocal();
+        localDir.cross(up, localLeft);
+        localLeft.cross(localDir, localUp);
 
-        checkCamera();
+        saveMatrixMode();
 
-        camera.setFrustumPerspective( fovY, aspect, near, far );
+        // set view matrix
+        RendererRecord matRecord = (RendererRecord) DisplaySystem
+                .getDisplaySystem().getCurrentContext().getRendererRecord();
+        matRecord.switchMode(GL.GL_MODELVIEW);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+        glu.gluLookAt(location.x, location.y, location.z, at.x, at.y, at.z,
+                localUp.x, localUp.y, localUp.z);
 
-        result.set( camera.getProjectionMatrix() );
-    }
-
-    /**
-     * Populates a <code>Matrix4f</code> with the proper frustum transformations
-     * from the Projection matrix.
-     * @param frustumLeft the left plane of the frustum
-     * @param frustumRight the right plane of the frustum
-     * @param frustumBottom the bottom plane of the frustum
-     * @param frustumTop the top plane of the frustum
-     * @param frustumNear the near plane of the frustum
-     * @param frustumFar the far plane of the frustum
-     * @param result the altered <code>Matrix4f</code>
-     */
-    public static void matrixFrustum( float frustumLeft, float frustumRight,
-            float frustumBottom, float frustumTop, float frustumNear,
-            float frustumFar, Matrix4f result ) {
-
-        checkCamera();
-
-        camera.setFrustum( frustumFar, frustumFar, frustumLeft, frustumRight,
-                frustumTop, frustumFar );
-
-        result.set( camera.getProjectionMatrix() );
-    }
-
-    private static void checkCamera() {
-        if( camera == null ){
-            final Renderer renderer = DisplaySystem.getDisplaySystem().getRenderer();
-            camera = (AbstractCamera) renderer.createCamera(
-                    renderer.getWidth(), renderer.getHeight() );
-            camera.setDataOnly( true );
+        if (result != null) {
+            tmp_FloatBuffer.rewind();
+            gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX, tmp_FloatBuffer);
+            tmp_FloatBuffer.rewind();
+            result.readFloatBuffer(tmp_FloatBuffer);
         }
+
+        gl.glPopMatrix();
+        restoreMatrixMode();
+    }
+
+    public static void matrixPerspective(float fovY, float aspect, float near,
+            float far, Matrix4f result) {
+        GL gl = glu.getCurrentGL();
+        saveMatrixMode();
+
+        // set view matrix
+        RendererRecord matRecord = (RendererRecord) DisplaySystem
+                .getDisplaySystem().getCurrentContext().getRendererRecord();
+        matRecord.switchMode(GL.GL_MODELVIEW);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+        glu.gluPerspective(fovY, aspect, near, far);
+
+        if (result != null) {
+            tmp_FloatBuffer.rewind();
+            gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX, tmp_FloatBuffer);
+            tmp_FloatBuffer.rewind();
+            result.readFloatBuffer(tmp_FloatBuffer);
+        }
+
+        gl.glPopMatrix();
+        restoreMatrixMode();
+    }
+
+    public static void matrixProjection(float fovY, float aspect, float near,
+            float far, Matrix4f result) {
+        GL gl = glu.getCurrentGL();
+        float h = FastMath.tan(fovY * FastMath.DEG_TO_RAD * .5f) * near;
+        float w = h * aspect;
+        float frustumLeft = -w;
+        float frustumRight = w;
+        float frustumBottom = -h;
+        float frustumTop = h;
+        float frustumNear = near;
+        float frustumFar = far;
+
+        saveMatrixMode();
+        RendererRecord matRecord = (RendererRecord) DisplaySystem
+                .getDisplaySystem().getCurrentContext().getRendererRecord();
+        matRecord.switchMode(GL.GL_PROJECTION);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+        gl.glFrustum(frustumLeft, frustumRight, frustumBottom, frustumTop,
+                frustumNear, frustumFar);
+
+        if (result != null) {
+            tmp_FloatBuffer.rewind();
+            gl.glGetFloatv(GL.GL_PROJECTION_MATRIX, tmp_FloatBuffer);
+            tmp_FloatBuffer.rewind();
+            result.readFloatBuffer(tmp_FloatBuffer);
+        }
+
+        gl.glPopMatrix();
+        restoreMatrixMode();
+    }
+
+    public static void matrixFrustum(float frustumLeft, float frustumRight,
+            float frustumBottom, float frustumTop, float frustumNear,
+            float frustumFar, Matrix4f result) {
+        GL gl = glu.getCurrentGL();
+        saveMatrixMode();
+        RendererRecord matRecord = (RendererRecord) DisplaySystem
+                .getDisplaySystem().getCurrentContext().getRendererRecord();
+        matRecord.switchMode(GL.GL_PROJECTION);
+        gl.glPushMatrix();
+        gl.glLoadIdentity();
+        gl.glFrustum(frustumLeft, frustumRight, frustumBottom, frustumTop,
+                frustumNear, frustumFar);
+
+        if (result != null) {
+            tmp_FloatBuffer.rewind();
+            gl.glGetFloatv(GL.GL_PROJECTION_MATRIX, tmp_FloatBuffer);
+            tmp_FloatBuffer.rewind();
+            result.readFloatBuffer(tmp_FloatBuffer);
+        }
+
+        gl.glPopMatrix();
+        restoreMatrixMode();
     }
 }

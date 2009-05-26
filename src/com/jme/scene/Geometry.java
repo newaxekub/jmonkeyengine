@@ -58,6 +58,9 @@ import com.jme.util.export.JMEImporter;
 import com.jme.util.export.OutputCapsule;
 import com.jme.util.export.Savable;
 import com.jme.util.geom.BufferUtils;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.IntBuffer;
 
 /**
  * <code>Geometry</code> defines a leaf node of the scene graph. The leaf node
@@ -89,7 +92,7 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
     protected transient FloatBuffer vertBuf;
 
     /** The geometry's per Texture per vertex texture coordinate information. */
-    protected transient ArrayList<TexCoords> texBuf;
+    protected ArrayList<TexCoords> texBuf;
 
     /** The geometry's per vertex color information. */
     protected transient FloatBuffer tangentBuf;
@@ -113,9 +116,9 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      * The compiled list of renderstates for this geometry, taking into account
      * ancestors' states - updated with updateRenderStates()
      */
-    public RenderState[] states = new RenderState[RenderState.StateType.values().length];
+    public transient RenderState[] states = new RenderState[RenderState.StateType.values().length];
 
-    private LightState lightState;
+    private transient LightState lightState;
     
     protected ColorRGBA defaultColor = new ColorRGBA(ColorRGBA.white);
 
@@ -937,6 +940,48 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
 
     public LightState getLightState() {
         return lightState;
+    }
+
+    /**
+     * Used with Serialization. Do not call this directly.
+     *
+     * @param s
+     * @throws IOException
+     * @see java.io.Serializable
+     */
+    private void writeObject(ObjectOutputStream output) throws IOException {
+        output.defaultWriteObject();
+        // write buffers
+        BufferUtils.serializeFloatBuffer(colorBuf, output);
+        BufferUtils.serializeFloatBuffer(normBuf, output);
+        BufferUtils.serializeFloatBuffer(vertBuf, output);
+        BufferUtils.serializeFloatBuffer(tangentBuf, output);
+        BufferUtils.serializeFloatBuffer(binormalBuf, output);
+        BufferUtils.serializeFloatBuffer(fogBuf, output);
+        // texture coords
+    }
+
+    /**
+     * Used with Serialization. Do not call this directly.
+     *
+     * @param s
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @see java.io.Serializable
+     */
+    private void readObject(ObjectInputStream input) throws IOException,
+            ClassNotFoundException {
+        input.defaultReadObject();
+        // read buffers
+        colorBuf = BufferUtils.deserializeFloatBuffer(input);
+        normBuf = BufferUtils.deserializeFloatBuffer(input);
+        vertBuf = BufferUtils.deserializeFloatBuffer(input);
+        tangentBuf = BufferUtils.deserializeFloatBuffer(input);
+        binormalBuf = BufferUtils.deserializeFloatBuffer(input);
+        fogBuf = BufferUtils.deserializeFloatBuffer(input);
+        // texture coords
+        // Render states
+        states = new RenderState[RenderState.StateType.values().length];
     }
 }
 

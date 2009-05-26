@@ -507,6 +507,14 @@ public class ColladaImporter {
     }
 
     /**
+     * The up axis for this model, X_UP, Y_UP or Z_UP
+     * @return the up axis
+     */
+    public String getUpAxis() {
+        return upAxis;
+    }
+
+    /**
      * getAssetInformation returns a string of the collected asset information
      * of this COLLADA model. The format is such: <br>
      * AUTHOR REVISION<br>
@@ -2361,22 +2369,30 @@ public class ColladaImporter {
           ms.setShininess(pt.getshininess().getfloat2().getValue().floatValue());
         }
         
-        /*
-         * if (pt.hastransparent()) { if (pt.gettransparent().hascolor() &&
-         * !pt.gettransparency().getfloat2().getValue() .toString().equals("0")) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.One_MINUS_DST_COLOR);
-         * as.setDstFunction(BlendState.DestinationFunction.One); as.setBlendEnabled(true);
-         * mat.setState(as); } else if (pt.gettransparent().hastexture()) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
-         * as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-         * as.setBlendEnabled(true); as.setReference(0.14f);
-         * as.setTestEnabled(true); as.setTestFunction(BlendState.TF_GEQUAL);
-         * mat.setState(as); } }
-         */
+        if (pt.hastransparent()) {
+            if (pt.gettransparent().hascolor() &&
+                    !pt.gettransparency().getfloat2().getValue().toString().equals("0")) {
+                ColorRGBA constantColor = getColor(pt.gettransparent().getcolor());
+                ColorRGBA diffuse = ms.getDiffuse();
+                diffuse.a = 1.0f - constantColor.r;
+                ms.setDiffuse(diffuse);
+                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+                as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
+                as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+                as.setBlendEnabled(true);
+                as.setEnabled(true);
+                mat.setState(as);
+//            } else if (pt.gettransparent().hastexture()) {
+//                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+//                as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
+//                as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+//                as.setBlendEnabled(true);
+//                as.setReference(0.14f);
+//                as.setTestEnabled(true);
+//                as.setTestFunction(BlendState.TF_GEQUAL);
+//                mat.setState(as);
+            }
+        }
         mat.setState(ms);
     }
 
@@ -2415,22 +2431,30 @@ public class ColladaImporter {
             ms.setEmissive(getColor(lt.getemission().getcolor()));
         }
         mat.setState(ms);
-        /*
-         * if (lt.hastransparent()) { if (lt.gettransparent().hascolor() &&
-         * !lt.gettransparency().getfloat2().getValue() .toString().equals("0")) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.One_MINUS_DST_COLOR);
-         * as.setDstFunction(BlendState.DestinationFunction.One); as.setBlendEnabled(true);
-         * mat.setState(as); } else if (lt.gettransparent().hastexture()) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
-         * as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-         * as.setBlendEnabled(true); as.setReference(0.14f);
-         * as.setTestEnabled(true); as.setTestFunction(BlendState.TF_GEQUAL);
-         * mat.setState(as); } }
-         */
+        if (lt.hastransparent()) {
+            if (lt.gettransparent().hascolor() &&
+                    !lt.gettransparency().getfloat2().getValue().toString().equals("0")) {
+                float alpha = lt.gettransparency().getfloat2().getValue().floatValue();
+                ColorRGBA diffuse = ms.getDiffuse();
+                diffuse.a = 1.0f - alpha;
+                ms.setDiffuse(diffuse);
+
+                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+                as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
+                as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+                as.setBlendEnabled(true);
+                mat.setState(as);
+//            } else if (lt.gettransparent().hastexture()) {
+//                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+//                as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
+//                as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+//                as.setBlendEnabled(true);
+//                as.setReference(0.14f);
+//                as.setTestEnabled(true);
+//                as.setTestFunction(BlendState.TF_GEQUAL);
+//                mat.setState(as);
+            }
+        }
         // Ignored: reflective attributes, transparent attributes
     }
 
@@ -2891,18 +2915,29 @@ public class ColladaImporter {
                             vecs[k] = new Vector3f(floats[(k * stride)],
                                     floats[(k * stride) + 1], 0.0f);
                         }
-                    } else {
-                        assert (3 == stride);
+                    } else if (3==stride) {
                         for (int k = 0; k < vecs.length; k++) {
                             vecs[k] = new Vector3f(floats[(k * stride)],
                                     floats[(k * stride) + 1],
                                     floats[(k * stride) + 2]);
                         }
-                    }
-                    put(source.getid().toString(), vecs);
+                    } else if (4 == stride) {
+                         for (int k = 0; k < vecs.length; k++) {
+                             vecs[k] = new Vector3f(floats[(k * stride)],
+                                     floats[(k * stride) + 1],
+                                     floats[(k * stride) + 2]);
+                         }
+                         logger.severe("4 Stride Mesh, Alpha is being ignored :-(");
+                         // TODO This should be color not Vector3f
+                     } else {
+                         logger.severe("Unsupported stride size for mesh "+stride);
+                         continue;
+                     }
+                     put(source.getid().toString(), vecs);
                 }
             }
         }
+        
         // next we have to define what source defines the vertices positional
         // information
         if (mesh.hasvertices()) {
@@ -2949,6 +2984,7 @@ public class ColladaImporter {
             trianglesType tri = mesh.gettrianglesAt(triangleIndex);
 
             TriMesh triMesh = new TriMesh(geom.getid().toString());
+	    int tcUnit = 0;
 
             if (tri.hasmaterial()) {
                 // first set the appropriate materials to this mesh.
@@ -3234,7 +3270,7 @@ public class ColladaImporter {
                     } else {
                         unit = set - 1;
                     }
-                    triMesh.setTextureCoords(new TexCoords(texBuffer,2), unit);
+                    triMesh.setTextureCoords(new TexCoords(texBuffer,2), tcUnit++);
                     // Set the wrap mode, check if the mesh has a texture
                     // first, if not check the geometry.
                     // Then, based on the texture coordinates, we may need to
@@ -4115,9 +4151,11 @@ public class ColladaImporter {
         }
         Spatial spatial = (Spatial) resourceLibrary.get(key);
         if (spatial != null) {
+            
             if (spatial instanceof Node) {
                 spatial = new SharedNode(key, (Node) spatial);
             }
+            
 
             parent.attachChild(spatial);
         }
@@ -4138,12 +4176,14 @@ public class ColladaImporter {
         }
         Spatial spatial = (Spatial) resourceLibrary.get(key);
         if (spatial != null) {
+            
             if (spatial instanceof TriMesh) {
                 spatial = new SharedMesh(key, (TriMesh) spatial);
             } else if (spatial instanceof Node) {
                 spatial = new SharedNode(key, (Node) spatial);
             }
-
+	    
+            
             node.attachChild(spatial);
             if (geometry.hasbind_material()) {
                 processBindMaterial(geometry.getbind_material(), spatial);

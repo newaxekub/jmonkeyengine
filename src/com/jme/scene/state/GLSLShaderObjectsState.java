@@ -54,6 +54,7 @@ import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
 import com.jme.renderer.ColorRGBA;
 import com.jme.scene.Geometry;
+import com.jme.util.geom.BufferUtils;
 import com.jme.scene.state.RenderState.StateType;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
@@ -546,6 +547,24 @@ public abstract class GLSLShaderObjectsState extends RenderState {
         shaderUniform.matrixBuffer.rewind();
         shaderUniform.rowMajor = rowMajor;
 
+        setNeedsRefresh(true);
+    }
+
+    
+     public void setUniformMatrix4Array(String name, float value[], boolean rowMajor) {
+        ShaderVariableMatrix4 shaderUniform =
+                getShaderUniform(name, ShaderVariableMatrix4.class);
+        // this is hack
+        // TODO: make a new ShaderVariable class instead
+        if ( shaderUniform.matrixBuffer.capacity() < value.length )
+        {
+            shaderUniform.matrixBuffer = BufferUtils.createFloatBuffer(value.length);
+        }
+        shaderUniform.matrixBuffer.clear();
+        shaderUniform.matrixBuffer.put(value);
+        //shaderUniform.matrixBuffer.rewind();
+        shaderUniform.rowMajor = rowMajor;
+        //shaderUniform.transpose = transpose;
         setNeedsRefresh(true);
     }
 

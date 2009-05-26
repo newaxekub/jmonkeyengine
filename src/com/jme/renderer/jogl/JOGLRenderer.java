@@ -1228,6 +1228,53 @@ public class JOGLRenderer extends Renderer {
                 }
             }
         }
+
+        // Dahlgren's Additions
+        if (vbo.isVBOTangentEnabled() && vbo.getVBOTangentID() <= 0)
+        {           
+            if (g.getTangentBuffer() != null) {
+                Object vboid;       
+                if ((vboid = vboMap.get(g.getTangentBuffer())) != null) {
+                    vbo.setVBOTangentID(((Integer) vboid).intValue());
+                } else {
+                    g.getTangentBuffer().rewind();
+                    int vboID = rendRecord.makeVBOId();
+                    vbo.setVBOTangentID(vboID);
+                    vboMap.put(g.getTangentBuffer(), vboID);
+
+                    rendRecord.invalidateVBO(); // make sure we set it...
+                    rendRecord.setBoundVBO(vbo.getVBOTangentID());
+                    gl.glBufferDataARB(
+                            GL.GL_ARRAY_BUFFER_ARB, g
+                                    .getTangentBuffer().limit() * 4, g
+                                    .getTangentBuffer(),
+                            GL.GL_STATIC_DRAW_ARB); // TODO Check <sizeInBytes>
+                }       
+            }           
+        } 
+
+        if (vbo.isVBOBinormalEnabled() && vbo.getVBOBinormalID() <= 0)
+        {               
+            if (g.getBinormalBuffer() != null) {
+                Object vboid;
+                if ((vboid = vboMap.get(g.getBinormalBuffer())) != null) {
+                    vbo.setVBOBinormalID(((Integer) vboid).intValue());
+                } else {
+                    g.getBinormalBuffer().rewind();
+                    int vboID = rendRecord.makeVBOId();
+                    vbo.setVBOBinormalID(vboID);
+                    vboMap.put(g.getBinormalBuffer(), vboID);
+
+                    rendRecord.invalidateVBO(); // make sure we set it...
+                    rendRecord.setBoundVBO(vbo.getVBOBinormalID());
+                    gl.glBufferDataARB(
+                            GL.GL_ARRAY_BUFFER_ARB, g
+                                    .getBinormalBuffer().limit() * 4, g
+                                    .getBinormalBuffer(),
+                            GL.GL_STATIC_DRAW_ARB); // TODO Check <sizeInBytes>
+                }
+            }
+        }
     }
 
     /**
@@ -1551,6 +1598,49 @@ public class JOGLRenderer extends Renderer {
             prevTextureNumber = ts.getNumberOfSetTextures() < TextureState
                     .getNumberOfFixedUnits() ? ts.getNumberOfSetTextures()
                     : TextureState.getNumberOfFixedUnits();
+        }
+
+        // Handle tangents and binormals
+        if (supportsVBO && vbo != null)
+        {
+            // tangents
+            if (vbo.getVBOTangentID() > 0)
+            {
+                // VBO
+                gl.glEnableClientState(GL.GL_SECONDARY_COLOR_ARRAY);
+                rendRecord.setBoundVBO(vbo.getVBOTangentID());
+                // index, size, type, normalized, stride, pointer
+                gl.glSecondaryColorPointer(3, GL.GL_FLOAT, 0, 0);
+//                gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, 0, 0);
+            }
+            // binormals
+            if (vbo.getVBOBinormalID() > 0)
+            {
+                // VBO
+                rendRecord.setBoundVBO(vbo.getVBOBinormalID());
+                // index, size, type, normalized, stride, pointer
+                gl.glVertexAttribPointer(1, 4, GL.GL_FLOAT, false, 0, 0);
+            }
+        }
+        else
+        {
+            if (g.getTangentBuffer() != null) {
+                g.getTangentBuffer().rewind();
+                gl.glEnableClientState(GL.GL_SECONDARY_COLOR_ARRAY);
+                gl.glSecondaryColorPointer(3, GL.GL_FLOAT, 0, g.getTangentBuffer());
+            } else {
+		gl.glDisableClientState(GL.GL_SECONDARY_COLOR_ARRAY);
+	    }
+
+            JOGLShaderObjectsState shader = (JOGLShaderObjectsState)g.states[RenderState.StateType.GLSLShaderObjects.ordinal()];
+            if (shader != null && shader.isEnabled() &&
+                shader.hasAttributes() && g.getBinormalBuffer() != null) {
+                g.getBinormalBuffer().rewind();
+                gl.glVertexAttribPointer(1, 4, GL.GL_FLOAT, false, 0, g.getBinormalBuffer());
+                gl.glEnableVertexAttribArray(1);
+            } else {
+                gl.glDisableVertexAttribArray(1);
+            }
         }
 
         return indicesVBO;

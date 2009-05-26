@@ -53,6 +53,7 @@ import com.jme.util.resource.ResourceLocatorTool;
  */
 final public class TextureKey implements Savable {
 
+    protected String relativePath = null;
     protected URL location = null;
     protected boolean flipped;
     protected int code = Integer.MAX_VALUE;
@@ -64,9 +65,24 @@ final public class TextureKey implements Savable {
     }
 
     public TextureKey(URL location, boolean flipped, Image.Format imageType) {
+        //digestPath(location);
         this.location = location;
         this.flipped = flipped;
         this.format = imageType;
+    }
+
+    private void digestPath(URL location)
+    {
+	if (location==null)
+	    return;
+
+        String urlString = location.toString();
+        int assetIndex = urlString.indexOf("assets/");
+        if (assetIndex != -1) // Of interest to us
+            this.relativePath = urlString.substring(assetIndex);
+        else
+            this.relativePath = urlString;
+
     }
 
     public boolean equals(Object other) {

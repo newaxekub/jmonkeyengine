@@ -48,6 +48,13 @@ import com.jme.math.Vector2f;
 import com.jme.math.Vector3f;
 import com.jme.renderer.ColorRGBA;
 import com.jme.util.Debug;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 /**
  * <code>BufferUtils</code> is a helper class for generating nio buffers from
@@ -66,6 +73,31 @@ public final class BufferUtils {
     ////  -- TRACKER HASH --  ////
     private static final Map<Buffer, Object> trackingHash = Collections.synchronizedMap(new WeakHashMap<Buffer, Object>());
     private static final Object ref = new Object();
+    
+    //// -- UPDATED TRACKING -- ////
+    private static final Map<Reference<Buffer>, BufferInfo> trackingMap =
+                                    new HashMap<Reference<Buffer>, BufferInfo>();
+    private static final ReferenceQueue refQueue = new ReferenceQueue();
+    private static final BufferStats stats = new BufferStats();
+   
+
+    //// -- STATIC INITIALIZER -- ////
+    static {
+        // create a thread that will monitor the reference queue and update
+        // the totals as objects are removed
+        Thread t = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    while (true) {
+                        removeTrackingReference(refQueue.remove());
+                    }
+                } catch (InterruptedException ie) {
+                    // end tracking on interrupt
+                }
+            }
+        }, "JME BufferUtils Reference Queue Monitor");
+        t.start();
+    }
 
     ////  -- COLORRGBA METHODS -- ////
 
@@ -669,6 +701,8 @@ public final class BufferUtils {
     public static DoubleBuffer createDoubleBuffer(int size) {
         DoubleBuffer buf = ByteBuffer.allocateDirect(8 * size).order(ByteOrder.nativeOrder()).asDoubleBuffer();
         buf.clear();
+
+        track(buf, BufferInfo.Type.DOUBLE);
         if (Debug.trackDirectMemory) {
             trackingHash.put(buf, ref);
         }
@@ -730,6 +764,8 @@ public final class BufferUtils {
     public static FloatBuffer createFloatBuffer(int size) {
         FloatBuffer buf = ByteBuffer.allocateDirect(4 * size).order(ByteOrder.nativeOrder()).asFloatBuffer();
         buf.clear();
+
+        track(buf, BufferInfo.Type.FLOAT);
         if (Debug.trackDirectMemory) {
             trackingHash.put(buf, ref);
         }
@@ -789,6 +825,8 @@ public final class BufferUtils {
     public static IntBuffer createIntBuffer(int size) {
         IntBuffer buf = ByteBuffer.allocateDirect(4 * size).order(ByteOrder.nativeOrder()).asIntBuffer();
         buf.clear();
+
+        track(buf, BufferInfo.Type.INTEGER);
         if (Debug.trackDirectMemory) {
             trackingHash.put(buf, ref);
         }
@@ -849,6 +887,8 @@ public final class BufferUtils {
     public static ByteBuffer createByteBuffer(int size) {
         ByteBuffer buf = ByteBuffer.allocateDirect(size).order(ByteOrder.nativeOrder());
         buf.clear();
+
+        track(buf, BufferInfo.Type.BYTE);
         if (Debug.trackDirectMemory) {
             trackingHash.put(buf, ref);
         }
@@ -909,6 +949,8 @@ public final class BufferUtils {
     public static ShortBuffer createShortBuffer(int size) {
         ShortBuffer buf = ByteBuffer.allocateDirect(2 * size).order(ByteOrder.nativeOrder()).asShortBuffer();
         buf.clear();
+
+        track(buf, BufferInfo.Type.SHORT);
         if (Debug.trackDirectMemory) {
             trackingHash.put(buf, ref);
         }
@@ -1034,50 +1076,240 @@ public final class BufferUtils {
         return copy;
     }
 
-    public static void printCurrentDirectMemory(StringBuilder store) {
-        long totalHeld = 0;
-        // make a new set to hold the keys to prevent concurrency issues.
-        ArrayList<Buffer> bufs = new ArrayList<Buffer>(trackingHash.keySet());
-        int fBufs = 0, bBufs = 0, iBufs = 0, sBufs = 0, dBufs = 0;
-        int fBufsM = 0, bBufsM = 0, iBufsM = 0, sBufsM = 0, dBufsM = 0;
-        for (Buffer b : bufs) {
-            if (b instanceof ByteBuffer) {
-                totalHeld += b.capacity();
-                bBufsM += b.capacity();
-                bBufs++;
-            } else if (b instanceof FloatBuffer) {
-                totalHeld += b.capacity() * 4;
-                fBufsM += b.capacity() * 4;
-                fBufs++;
-            } else if (b instanceof IntBuffer) {
-                totalHeld += b.capacity() * 4;
-                iBufsM += b.capacity() * 4;
-                iBufs++;
-            } else if (b instanceof ShortBuffer) {
-                totalHeld += b.capacity() * 2;
-                sBufsM += b.capacity() * 2;
-                sBufs++;
-            } else if (b instanceof DoubleBuffer) {
-                totalHeld += b.capacity() * 8;
-                dBufsM += b.capacity() * 8;
-                dBufs++;
+    /**
+     * Add tracking data for a buffer
+     * @param buffer the buffer to track
+     * @param type the type
+     */
+    private static void track(Buffer buf, BufferInfo.Type type) {
+        BufferInfo info = new BufferInfo();
+        info.type = type;
+        int size = buf.capacity();
+
+        WeakReference<Buffer> r = new WeakReference<Buffer>(buf, refQueue);
+
+        // update totals
+        synchronized (trackingMap) {
+            trackingMap.put(r, info);
+
+            stats.totalBuffers++;
+
+            switch (type) {
+                case BYTE:
+                    info.size = size;
+                    stats.totalByteBuffers++;
+                    stats.totalByteBufferBytes += info.size;
+                    break;
+                case SHORT:
+                    info.size = size * 2;
+                    stats.totalShortBuffers++;
+                    stats.totalShortBufferBytes += info.size;
+                    break;
+                case INTEGER:
+                    info.size = size * 4;
+                    stats.totalIntBuffers++;
+                    stats.totalIntBufferBytes += info.size;
+                    break;
+                case FLOAT:
+                    info.size = size * 4;
+                    stats.totalFloatBuffers++;
+                    stats.totalFloatBufferBytes += info.size;
+                    break;
+                case DOUBLE:
+                    info.size = size * 8;
+                    stats.totalDoubleBuffers++;
+                    stats.totalDoubleBufferBytes += info.size;
+                    break;
             }
+
+            stats.totalBufferBytes += info.size;
         }
+    }
+
+    /**
+     * Remove tracking data for a buffer
+     * @param r a reference to the buffer
+     */
+    private static void removeTrackingReference(Reference<Buffer> r) {
+        // update totals
+        synchronized (trackingMap) {
+            BufferInfo info = trackingMap.remove(r);
+            if (info == null) {
+                // yikes!
+                System.err.println("[BufferUtils] remove unknown reference");
+                return;
+            }
+
+            stats.totalBuffers--;
+            stats.totalBufferBytes -= info.size;
+
+            switch (info.type) {
+                case BYTE:
+                    stats.totalByteBuffers--;
+                    stats.totalByteBufferBytes -= info.size;
+                    break;
+                case SHORT:
+                    stats.totalShortBuffers--;
+                    stats.totalShortBufferBytes -= info.size;
+                    break;
+                case INTEGER:
+                    stats.totalIntBuffers--;
+                    stats.totalIntBufferBytes -= info.size;
+                    break;
+                case FLOAT:
+                    stats.totalFloatBuffers--;
+                    stats.totalFloatBufferBytes -= info.size;
+                    break;
+                case DOUBLE:
+                    stats.totalDoubleBuffers--;
+                    stats.totalDoubleBufferBytes -= info.size;
+                    break;
+            }
+
+        }
+    }
+
+    public static void printCurrentDirectMemory(StringBuilder store) {
         boolean printStout = store == null;
         if (store == null) {
             store = new StringBuilder();
         }
-        store.append("Existing buffers: ").append(bufs.size()).append("\n");
-        store.append("(b: ").append(bBufs).append("  f: ").append(fBufs)
-                .append("  i: ").append(iBufs).append("  s: ").append(sBufs)
-                .append("  d: ").append(dBufs).append(")").append("\n");
-        store.append("Total direct memory held: ").append(totalHeld/1024).append("kb\n");
-        store.append("(b: ").append(bBufsM/1024).append("kb  f: ").append(fBufsM/1024)
-                .append("kb  i: ").append(iBufsM/1024).append("kb  s: ").append(sBufsM/1024)
-                .append("kb  d: ").append(dBufsM/1024).append("kb)").append("\n");
+        
+        if (Debug.trackDirectMemory) {
+            long totalHeld = 0;
+            // make a new set to hold the keys to prevent concurrency issues.
+            ArrayList<Buffer> bufs = new ArrayList<Buffer>(trackingHash.keySet());
+            int fBufs = 0, bBufs = 0, iBufs = 0, sBufs = 0, dBufs = 0;
+            int fBufsM = 0, bBufsM = 0, iBufsM = 0, sBufsM = 0, dBufsM = 0;
+            for (Buffer b : bufs) {
+                if (b instanceof ByteBuffer) {
+                    totalHeld += b.capacity();
+                    bBufsM += b.capacity();
+                    bBufs++;
+                } else if (b instanceof FloatBuffer) {
+                    totalHeld += b.capacity() * 4;
+                    fBufsM += b.capacity() * 4;
+                    fBufs++;
+                } else if (b instanceof IntBuffer) {
+                    totalHeld += b.capacity() * 4;
+                    iBufsM += b.capacity() * 4;
+                    iBufs++;
+                } else if (b instanceof ShortBuffer) {
+                    totalHeld += b.capacity() * 2;
+                    sBufsM += b.capacity() * 2;
+                    sBufs++;
+                } else if (b instanceof DoubleBuffer) {
+                    totalHeld += b.capacity() * 8;
+                    dBufsM += b.capacity() * 8;
+                    dBufs++;
+                }
+            }
+        
+            store.append("JME Existing buffers: ").append(bufs.size()).append("\n");
+            store.append("(b: ").append(bBufs).append("  f: ").append(fBufs)
+                    .append("  i: ").append(iBufs).append("  s: ").append(sBufs)
+                    .append("  d: ").append(dBufs).append(")").append("\n");
+            store.append("Total direct memory held: ").append(totalHeld/1024).append("kb\n");
+            store.append("(b: ").append(bBufsM/1024).append("kb  f: ").append(fBufsM/1024)
+                    .append("kb  i: ").append(iBufsM/1024).append("kb  s: ").append(sBufsM/1024)
+                    .append("kb  d: ").append(dBufsM/1024).append("kb)").append("\n");
+
+            store.append("\n\n");
+        }
+
+        store.append("Existing Buffers:").append(stats.totalBuffers).append("\n");
+        store.append("(b: ").append(stats.totalByteBuffers)
+                .append("  f: ").append(stats.totalFloatBuffers)
+                .append("  i: ").append(stats.totalIntBuffers)
+                .append("  s: ").append(stats.totalShortBuffers)
+                .append("  d: ").append(stats.totalDoubleBuffers).append(")").append("\n");
+        store.append("Total direct memory held: ").append(stats.totalBufferBytes/1024).append("kb\n");
+        store.append("(b: ").append(stats.totalByteBufferBytes/1024)
+                .append("kb  f: ").append(stats.totalFloatBufferBytes/1024)
+                .append("kb  i: ").append(stats.totalIntBufferBytes/1024)
+                .append("kb  s: ").append(stats.totalShortBufferBytes/1024)
+                .append("kb  d: ").append(stats.totalDoubleBufferBytes/1024)
+                .append("kb)").append("\n");
         if (printStout) {
             System.out.println(store.toString());
         }
     }
 
+    /**
+     * Get the current buffer usage statistics
+     * @return the buffer statistics
+     */
+    public static BufferStats getDirectMemoryUsage() {
+        synchronized (trackingMap) {
+            return stats.clone();
+        }
+    }
+
+    public static void serializeFloatBuffer(FloatBuffer buffer, ObjectOutputStream output) throws IOException
+    {
+        if (buffer == null)
+            output.writeInt(0);
+        else
+        {
+            int length = buffer.limit();
+            output.writeInt(length);
+            buffer.rewind();
+            for (int i = 0; i < length; ++i)
+                output.writeFloat(buffer.get());
+        }
+    }
+
+    public static FloatBuffer deserializeFloatBuffer(ObjectInputStream input) throws IOException
+    {
+        int length = input.readInt();
+        if (length == 0)
+            return null;
+        else
+        {          
+	    FloatBuffer result = BufferUtils.createFloatBuffer(length);
+            for (int i = 0; i < length; ++i)
+                result.put(input.readFloat());
+            return result;
+        }
+    }
+
+    private static class BufferInfo {
+        enum Type { BYTE, SHORT, INTEGER, FLOAT, DOUBLE };
+
+        Type type;
+        long size;
+    }
+
+    public static class BufferStats implements Cloneable {
+        public int  totalBuffers           = 0;
+        public long totalBufferBytes       = 0;
+        public int  totalByteBuffers       = 0;
+        public long totalByteBufferBytes   = 0;
+        public int  totalShortBuffers      = 0;
+        public long totalShortBufferBytes  = 0;
+        public int  totalIntBuffers        = 0;
+        public long totalIntBufferBytes    = 0;
+        public int  totalFloatBuffers      = 0;
+        public long totalFloatBufferBytes  = 0;
+        public int  totalDoubleBuffers     = 0;
+        public long totalDoubleBufferBytes = 0;
+
+        @Override
+        public BufferStats clone() {
+            BufferStats out = new BufferStats();
+            out.totalBuffers           = totalBuffers;
+            out.totalBufferBytes       = totalBufferBytes;
+            out.totalByteBuffers       = totalByteBuffers;
+            out.totalByteBufferBytes   = totalByteBufferBytes;
+            out.totalShortBuffers      = totalShortBuffers;
+            out.totalShortBufferBytes  = totalShortBufferBytes;
+            out.totalIntBuffers        = totalIntBuffers;
+            out.totalIntBufferBytes    = totalIntBufferBytes;
+            out.totalFloatBuffers      = totalFloatBuffers;
+            out.totalFloatBufferBytes  = totalFloatBufferBytes;
+            out.totalDoubleBuffers     = totalDoubleBuffers;
+            out.totalDoubleBufferBytes = totalDoubleBufferBytes;
+            return out;
+        }
+    }
 }

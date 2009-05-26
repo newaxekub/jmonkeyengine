@@ -43,6 +43,9 @@ import com.jme.util.export.JMEImporter;
 import com.jme.util.export.OutputCapsule;
 import com.jme.util.export.Savable;
 import com.jme.util.geom.BufferUtils;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 /**
  * Simple data class storing a buffer of floats and a number that indicates how
@@ -50,9 +53,9 @@ import com.jme.util.geom.BufferUtils;
  * 
  * @author Joshua Slack
  */
-public class TexCoords implements Savable {
+public class TexCoords implements Savable, Serializable {
 
-    public FloatBuffer coords;
+    public transient FloatBuffer coords;
     public int perVert;
 
     public TexCoords() {
@@ -131,5 +134,33 @@ public class TexCoords implements Savable {
         OutputCapsule cap = ex.getCapsule(this);
         cap.write(coords, "coords", null);
         cap.write(perVert, "perVert", 0);
+    }
+
+     /**
+     * Used with Serialization. Do not call this directly.
+     *
+     * @param s
+     * @throws IOException
+     * @see java.io.Serializable
+     */
+    private void writeObject(ObjectOutputStream output) throws IOException {
+        output.defaultWriteObject();
+        // write buffer
+        BufferUtils.serializeFloatBuffer(coords, output);
+    }
+
+    /**
+     * Used with Serialization. Do not call this directly.
+     *
+     * @param s
+     * @throws IOException
+     * @throws ClassNotFoundException
+     * @see java.io.Serializable
+     */
+    private void readObject(ObjectInputStream input) throws IOException,
+            ClassNotFoundException {
+        input.defaultReadObject();
+        // read buffer
+        coords = BufferUtils.deserializeFloatBuffer(input);
     }
 }

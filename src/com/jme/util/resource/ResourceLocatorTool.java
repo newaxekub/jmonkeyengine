@@ -56,13 +56,27 @@ public class ResourceLocatorTool {
     public static final String TYPE_SHADER = "shader";
 
     private static final Map<String, ArrayList<ResourceLocator>> locatorMap = new HashMap<String, ArrayList<ResourceLocator>>();
+    private static final Map<Long, Map<String, ArrayList<ResourceLocator>>> threadLocatorMap = new HashMap<Long, Map<String, ArrayList<ResourceLocator>>>();
 
     public static URL locateResource(String resourceType, String resourceName) {
         if (resourceName == null) {
             return null;
         }
         synchronized (locatorMap) {
-            ArrayList<ResourceLocator> bases = locatorMap.get(resourceType);
+            ArrayList<ResourceLocator> bases = new ArrayList();
+
+            ArrayList<ResourceLocator> tmp = locatorMap.get(resourceType);
+            if (tmp!=null)
+                bases.addAll(tmp);
+
+            Long threadId = new Long(Thread.currentThread().getId());
+            Map<String, ArrayList<ResourceLocator>> threadMap = threadLocatorMap.get(threadId);
+            if (threadMap!=null) {
+                tmp = threadMap.get(resourceType);
+                if (tmp!=null)
+                    bases.addAll(tmp);
+            }
+            
             if (bases != null) {
                 for (int i = bases.size(); --i >= 0; ) {
                     ResourceLocator loc = bases.get(i);
@@ -104,6 +118,29 @@ public class ResourceLocatorTool {
         }
     }
 
+    public static void addThreadResourceLocator(String resourceType,
+            ResourceLocator locator) {
+        if (locator == null)
+            return;
+        synchronized (locatorMap) {
+            Long threadId = new Long(Thread.currentThread().getId());
+            Map<String, ArrayList<ResourceLocator>> map = threadLocatorMap.get(threadId);
+            if (map==null) {
+                map = new HashMap();
+                threadLocatorMap.put(threadId, map);
+            }
+            ArrayList<ResourceLocator> bases = map.get(resourceType);
+            if (bases == null) {
+                bases = new ArrayList<ResourceLocator>();
+                map.put(resourceType, bases);
+            }
+
+            if (!bases.contains(locator)) {
+                bases.add(locator);
+            }
+        }
+    }
+
     public static boolean removeResourceLocator(String resourceType,
             ResourceLocator locator) {
         synchronized (locatorMap) {
@@ -114,4 +151,19 @@ public class ResourceLocatorTool {
             return bases.remove(locator);
         }
     }
-}
+
+    public static boolean removeThreadResourceLocator(String resourceType,
+            ResourceLocator locator) {
+        synchronized (locatorMap) {
+            Map<String, ArrayList<ResourceLocator>> map = threadLocatorMap.get(new Long(Thread.currentThread().getId()));
+            if (map==null)
+                return false;
+
+
+            ArrayList<ResourceLocator> bases = map.get(resourceType);
+            if (bases == null) {
+                return false;
+            }
+            return bases.remove(locator);
+        }
+    }}

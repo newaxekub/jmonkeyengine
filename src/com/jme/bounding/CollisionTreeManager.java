@@ -166,7 +166,7 @@ public class CollisionTreeManager {
         }
 
         // we didn't have it in the cache, create it if possible.
-        if (toReturn == null) {
+        if (toReturn == null || !mesh.getCollisionTreeValid()) {
             if (generateTrees) {
                 return generateCollisionTree(treeType, mesh, false);
             } else {

@@ -135,6 +135,7 @@ public class Quad extends TriMesh {
         getVertexBuffer().put(-width / 2f).put(-height / 2f).put(0);
         getVertexBuffer().put(width / 2f).put(-height / 2f).put(0);
         getVertexBuffer().put(width / 2f).put(height / 2f).put(0);
+        setCollisionTreeValid(false);
     }
 
     /**

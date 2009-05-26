@@ -95,6 +95,8 @@ public class TriMesh extends Geometry implements Serializable {
     protected Mode mode = Mode.Triangles;
     protected int triangleQuantity;
 
+    private boolean collisionTreeValid = false;
+
     /**
      * Empty Constructor to be used internally only.
      */
@@ -574,6 +576,14 @@ public class TriMesh extends Geometry implements Serializable {
         localToWorld(fill, fill);
 
         return fill;
+    }
+
+    public boolean getCollisionTreeValid() {
+        return (collisionTreeValid);
+    }
+
+    public void setCollisionTreeValid(boolean flag) {
+        collisionTreeValid = flag;
     }
 
     /**
