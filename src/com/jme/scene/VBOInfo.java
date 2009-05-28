@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2008 jMonkeyEngine
+ * Copyright (c) 2003-2009 jMonkeyEngine
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,14 +55,14 @@ public class VBOInfo implements Serializable, Savable {
 	private boolean useVBOTexture = false;
 	private boolean useVBOColor = false;
 	private boolean useVBONormal = false;
-	private boolean useVBOTangent = false;
+        private boolean useVBOTangent = false;
 	private boolean useVBOBinormal = false;
 	private boolean useVBOFogCoords = false;
 	private boolean useVBOIndex = false;
 	private int vboVertexID = -1;
 	private int vboColorID = -1;
 	private int vboNormalID = -1;
-	private int vboTangentID = -1;
+        private int vboTangentID = -1;
 	private int vboBinormalID = -1;
 	private int vboFogCoordsID = -1;
 	private int[] vboTextureIDs = null;
@@ -85,8 +85,8 @@ public class VBOInfo implements Serializable, Savable {
 	    useVBOTexture = defaultVBO;
 	    useVBOVertex = defaultVBO;
 	    useVBONormal = defaultVBO;
-        useVBOTangent = defaultVBO;
-        useVBOBinormal = defaultVBO;
+            useVBOTangent = defaultVBO;
+            useVBOBinormal = defaultVBO;
 	    useVBOFogCoords = defaultVBO;
 	    useVBOIndex = false;
 
@@ -104,7 +104,7 @@ public class VBOInfo implements Serializable, Savable {
 	    copy.useVBOTexture = useVBOTexture;
 	    copy.useVBOColor = useVBOColor;
 	    copy.useVBONormal = useVBONormal;
-	    copy.useVBOTangent = useVBOTangent;
+            copy.useVBOTangent = useVBOTangent;
 	    copy.useVBOBinormal = useVBOBinormal;
 	    copy.useVBOIndex = useVBOIndex;
 	    copy.useVBOFogCoords = useVBOFogCoords;
@@ -250,30 +250,31 @@ public class VBOInfo implements Serializable, Savable {
 		useVBOColor = enabled;
 	}
 
-    // Dahlgren's additions
-    public boolean isVBOTangentEnabled() {
-        return useVBOTangent;
-    }
+        // Dahlgren's additions
+        public boolean isVBOTangentEnabled() {
+            return useVBOTangent;
+        }
 
-    public void setVBOTangentEnabled(boolean enabled) {
-        useVBOTangent = enabled;
-    }
+        public void setVBOTangentEnabled(boolean enabled) {
+            useVBOTangent = enabled;
+        }
 
-    public boolean isVBOBinormalEnabled() {
-        return useVBOBinormal;
-    }
+        public boolean isVBOBinormalEnabled() {
+            return useVBOBinormal;
+        }
 
-    public void setVBOBinormalEnabled(boolean enabled) {
-        useVBOBinormal = enabled;
-    }
+        public void setVBOBinormalEnabled(boolean enabled) {
+            useVBOBinormal = enabled;
+        }
 
-    public int getVBOTangentID() {
-        return vboTangentID;
-    }
+        public int getVBOTangentID() {
+            return vboTangentID;
+        }
 
-    public int getVBOBinormalID() {
-        return vboBinormalID;
-    }
+        public int getVBOBinormalID() {
+            return vboBinormalID;
+        }
+    
 	public int getVBOVertexID() {
 		return vboVertexID;
 	}
@@ -295,20 +296,23 @@ public class VBOInfo implements Serializable, Savable {
 		return vboColorID;
 	}
 
-    // Dahlgren's additions
-    public void setVBOTangentID(int id) {
-        vboTangentID = id;
-    }
+            // Dahlgren's additions
+        public void setVBOTangentID(int id) {
+            vboTangentID = id;
+        }
 
-    public void setVBOBinormalID(int id) {
-        vboBinormalID = id;
-    }
-
+        public void setVBOBinormalID(int id) {
+            vboBinormalID = id;
+        }
+    
 	public void setVBOVertexID(int id) {
 		vboVertexID = id;
 	}
 
 	public void setVBOTextureID(int index, int id) {
+	//	if (index >= vboTextureIDs.length) {
+	//		resizeTextureIds(index+1);
+	//	}
 		vboTextureIDs[index] = id;
 	}
 

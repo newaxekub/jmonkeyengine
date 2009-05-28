@@ -269,10 +269,10 @@ public abstract class Spatial implements Serializable, Savable {
 
     /** ArrayList of controllers for this spatial. */
     protected ArrayList<Controller> geometricalControllers;
-    
+        
     /** ArrayList of controllers for this spatial. */
     protected ArrayList<GeometricUpdateListener> geometricUpdateListeners;
-
+    
     private static final Vector3f compVecA = new Vector3f();
     private static final Quaternion compQuat = new Quaternion();
 
@@ -315,36 +315,6 @@ public abstract class Spatial implements Serializable, Savable {
         geometricalControllers.add(controller);
     }
 
-    /**
-     * Adds a Controller to this Spatial's list of controllers.
-     * 
-     * @param controller
-     *            The Controller to add
-     * @see com.jme.scene.Controller
-     */
-    public void addGeometricUpdateListener(GeometricUpdateListener l) {
-        if (geometricUpdateListeners == null) {
-            geometricUpdateListeners = new ArrayList<GeometricUpdateListener>(1);
-        }
-        geometricUpdateListeners.add(l);
-    }
-     
-    /**
-     * Removes a Controller from this Spatial's list of controllers, if it
-     * exist.
-     * 
-     * @param controller
-     *            The Controller to remove
-     * @return True if the Controller was in the list to remove.
-     * @see com.jme.scene.Controller
-     */
-    public boolean removeGeometricUpdateListener(GeometricUpdateListener l) {
-        if (geometricUpdateListeners == null) {
-            return false;
-        }
-        return geometricUpdateListeners.remove(l);
-    }
-    
     /**
      * Removes a Controller from this Spatial's list of controllers, if it
      * exist.
@@ -424,6 +394,37 @@ public abstract class Spatial implements Serializable, Savable {
         return geometricalControllers.size();
     }
 
+    
+    /**
+     * Adds a Controller to this Spatial's list of controllers.
+     * 
+     * @param controller
+     *            The Controller to add
+     * @see com.jme.scene.Controller
+     */
+    public void addGeometricUpdateListener(GeometricUpdateListener l) {
+        if (geometricUpdateListeners == null) {
+            geometricUpdateListeners = new ArrayList<GeometricUpdateListener>(1);
+        }
+        geometricUpdateListeners.add(l);
+    }
+     
+    /**
+     * Removes a Controller from this Spatial's list of controllers, if it
+     * exist.
+     * 
+     * @param controller
+     *            The Controller to remove
+     * @return True if the Controller was in the list to remove.
+     * @see com.jme.scene.Controller
+     */
+    public boolean removeGeometricUpdateListener(GeometricUpdateListener l) {
+        if (geometricUpdateListeners == null) {
+            return false;
+        }
+        return geometricUpdateListeners.remove(l);
+    }
+    
     /**
      * <code>onDraw</code> checks the spatial with the camera to see if it
      * should be culled, if not, the node's draw method is called.
@@ -456,7 +457,6 @@ public abstract class Spatial implements Serializable, Savable {
                 && frustrumIntersects == Camera.FrustumIntersect.Intersects) {
             frustrumIntersects = camera.contains(worldBound);
         }
-
         if (frustrumIntersects != Camera.FrustumIntersect.Outside) {
             draw(r);
         }
@@ -554,18 +554,6 @@ public abstract class Spatial implements Serializable, Savable {
                 propagateBoundToRoot();
             }
         }
-        notifyListeners();
-    }
-    
-    void notifyListeners() {
-        GeometricUpdateListener l = null;
-                
-        if (geometricUpdateListeners != null) {
-            for (int i=0; i<geometricUpdateListeners.size(); i++) {
-                l = (GeometricUpdateListener)geometricUpdateListeners.get(i);
-                l.geometricDataChanged(this);
-            }
-        }
     }
 
     /**
@@ -626,7 +614,7 @@ public abstract class Spatial implements Serializable, Savable {
                     worldTranslation);
         } else {
             worldTranslation.set(localTranslation);
-        }
+        }   
     }
 
     protected void updateWorldRotation() {

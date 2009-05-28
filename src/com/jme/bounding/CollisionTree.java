@@ -149,7 +149,7 @@ public class CollisionTree implements Serializable {
             mesh = (TriMesh) spat;
             triIndex = mesh.getTriangleIndices(triIndex);
             createTree(0, triIndex.length, doSort);
-	    mesh.setCollisionTreeValid(true);
+            mesh.setCollisionTreeValid(true);
         }
     }
 
@@ -165,7 +165,7 @@ public class CollisionTree implements Serializable {
         this.mesh = mesh;
         triIndex = mesh.getTriangleIndices(triIndex);
         createTree(0, triIndex.length, doSort);
-	mesh.setCollisionTreeValid(true);
+        mesh.setCollisionTreeValid(true);
     }
 
     /**
@@ -184,7 +184,6 @@ public class CollisionTree implements Serializable {
     public void createTree(int start, int end, boolean doSort) {
         this.start = start;
         this.end = end;
-
         if (triIndex == null) {
             return;
         }
