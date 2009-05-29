@@ -175,15 +175,15 @@ public class BoundingBox extends BoundingVolume {
     private void checkMinMax(Vector3f min, Vector3f max, Vector3f point) {
         if (point.x < min.x)
             min.x = point.x;
-        else if (point.x > max.x)
+        if (point.x > max.x)
             max.x = point.x;
         if (point.y < min.y)
             min.y = point.y;
-        else if (point.y > max.y)
+        if (point.y > max.y)
             max.y = point.y;
         if (point.z < min.z)
             min.z = point.z;
-        else if (point.z > max.z)
+        if (point.z > max.z)
             max.z = point.z;
     }
 

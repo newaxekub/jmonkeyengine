@@ -51,7 +51,9 @@ public class TrianglePickData extends PickData {
     private final Vector3f[] worldTriangle = new Vector3f[]{new Vector3f(), new Vector3f(), new Vector3f()};
     private final Vector3f[] vertices = new Vector3f[]{new Vector3f(), new Vector3f(), new Vector3f()};
 
-	private final Vector3f intersectionPoint = new Vector3f();
+    private final Vector3f intersectionPoint = new Vector3f();
+    private int intersectionTri = -1;
+    private TriMesh intersectionMesh = null;
 
     public TrianglePickData(Ray ray, TriMesh targetMesh,
 			ArrayList<Integer> targetTris, boolean checkDistance) {
@@ -104,9 +106,11 @@ public class TrianglePickData extends PickData {
 			}
 		}
 		
+		intersectionTri = tris.get(0).intValue();
+        intersectionMesh = mesh;
 		if (Float.isInfinite( distanceSq )) {
-            return distanceSq;
-        } else
+            		return distanceSq;
+        	} else
 			return FastMath.sqrt(distanceSq);
 	}
 
@@ -134,5 +138,13 @@ public class TrianglePickData extends PickData {
         
         public void getIntersectionPoint(Vector3f out) {
             out.set(intersectionPoint);
+        }
+
+        public int getIntersectionTri() {
+            return(intersectionTri);
+        }
+
+        public TriMesh getIntersectionMesh() {
+            return(intersectionMesh);
         }
 }

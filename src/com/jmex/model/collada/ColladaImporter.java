@@ -13,8 +13,8 @@
  *   notice, this list of conditions and the following disclaimer in the
  *   documentation and/or other materials provided with the distribution.
  *
- * * Neither the name of 'jMonkeyEngine' nor the names of its contributors 
- *   may be used to endorse or promote products derived from this software 
+ * * Neither the name of 'jMonkeyEngine' nor the names of its contributors
+ *   may be used to endorse or promote products derived from this software
  *   without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -169,7 +169,7 @@ import com.jmex.model.collada.schema.visual_sceneType;
  * jME. This processing is currently aimed at the 1.4.1 release of the COLLADA
  * Specification, and will, in most likelyhood, require updating with a new
  * release of COLLADA.
- * 
+ *
  * @author Mark Powell, Rikard Herlitz, and others
  */
 public class ColladaImporter {
@@ -214,7 +214,7 @@ public class ColladaImporter {
      * Default constructor instantiates a ColladaImporter object. A basic Node
      * structure is built and no data is loaded until the <code>load</code>
      * method is called.
-     * 
+     *
      * @param name
      *            the name of the node.
      */
@@ -250,7 +250,7 @@ public class ColladaImporter {
      * COLLADASchemaDoc object to load it. This is then stored as a heirarchy of
      * data objects. This heirarchy is passed to the processCollada method to
      * build the jME data structures necessary to view the model.
-     * 
+     *
      * @param source
      *            the source to import.
      * @param textureDirectory
@@ -268,7 +268,7 @@ public class ColladaImporter {
     /**
      * load is called by the static load method, creating an instance of the
      * model to be returned.
-     * 
+     *
      * @param source
      *            the source to import.
      * @param textureDirectory
@@ -291,7 +291,7 @@ public class ColladaImporter {
 
     /**
      * returns the names of the controllers that affect this imported model.
-     * 
+     *
      * @return the list of string values for each controller name.
      */
     public static ArrayList<String> getControllerNames() {
@@ -321,7 +321,7 @@ public class ColladaImporter {
     /**
      * returns the names of the skin nodes that are associated with this
      * imported model.
-     * 
+     *
      * @return the names of the skin nodes associated with this model.
      */
     public static ArrayList<String> getSkinNodeNames() {
@@ -333,7 +333,7 @@ public class ColladaImporter {
 
     /**
      * Returns the camera node names associated with this model.
-     * 
+     *
      * @return the list of camera names that are referenced in this file.
      */
     public static ArrayList<String> getCameraNodeNames() {
@@ -401,7 +401,7 @@ public class ColladaImporter {
      * an object referenced by this key and it is not the same object that is to
      * be added to the library, a warning is issued. If this object already
      * exists in the library we do not readd it.
-     * 
+     *
      * @param key
      *            the key to obtain the object from the library.
      * @param value
@@ -463,7 +463,7 @@ public class ColladaImporter {
 
     /**
      * Author of the last loaded collada model.
-     * 
+     *
      * @return the modelAuthor the author of the last loaded model.
      */
     public String getModelAuthor() {
@@ -472,7 +472,7 @@ public class ColladaImporter {
 
     /**
      * Revision number of the last loaded collada model.
-     * 
+     *
      * @return the revision revision number of the last loaded collada model.
      */
     public String getRevision() {
@@ -481,7 +481,7 @@ public class ColladaImporter {
 
     /**
      * the tool used to build the last collada model.
-     * 
+     *
      * @return the tool
      */
     public String getTool() {
@@ -490,7 +490,7 @@ public class ColladaImporter {
 
     /**
      * the unit scale of the last collada model.
-     * 
+     *
      * @return the unitMeter
      */
     public float getUnitMeter() {
@@ -499,7 +499,7 @@ public class ColladaImporter {
 
     /**
      * the unit name of the last collada model.
-     * 
+     *
      * @return the unitName
      */
     public String getUnitName() {
@@ -521,7 +521,7 @@ public class ColladaImporter {
      * TOOL<br>
      * UNITNAME UNITMETER<br>
      * UPAXIS<br>
-     * 
+     *
      * @return the string representation of the asset information of this file.
      */
     public String getAssetInformation() {
@@ -534,7 +534,7 @@ public class ColladaImporter {
      * information obtained from the XML structure of a COLLADA model. This root
      * object is processed and sets the data structures for jME to render the
      * model to *this* object.
-     * 
+     *
      * @param root
      *            the COLLADAType data structure that contains the COLLADA model
      *            information.
@@ -817,7 +817,7 @@ public class ColladaImporter {
 
     /**
      * processLightLibrary
-     * 
+     *
      * @param libraryLights
      * @throws Exception
      */
@@ -885,7 +885,7 @@ public class ColladaImporter {
 
     /**
      * getLightColor
-     * 
+     *
      * @param color
      * @return c
      */
@@ -900,7 +900,7 @@ public class ColladaImporter {
      * processScene finalizes the model node to be returned as the COLLADA
      * model. This looks up visual scene instances that were placed in the
      * resource library previously.
-     * 
+     *
      * @param scene
      *            the scene to process
      * @throws Exception
@@ -997,7 +997,7 @@ public class ColladaImporter {
     /**
      * processSource builds resource objects TIME, TRANSFORM and Name array for
      * the interpolation type.
-     * 
+     *
      * @param source
      *            the source to process
      * @throws Exception
@@ -1109,7 +1109,7 @@ public class ColladaImporter {
     /**
      * processInterpolationArray builds a int array that corresponds to the
      * interpolation types defined in BoneAnimationController.
-     * 
+     *
      * @param array
      *            the array to process.
      * @return the int array.
@@ -1135,7 +1135,7 @@ public class ColladaImporter {
     /**
      * processes a float array object. The floats are represented as a String
      * with the values delimited by a space.
-     * 
+     *
      * @param array
      *            the array to parse.
      * @return the float array to return.
@@ -1155,7 +1155,7 @@ public class ColladaImporter {
      * processAssetInformation will store the information about the collada file
      * for future reference. This will include the author, the tool used, the
      * revision, the unit information, and the defined up axis.
-     * 
+     *
      * @param asset
      *            the assetType for the root of the model.
      */
@@ -1186,7 +1186,7 @@ public class ColladaImporter {
      * Animations at this level can be considered top level animations that
      * should be called from this level. These animations may contain children
      * animations the top level animation is responsible for calling.
-     * 
+     *
      * @param animLib
      *            the library of animations to parse.
      */
@@ -1219,7 +1219,7 @@ public class ColladaImporter {
      * controller defining the animation's keyframe and sampler functions. These
      * interact on single bones, where a collection of controllers will build up
      * a complete animation.
-     * 
+     *
      * @param animation
      *            the animation to parse.
      * @throws Exception
@@ -1496,7 +1496,7 @@ public class ColladaImporter {
      * working directory. Therefore, the directory will be stripped off leaving
      * only the filename. This filename will be associated with a id key that
      * can be obtained by the material that wishes to make use of it.
-     * 
+     *
      * @param libraryImg
      *            the library of images (name/image pair).
      */
@@ -1512,7 +1512,7 @@ public class ColladaImporter {
     /**
      * processImage takes an image type and places the necessary information in
      * the resource library.
-     * 
+     *
      * @param image
      *            the image to process.
      * @throws Exception
@@ -1537,7 +1537,7 @@ public class ColladaImporter {
      * instance effect that defines its qualities, it won't be until the
      * library_effects tag is processed that the material state information is
      * filled in.
-     * 
+     *
      * @param libraryMat
      *            the material library type.
      * @throws Exception
@@ -1555,7 +1555,7 @@ public class ColladaImporter {
     /**
      * process Material which typically contains an id and a reference URL to an
      * effect.
-     * 
+     *
      * @param mat
      * @throws Exception
      *             thrown if there is a problem processing the xml.
@@ -1582,7 +1582,7 @@ public class ColladaImporter {
      * based on the the name of the effect. Currently, the id of the effect is
      * ignored as it is directly tied to the material id. However, in the future
      * this may require support.
-     * 
+     *
      * @param libraryEffects
      *            the library of effects to build.
      * @throws Exception
@@ -1613,7 +1613,7 @@ public class ColladaImporter {
      * There is a possibility that each profile may have multiple techniques,
      * defining different materials for different situations, i.e. LOD. This
      * version of the loader will assume a single technique.
-     * 
+     *
      * @param effect
      *            the collada effect to process.
      * @param mat
@@ -1654,7 +1654,7 @@ public class ColladaImporter {
     /**
      * processNewParam sets specific properties of a material (surface
      * properties, sampler properties, etc).
-     * 
+     *
      * @param param
      *            the xml element of the new parameter.
      * @param mat
@@ -1676,7 +1676,7 @@ public class ColladaImporter {
     /**
      * processes images information, defining the min and mag filter for
      * mipmapping.
-     * 
+     *
      * @param id
      *            the id on the sampler
      * @param sampler
@@ -1696,7 +1696,7 @@ public class ColladaImporter {
         }
         mat.wrapS = "WRAP";
         mat.wrapT = "WRAP";
-        
+
         put(id, sampler.getsource().getValue());
     }
 
@@ -1708,7 +1708,7 @@ public class ColladaImporter {
     /**
      * processes rendering information defined to be GLSL standard, which
      * includes all OpenGL state information and GLSL shader information.
-     * 
+     *
      * @param technique
      * @param mat
      * @throws Exception
@@ -2305,7 +2305,7 @@ public class ColladaImporter {
      * processTechniqueCOMMON process a technique of techniqueType2 which are
      * defined to be returned from a profile_COMMON object. This technique
      * contains images, lambert shading, phong shading and blinn shading.
-     * 
+     *
      * @param technique
      *            the fixed pipeline technique.
      * @param mat
@@ -2348,7 +2348,7 @@ public class ColladaImporter {
                 // create a texturestate, and we will need to make use of
                 // texcoord to put this texture in the correct "unit"
                 for (int i = 0; i < pt.getdiffuse().gettextureCount(); i++) {
-                	
+
                     mat.setState(processTexture(
                             pt.getdiffuse().gettextureAt(i), mat));
                 }
@@ -2368,23 +2368,32 @@ public class ColladaImporter {
         if (pt.hasshininess()) {
           ms.setShininess(pt.getshininess().getfloat2().getValue().floatValue());
         }
-        
-        /*
-         * if (pt.hastransparent()) { if (pt.gettransparent().hascolor() &&
-         * !pt.gettransparency().getfloat2().getValue() .toString().equals("0")) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.One_MINUS_DST_COLOR);
-         * as.setDstFunction(BlendState.DestinationFunction.One); as.setBlendEnabled(true);
-         * mat.setState(as); } else if (pt.gettransparent().hastexture()) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
-         * as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-         * as.setBlendEnabled(true); as.setReference(0.14f);
-         * as.setTestEnabled(true); as.setTestFunction(BlendState.TF_GEQUAL);
-         * mat.setState(as); } }
-         */
+
+        if (pt.hastransparent()) {
+            if (pt.gettransparent().hascolor() &&
+                    !pt.gettransparency().getfloat2().getValue().toString().equals("0")) {
+                ColorRGBA constantColor = getColor(pt.gettransparent().getcolor());
+                ColorRGBA diffuse = ms.getDiffuse();
+                diffuse.a = 1.0f - constantColor.r;
+                ms.setDiffuse(diffuse);
+                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+                as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
+                as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+                as.setBlendEnabled(true);
+                as.setEnabled(true);
+                mat.setState(as);
+//            } else if (pt.gettransparent().hastexture()) {
+//                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+//                as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
+//                as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+//                as.setBlendEnabled(true);
+//                as.setReference(0.14f);
+//                as.setTestEnabled(true);
+//                as.setTestFunction(BlendState.TF_GEQUAL);
+//                mat.setState(as);
+            }
+        }
+
         mat.setState(ms);
     }
 
@@ -2422,23 +2431,33 @@ public class ColladaImporter {
         if (lt.hasemission()) {
             ms.setEmissive(getColor(lt.getemission().getcolor()));
         }
+
+        if (lt.hastransparent()) {
+            if (lt.gettransparent().hascolor() &&
+                    !lt.gettransparency().getfloat2().getValue().toString().equals("0")) {
+                float alpha = lt.gettransparency().getfloat2().getValue().floatValue();
+                ColorRGBA diffuse = ms.getDiffuse();
+                diffuse.a = 1.0f - alpha;
+                ms.setDiffuse(diffuse);
+
+                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+                as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
+                as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+                as.setBlendEnabled(true);
+                mat.setState(as);
+//            } else if (lt.gettransparent().hastexture()) {
+//                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
+//                as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
+//                as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+//                as.setBlendEnabled(true);
+//                as.setReference(0.14f);
+//                as.setTestEnabled(true);
+//                as.setTestFunction(BlendState.TF_GEQUAL);
+//                mat.setState(as);
+            }
+        }
+
         mat.setState(ms);
-        /*
-         * if (lt.hastransparent()) { if (lt.gettransparent().hascolor() &&
-         * !lt.gettransparency().getfloat2().getValue() .toString().equals("0")) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.One_MINUS_DST_COLOR);
-         * as.setDstFunction(BlendState.DestinationFunction.One); as.setBlendEnabled(true);
-         * mat.setState(as); } else if (lt.gettransparent().hastexture()) {
-         * BlendState as = DisplaySystem.getDisplaySystem()
-         * .getRenderer().createBlendState();
-         * as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
-         * as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-         * as.setBlendEnabled(true); as.setReference(0.14f);
-         * as.setTestEnabled(true); as.setTestFunction(BlendState.TF_GEQUAL);
-         * mat.setState(as); } }
-         */
         // Ignored: reflective attributes, transparent attributes
     }
 
@@ -2446,7 +2465,7 @@ public class ColladaImporter {
      * processTexture generates a texture state that contains the image and
      * texture coordinate unit information. This texture state is returned to be
      * placed in the Collada material.
-     * 
+     *
      * @param texture
      *            the texture type to process.
      * @return the generated TextureState that handles this texture tag.
@@ -2464,11 +2483,11 @@ public class ColladaImporter {
         try {
         	index = Integer.parseInt(channel) - 1;
         } catch (NumberFormatException e) {
-        	
+
         }
         return processTexture(key, mat, index);
     }
-    
+
     public TextureState processTexture(String key, ColladaMaterial mat,
             int index) throws Exception {
         TextureState ts = (TextureState) mat.getState(RenderState.StateType.Texture);
@@ -2498,7 +2517,7 @@ public class ColladaImporter {
             ColladaMaterial mat, int index) {
         URL textureURL = ResourceLocatorTool.locateResource(
                 ResourceLocatorTool.TYPE_TEXTURE, filename);
-        
+
         if (textureURL != null) {
             Texture t0 = TextureManager.loadTexture(textureURL, mat
                     .getMinFilterConstant(), mat.getMagFilterConstant(),
@@ -2506,7 +2525,7 @@ public class ColladaImporter {
 
             t0.setWrap(WrapAxis.S, mat.getWrapSConstant());
             t0.setWrap(WrapAxis.T, mat.getWrapTConstant());
-            
+
             ts.setTexture(t0, index);
         } else {
             if (!squelch) {
@@ -2519,7 +2538,7 @@ public class ColladaImporter {
     /**
      * Process Geometry will build a number of Geometry objects attaching them
      * to the supplied parent.
-     * 
+     *
      * @param geometryLibrary
      *            the geometries to process individually.
      * @throws Exception
@@ -2552,7 +2571,7 @@ public class ColladaImporter {
     /**
      * processControllerLibrary builds a controller for each controller tag in
      * the file.
-     * 
+     *
      * @param controllerLibrary
      *            the controller library object to parse.
      * @throws Exception
@@ -2570,7 +2589,7 @@ public class ColladaImporter {
     /**
      * controllers define how one object interacts with another. Typically, this
      * is skinning and morph targets.
-     * 
+     *
      * @param controller
      *            the controller to process
      */
@@ -2587,7 +2606,7 @@ public class ColladaImporter {
     /**
      * processSkin builds a SkinnedMesh object that defines the vertex
      * information of a model and the skeletal system that supports it.
-     * 
+     *
      * @param skin
      *            the skin to process
      * @throws Exception
@@ -2686,7 +2705,7 @@ public class ColladaImporter {
      * processVertexWeights defines a list of vertices and weights for a given
      * bone. These bones are defined by <v> as the first element to a group. The
      * bones were prebuilt in the priocessControllerSource method.
-     * 
+     *
      * @param weights
      * @throws Exception
      */
@@ -2750,7 +2769,7 @@ public class ColladaImporter {
      * processControllerSource will process the source types that define how a
      * controller is built. This includes support for skin joints, bindings and
      * weights.
-     * 
+     *
      * @param source
      *            the source to process.
      * @throws Exception
@@ -2823,7 +2842,7 @@ public class ColladaImporter {
      * processBindShapeMatrix sets the initial transform of the skinned mesh.
      * The 4x4 matrix is converted to a 3x3 matrix and a vector, then passed to
      * the skinned mesh for use.
-     * 
+     *
      * @param skin
      *            the skin to apply the bind to.
      * @param matrix
@@ -2842,7 +2861,7 @@ public class ColladaImporter {
 
     /**
      * processBindMaterial
-     * 
+     *
      * @param material
      * @param spatial
      * @throws Exception
@@ -2861,7 +2880,7 @@ public class ColladaImporter {
      * processMesh will create either lines or a TriMesh. This means that the
      * only supported child elements are: triangles and lines or linestrips.
      * Polygons, trifans and tristrips are ignored.
-     * 
+     *
      * @param mesh
      *            the mesh to parse.
      * @param geom
@@ -2946,7 +2965,7 @@ public class ColladaImporter {
      * processTriMesh will process the triangles tag from the mesh section of
      * the COLLADA file. A jME TriMesh is returned that defines the vertices,
      * indices, normals, texture coordinates and colors.
-     * 
+     *
      * @param mesh
      *            the meshType to process for the trimesh.
      * @param geom
@@ -3259,7 +3278,7 @@ public class ColladaImporter {
                     // Then, based on the texture coordinates, we may need to
                     // change it from the default.
 
-                    //XXX: not a good way of doing it                    
+                    //XXX: not a good way of doing it
 //                    TextureState ts = (TextureState) triMesh
 //                            .getRenderState(RenderState.RS_TEXTURE);
 //                    if (ts == null) {
@@ -3326,7 +3345,7 @@ public class ColladaImporter {
             triMesh.setModelBound(new BoundingBox());
             triMesh.updateModelBound();
 
-//XXX: not parenting under a node when only one mesh needs to be fixed!! /rherlitz            
+//XXX: not parenting under a node when only one mesh needs to be fixed!! /rherlitz
 //            if (mesh.gettrianglesCount() == 1) {
 //                return triMesh;
 //            }
@@ -3342,7 +3361,7 @@ public class ColladaImporter {
      * polygon form... processPolygonMesh will process the polygons tag from the
      * mesh section of the COLLADA file. A jME TriMesh is returned that defines
      * the vertices, indices, normals, texture coordinates and colors.
-     * 
+     *
      * @param mesh
      *            the meshType to process for the trimesh.
      * @param geom
@@ -3708,7 +3727,7 @@ public class ColladaImporter {
                     // Then, based on the texture coordinates, we may need to
                     // change it from the
                     // default.
-                    
+
                     //XXX: not a good way of doing it
 //                    TextureState ts = (TextureState) triMesh
 //                            .getRenderState(RenderState.RS_TEXTURE);
@@ -3790,7 +3809,7 @@ public class ColladaImporter {
      * processLines will process the lines tag from the mesh section of the
      * COLLADA file. A jME Line is returned that defines the vertices, normals,
      * texture coordinates and colors.
-     * 
+     *
      * @param mesh
      *            the meshType to process for the lines.
      * @param geom
@@ -3807,7 +3826,7 @@ public class ColladaImporter {
     /**
      * the nodes library is a collection of nodes that can be instanced later by
      * the visual scene.
-     * 
+     *
      * @param type
      *            the nodes library to process.
      * @throws Exception
@@ -3825,7 +3844,7 @@ public class ColladaImporter {
     /**
      * The library of visual scenes defines how the loaded geometry is stored in
      * the scene graph, including scaling, translation, rotation, etc.
-     * 
+     *
      * @param libScene
      *            the library of scenes
      * @throws Exception
@@ -3844,7 +3863,7 @@ public class ColladaImporter {
     /**
      * the visual scene will contain any number of nodes that define references
      * to geometry. These are then placed into the scene as needed.
-     * 
+     *
      * @param scene
      *            the scene to process.
      * @param node
@@ -3869,7 +3888,7 @@ public class ColladaImporter {
 
     /**
      * a node tag
-     * 
+     *
      * @param xmlNode
      * @param parent
      * @throws Exception
@@ -4006,11 +4025,11 @@ public class ColladaImporter {
             rm.m00 = tm.m00 / scaleX;
             rm.m10 = tm.m10 / scaleX;
             rm.m20 = tm.m20 / scaleX;
-           
+
             rm.m01 = tm.m01 / scaleY;
             rm.m11 = tm.m11 / scaleY;
             rm.m21 = tm.m21 / scaleY;
-           
+
             rm.m02 = tm.m02 / scaleZ;
             rm.m12 = tm.m12 / scaleZ;
             rm.m22 = tm.m22 / scaleZ;
@@ -4040,7 +4059,7 @@ public class ColladaImporter {
 
     /**
      * processInstanceCamera
-     * 
+     *
      * @param camera
      * @param node
      * @throws Exception
@@ -4059,7 +4078,7 @@ public class ColladaImporter {
 
     /**
      * processInstanceLight
-     * 
+     *
      * @param light
      * @param node
      * @throws Exception
@@ -4078,7 +4097,7 @@ public class ColladaImporter {
 
     /**
      * processInstanceController
-     * 
+     *
      * @param controller
      * @param node
      * @throws Exception
@@ -4121,7 +4140,7 @@ public class ColladaImporter {
 
     /**
      * processInstanceNode
-     * 
+     *
      * @param instance
      * @param parent
      * @throws Exception
@@ -4134,11 +4153,11 @@ public class ColladaImporter {
         }
         Spatial spatial = (Spatial) resourceLibrary.get(key);
         if (spatial != null) {
-            
+
             if (spatial instanceof Node) {
                 spatial = new SharedNode(key, (Node) spatial);
             }
-            
+
 
             parent.attachChild(spatial);
         }
@@ -4146,7 +4165,7 @@ public class ColladaImporter {
 
     /**
      * processInstanceGeom
-     * 
+     *
      * @param geometry
      * @param node
      * @throws Exception
@@ -4159,14 +4178,14 @@ public class ColladaImporter {
         }
         Spatial spatial = (Spatial) resourceLibrary.get(key);
         if (spatial != null) {
-            
+
             if (spatial instanceof TriMesh) {
                 spatial = new SharedMesh(key, (TriMesh) spatial);
             } else if (spatial instanceof Node) {
                 spatial = new SharedNode(key, (Node) spatial);
             }
-	    
-            
+
+
             node.attachChild(spatial);
             if (geometry.hasbind_material()) {
                 processBindMaterial(geometry.getbind_material(), spatial);
@@ -4176,7 +4195,7 @@ public class ColladaImporter {
 
     /**
      * processInstanceMaterial
-     * 
+     *
      * @param material
      * @param node
      * @throws Exception
@@ -4239,7 +4258,7 @@ public class ColladaImporter {
     /**
      * getColor uses a string tokenizer to parse the value of a colorType into a
      * ColorRGBA type used internally by jME.
-     * 
+     *
      * @param color
      *            the colorType to parse (RGBA format).
      * @return the ColorRGBA object to be used by jME.
@@ -4264,7 +4283,7 @@ public class ColladaImporter {
 
         /**
          * MeshVertPair
-         * 
+         *
          * @param mesh
          * @param index
          */
@@ -4276,7 +4295,7 @@ public class ColladaImporter {
 
     /**
      * squelchErrors sets if the ColladaImporter should spit out errors or not
-     * 
+     *
      * @param b
      */
     public static void squelchErrors(boolean b) {

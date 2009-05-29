@@ -55,13 +55,14 @@ import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
 import com.jme.util.export.OutputCapsule;
 import com.jme.util.export.Savable;
+import com.jme.renderer.ColorRGBA;
 
 /**
  * <code>Spatial</code> defines the base class for scene graph nodes. It
  * maintains a link to a parent, it's local transforms and the world's
  * transforms. All other nodes, such as <code>Node</code> and
  * <code>Geometry</code> are subclasses of <code>Spatial</code>.
- * 
+ *
  * @author Mark Powell
  * @author Joshua Slack
  * @version $Revision$, $Data$
@@ -71,7 +72,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Describes how to combine textures from ancestor texturestates when an
      * updateRenderState is called on a Spatial.
-     * 
+     *
      * @author Joshua Slack
      */
     public enum TextureCombineMode {
@@ -106,7 +107,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Describes how to combine lights from ancestor lightstates when an
      * updateRenderState is called on a Spatial.
-     * 
+     *
      * @author Joshua Slack
      */
     public enum LightCombineMode {
@@ -269,12 +270,16 @@ public abstract class Spatial implements Serializable, Savable {
 
     /** ArrayList of controllers for this spatial. */
     protected ArrayList<Controller> geometricalControllers;
-        
+
     /** ArrayList of controllers for this spatial. */
     protected ArrayList<GeometricUpdateListener> geometricUpdateListeners;
-    
+
     private static final Vector3f compVecA = new Vector3f();
     private static final Quaternion compQuat = new Quaternion();
+
+    private boolean glow = false;
+    private ColorRGBA glowColor = new ColorRGBA(1.0f, 1.0f, 0.0f, 0.5f);
+    private Vector3f glowScale = new Vector3f(1.2f, 1.2f, 1.2f);
 
     /**
      * Default Constructor.
@@ -291,7 +296,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Constructor instantiates a new <code>Spatial</code> object setting the
      * rotation, translation and scale value to defaults.
-     * 
+     *
      * @param name
      *            the name of the scene element. This is required for
      *            identification and comparision purposes.
@@ -303,7 +308,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Adds a Controller to this Spatial's list of controllers.
-     * 
+     *
      * @param controller
      *            The Controller to add
      * @see com.jme.scene.Controller
@@ -318,7 +323,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Removes a Controller from this Spatial's list of controllers, if it
      * exist.
-     * 
+     *
      * @param controller
      *            The Controller to remove
      * @return True if the Controller was in the list to remove.
@@ -333,7 +338,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Removes a Controller from this Spatial's list of controllers by index.
-     * 
+     *
      * @param index
      *            The index of the controller to remove
      * @return The Controller removed or null if nothing was removed.
@@ -348,7 +353,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Removes all Controllers from this Spatial's list of controllers.
-     * 
+     *
      * @see com.jme.scene.Controller
      */
     public void clearControllers() {
@@ -359,7 +364,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Returns the controller in this list of controllers at index i.
-     * 
+     *
      * @param i
      *            The index to get a controller from.
      * @return The controller at index i.
@@ -374,7 +379,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Returns the ArrayList that contains this spatial's Controllers.
-     * 
+     *
      * @return This spatial's geometricalControllers.
      */
     public ArrayList<Controller> getControllers() {
@@ -394,10 +399,10 @@ public abstract class Spatial implements Serializable, Savable {
         return geometricalControllers.size();
     }
 
-    
+
     /**
      * Adds a Controller to this Spatial's list of controllers.
-     * 
+     *
      * @param controller
      *            The Controller to add
      * @see com.jme.scene.Controller
@@ -408,11 +413,11 @@ public abstract class Spatial implements Serializable, Savable {
         }
         geometricUpdateListeners.add(l);
     }
-     
+
     /**
      * Removes a Controller from this Spatial's list of controllers, if it
      * exist.
-     * 
+     *
      * @param controller
      *            The Controller to remove
      * @return True if the Controller was in the list to remove.
@@ -424,14 +429,56 @@ public abstract class Spatial implements Serializable, Savable {
         }
         return geometricUpdateListeners.remove(l);
     }
-    
+
+    /**
+     * Set whether glow is enabled or disabled for this object
+     */
+    public void setGlowEnabled(boolean enable) {
+        glow = enable;
+    }
+
+    /**
+     * Get whether or not glow is enabled
+     */
+    public boolean isGlowEnabled() {
+        return (glow);
+    }
+
+    /**
+     * Set the glow scale
+     */
+    public void setGlowScale(Vector3f scale) {
+        glowScale.set(scale);
+    }
+
+    /**
+     * Set the glow color
+     */
+    public void setGlowColor(ColorRGBA color) {
+        glowColor.set(color);
+    }
+
+    /**
+     * Get the glow color
+     */
+    public ColorRGBA getGlowColor() {
+        return(glowColor);
+    }
+
+    /**
+     * Get the glow scale
+     */
+    public Vector3f getGlowScale() {
+        return (glowScale);
+    }
+
     /**
      * <code>onDraw</code> checks the spatial with the camera to see if it
      * should be culled, if not, the node's draw method is called.
      * <p>
      * This method is called by the renderer. Usually it should not be called
      * directly.
-     * 
+     *
      * @param r
      *            the renderer used for display.
      */
@@ -466,7 +513,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>getWorldRotation</code> retrieves the absolute rotation of the
      * Spatial.
-     * 
+     *
      * @return the Spatial's world rotation matrix.
      */
     public Quaternion getWorldRotation() {
@@ -476,7 +523,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>getWorldTranslation</code> retrieves the absolute translation of
      * the spatial.
-     * 
+     *
      * @return the world's tranlsation vector.
      */
     public Vector3f getWorldTranslation() {
@@ -486,7 +533,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>getWorldScale</code> retrieves the absolute scale factor of the
      * spatial.
-     * 
+     *
      * @return the world's scale factor.
      */
     public Vector3f getWorldScale() {
@@ -496,7 +543,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>rotateUpTo</code> is a util function that alters the
      * localrotation to point the Y axis in the direction given by newUp.
-     * 
+     *
      * @param newUp
      *            the up vector to use - assumed to be a unit vector.
      */
@@ -523,7 +570,7 @@ public abstract class Spatial implements Serializable, Savable {
      * to transform the z-axis to point onto 'position' and the y-axis to 'up'.
      * Unlike {@link Quaternion#lookAt} this method takes a world position to
      * look at not a relative direction.
-     * 
+     *
      * @param position
      *            where to look at in terms of world coordinates
      * @param upVector
@@ -538,7 +585,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>updateGeometricState</code> updates all the geometry information
      * for the node.
-     * 
+     *
      * @param time
      *            the frame time.
      * @param initiator
@@ -559,7 +606,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>updateWorldData</code> updates the world transforms from the
      * parent down to the leaf.
-     * 
+     *
      * @param time
      *            the frame time.
      */
@@ -594,7 +641,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * If not locked, updates worldscale, worldrotation and worldtranslation
-     * 
+     *
      * @param recurse
      *            usually false when updating the tree. Set to true when you
      *            just want to update the world transforms for a branch without
@@ -614,7 +661,7 @@ public abstract class Spatial implements Serializable, Savable {
                     worldTranslation);
         } else {
             worldTranslation.set(localTranslation);
-        }   
+        }
     }
 
     protected void updateWorldRotation() {
@@ -636,7 +683,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Convert a vector (in) from this spatials local coordinate space to world
      * coordinate space.
-     * 
+     *
      * @param in
      *            vector to read from
      * @param store
@@ -657,7 +704,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Convert a vector (in) from world coordinate space to this spatials local
      * coordinate space.
-     * 
+     *
      * @param in
      *            vector to read from
      * @param store
@@ -673,7 +720,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>getParent</code> retrieve's this node's parent. If the parent is
      * null this is the root node.
-     * 
+     *
      * @return the parent of this node.
      */
     public Node getParent() {
@@ -684,7 +731,7 @@ public abstract class Spatial implements Serializable, Savable {
      * Called by {@link Node#attachChild(Spatial)} and
      * {@link Node#detachChild(Spatial)} - don't call directly.
      * <code>setParent</code> sets the parent of this node.
-     * 
+     *
      * @param parent
      *            the parent of this node.
      */
@@ -694,7 +741,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * <code>removeFromParent</code> removes this Spatial from it's parent.
-     * 
+     *
      * @return true if it has a parent and performed the remove.
      */
     public boolean removeFromParent() {
@@ -707,7 +754,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * determines if the provided Node is the parent, or parent's parent, etc. of this Spatial.
-     * 
+     *
      * @param ancestor
      *            the ancestor object to look for.
      * @return true if the ancestor is found, false otherwise.
@@ -721,11 +768,11 @@ public abstract class Spatial implements Serializable, Savable {
             return parent.hasAncestor(ancestor);
         }
     }
-    
+
     /**
      * <code>getLocalRotation</code> retrieves the local rotation of this
      * node.
-     * 
+     *
      * @return the local rotation of this node.
      */
     public Quaternion getLocalRotation() {
@@ -734,7 +781,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * <code>setLocalRotation</code> sets the local rotation of this node.
-     * 
+     *
      * @param rotation
      *            the new local rotation.
      */
@@ -748,7 +795,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>setLocalRotation</code> sets the local rotation of this node,
      * using a quaterion to build the matrix.
-     * 
+     *
      * @param quaternion
      *            the quaternion that defines the matrix.
      */
@@ -759,7 +806,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * <code>getLocalScale</code> retrieves the local scale of this node.
-     * 
+     *
      * @return the local scale of this node.
      */
     public Vector3f getLocalScale() {
@@ -768,7 +815,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * <code>setLocalScale</code> sets the local scale of this node.
-     * 
+     *
      * @param localScale
      *            the new local scale, applied to x, y and z
      */
@@ -781,7 +828,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * <code>setLocalScale</code> sets the local scale of this node.
-     * 
+     *
      * @param localScale
      *            the new local scale.
      */
@@ -793,7 +840,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>getLocalTranslation</code> retrieves the local translation of
      * this node.
-     * 
+     *
      * @return the local translation of this node.
      */
     public Vector3f getLocalTranslation() {
@@ -803,7 +850,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>setLocalTranslation</code> sets the local translation of this
      * node.
-     * 
+     *
      * @param localTranslation
      *            the local translation of this node.
      */
@@ -821,7 +868,7 @@ public abstract class Spatial implements Serializable, Savable {
      * Sets the zOrder of this Spatial and, if setOnChildren is true, all
      * children as well. This value is used in conjunction with the RenderQueue
      * and QUEUE_ORTHO for determining draw order.
-     * 
+     *
      * @param zOrder
      *            the new zOrder.
      * @param setOnChildren
@@ -859,7 +906,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Returns this spatial's texture combine mode. If the mode is set to
      * inherit, then the spatial gets its combine mode from its parent.
-     * 
+     *
      * @return The spatial's texture current combine mode.
      */
     public TextureCombineMode getTextureCombineMode() {
@@ -874,7 +921,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Returns this spatial's light combine mode. If the mode is set to inherit,
      * then the spatial gets its combine mode from its parent.
-     * 
+     *
      * @return The spatial's light current combine mode.
      */
     public LightCombineMode getLightCombineMode() {
@@ -889,7 +936,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Returns this spatial's renderqueue mode. If the mode is set to inherit,
      * then the spatial gets its renderqueue mode from its parent.
-     * 
+     *
      * @return The spatial's current renderqueue mode.
      */
     public int getRenderQueueMode() {
@@ -904,7 +951,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Returns this spatial's normals mode. If the mode is set to inherit, then
      * the spatial gets its normals mode from its parent.
-     * 
+     *
      * @return The spatial's current normals mode.
      */
     public NormalsMode getNormalsMode() {
@@ -920,7 +967,7 @@ public abstract class Spatial implements Serializable, Savable {
      * Called during updateRenderState(Stack[]), this function goes up the scene
      * graph tree until the parent is null and pushes RenderStates onto the
      * states Stack array.
-     * 
+     *
      * @param states
      *            The Stack[] to push states onto.
      */
@@ -951,7 +998,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>calculateCollisions</code> calls findCollisions to populate the
      * CollisionResults object then processes the collision results.
-     * 
+     *
      * @param scene
      *            the scene to test against.
      * @param results
@@ -970,7 +1017,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * <code>setModelBound</code> sets the bounding object for this Spatial.
-     * 
+     *
      * @param modelBound
      *            the bounding object for this spatial.
      */
@@ -979,7 +1026,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * checks this spatial against a second spatial, any collisions are stored
      * in the results object.
-     * 
+     *
      * @param scene
      *            the scene to test against.
      * @param results
@@ -989,7 +1036,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Checks this spatial against a second spatial for collisions.
-     * 
+     *
      * @param scene
      *            the scene to test against.
      * @param checkTriangles
@@ -1006,7 +1053,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Tests a ray against this spatial, and stores the results in the result
      * object.
-     * 
+     *
      * @param toTest
      *            ray to test picking against
      * @param results
@@ -1016,7 +1063,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Stores user define data for this Spatial.
-     * 
+     *
      * @param key
      *            the key component to retrieve the data from the hash map.
      * @param data
@@ -1028,7 +1075,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Retrieves user data from the hashmap defined by the provided key.
-     * 
+     *
      * @param key
      *            the key of the data to obtain.
      * @return the data referenced by the key. If the key is invalid, null is
@@ -1040,7 +1087,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Removes user data from the hashmap defined by the provided key.
-     * 
+     *
      * @param key
      *            the key of the data to remove.
      * @return the data that has been removed, null if no data existed.
@@ -1129,7 +1176,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Sets the name of this spatial.
-     * 
+     *
      * @param name
      *            The spatial's new name.
      */
@@ -1139,7 +1186,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Returns the name of this spatial.
-     * 
+     *
      * @return This spatial's name.
      */
     public String getName() {
@@ -1149,7 +1196,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Sets if this Spatial is to be used in intersection (collision and
      * picking) calculations. By default this is true.
-     * 
+     *
      * @param isCollidable
      *            true if this Spatial is to be used in intersection
      *            calculations, false otherwise.
@@ -1161,7 +1208,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Defines if this Spatial is to be used in intersection (collision and
      * picking) calculations. By default this is true.
-     * 
+     *
      * @return true if this Spatial is to be used in intersection calculations,
      *         false otherwise.
      */
@@ -1172,7 +1219,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * <code>getWorldBound</code> retrieves the world bound at this node
      * level.
-     * 
+     *
      * @return the world bound at this level.
      */
     public BoundingVolume getWorldBound() {
@@ -1183,7 +1230,7 @@ public abstract class Spatial implements Serializable, Savable {
      * <code>draw</code> abstract method that handles drawing data to the
      * renderer if it is geometry and passing the call to it's children if it is
      * a node.
-     * 
+     *
      * @param r
      *            the renderer used for display.
      */
@@ -1198,7 +1245,7 @@ public abstract class Spatial implements Serializable, Savable {
      * it) CullHint.Inherit: Look for a non-inherit parent and use its cull
      * mode. NOTE: You must set this AFTER attaching to a parent or it will be
      * reset with the parent's cullMode value.
-     * 
+     *
      * @param hint
      *            one of CullHint.Dynamic, CullHint.Always, CullHint.Inherit or
      *            CullHint.Never
@@ -1221,7 +1268,7 @@ public abstract class Spatial implements Serializable, Savable {
      * not move (at all) or change shape and thus do not need constant
      * re-calculation of boundaries. When you call lock, the bounds are first
      * updated to ensure current bounds are accurate.
-     * 
+     *
      * @see #unlockBounds()
      */
     public void lockBounds() {
@@ -1234,7 +1281,7 @@ public abstract class Spatial implements Serializable, Savable {
      * update Shadow volumes that may be associated with this Spatial. This is
      * useful for skipping various checks for spatial transformation when
      * deciding whether or not to recalc a shadow volume for a Spatial.
-     * 
+     *
      * @see #unlockShadows()
      */
     public void lockShadows() {
@@ -1246,7 +1293,7 @@ public abstract class Spatial implements Serializable, Savable {
      * traverse this Spatial or any below it during the update phase. This
      * should be called *after* any other lock call to ensure they are able to
      * update any bounds or vectors they might need to update.
-     * 
+     *
      * @see #unlockBranch()
      */
     public void lockBranch() {
@@ -1259,7 +1306,7 @@ public abstract class Spatial implements Serializable, Savable {
      * every update. This is useful for efficiency when you have scene items
      * that stay in one place all the time as it avoids needless recalculation
      * of transforms.
-     * 
+     *
      * @see #unlockTransforms()
      */
     public void lockTransforms() {
@@ -1274,7 +1321,7 @@ public abstract class Spatial implements Serializable, Savable {
      * creating display lists from the data. Calling this method does not
      * provide a guarentee that data changes will not be allowed or will/won't
      * show up in the scene. It is merely a hint to the engine.
-     * 
+     *
      * @param r
      *            A renderer to lock against.
      * @see #unlockMeshes(Renderer)
@@ -1292,7 +1339,7 @@ public abstract class Spatial implements Serializable, Savable {
      * provide a guarentee that data changes will not be allowed or will/won't
      * show up in the scene. It is merely a hint to the engine. Calls
      * lockMeshes(Renderer) with the current display system's renderer.
-     * 
+     *
      * @see #lockMeshes(Renderer)
      */
     public void lockMeshes() {
@@ -1301,7 +1348,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Convienence function for locking all aspects of a Spatial.
-     * 
+     *
      * @see #lockBounds()
      * @see #lockTransforms()
      * @see #lockMeshes(Renderer)
@@ -1319,7 +1366,7 @@ public abstract class Spatial implements Serializable, Savable {
      * Convienence function for locking all aspects of a Spatial. For lockMeshes
      * it calls:
      * <code>lockMeshes(DisplaySystem.getDisplaySystem().getRenderer());</code>
-     * 
+     *
      * @see #lockBounds()
      * @see #lockTransforms()
      * @see #lockMeshes()
@@ -1336,7 +1383,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Flags this spatial and those below it to allow for bounds updating (the
      * default).
-     * 
+     *
      * @see #lockBounds()
      */
     public void unlockBounds() {
@@ -1346,7 +1393,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Flags this spatial and those below it to allow for shadow volume updates
      * (the default).
-     * 
+     *
      * @see #lockShadows()
      */
     public void unlockShadows() {
@@ -1356,7 +1403,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Flags this Spatial and any below it as being traversable during the
      * update phase.
-     * 
+     *
      * @see #lockBranch()
      */
     public void unlockBranch() {
@@ -1366,7 +1413,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Flags this spatial and those below it to allow for transform updating
      * (the default).
-     * 
+     *
      * @see #lockTransforms()
      */
     public void unlockTransforms() {
@@ -1378,7 +1425,7 @@ public abstract class Spatial implements Serializable, Savable {
      * default). Generally this means that any display lists setup will be
      * erased and released. Calls unlockMeshes(Renderer) with the current
      * display system's renderer.
-     * 
+     *
      * @see #unlockMeshes(Renderer)
      */
     public void unlockMeshes() {
@@ -1389,7 +1436,7 @@ public abstract class Spatial implements Serializable, Savable {
      * Flags this spatial and those below it to allow for mesh updating (the
      * default). Generally this means that any display lists setup will be
      * erased and released.
-     * 
+     *
      * @param r
      *            The renderer used to lock against.
      * @see #lockMeshes(Renderer)
@@ -1400,7 +1447,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Convienence function for unlocking all aspects of a Spatial.
-     * 
+     *
      * @see #unlockBounds()
      * @see #unlockTransforms()
      * @see #unlockMeshes(Renderer)
@@ -1420,7 +1467,7 @@ public abstract class Spatial implements Serializable, Savable {
      * Convienence function for unlocking all aspects of a Spatial. For
      * unlockMeshes it calls:
      * <code>unlockMeshes(DisplaySystem.getDisplaySystem().getRenderer());</code>
-     * 
+     *
      * @see #unlockBounds()
      * @see #unlockTransforms()
      * @see #unlockMeshes()
@@ -1447,7 +1494,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Note: Uses the currently set Renderer to generate a display list if
      * LOCKED_MESH_DATA is set.
-     * 
+     *
      * @param locks
      *            a bitwise combination of the locks to establish on this
      *            Spatial.
@@ -1518,7 +1565,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Called internally. Updates the render states of this Spatial. The stack
      * contains parent render states.
-     * 
+     *
      * @param parentStates
      *            The list of parent renderstates.
      */
@@ -1556,23 +1603,23 @@ public abstract class Spatial implements Serializable, Savable {
      * Called during updateRenderState(Stack[]), this function determines how
      * the render states are actually applied to the spatial and any children it
      * may have. By default, this function does nothing.
-     * 
+     *
      * @param states
      *            An array of stacks for each state.
      */
     protected void applyRenderState(Stack<? extends RenderState>[] states) {
     }
 
-    public void sortLights() {        
+    public void sortLights() {
     }
-    
+
     /**
      * <code>setRenderState</code> sets a render state for this node. Note,
      * there can only be one render state per type per node. That is, there can
      * only be a single BlendState a single TextureState, etc. If there is
      * already a render state for a type set the old render state will be
      * returned. Otherwise, null is returned.
-     * 
+     *
      * @param rs
      *            the render state to add.
      * @return the old render state.
@@ -1588,14 +1635,14 @@ public abstract class Spatial implements Serializable, Savable {
 
         RenderState oldState = renderStateList[rs.getStateType().ordinal()];
         renderStateList[rs.getStateType().ordinal()] = rs;
-        
+
         return oldState;
     }
 
     /**
      * Returns the requested RenderState that this Spatial currently has set or
      * null if none is set.
-     * 
+     *
      * @param type
      *            the renderstate type to retrieve
      * @return a renderstate at the given position or null
@@ -1608,7 +1655,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Returns the requested RenderState that this Spatial currently has set or
      * null if none is set.
-     * 
+     *
      * @param type
      *            the {@link RenderState.StateType} to return
      * @return a {@link RenderState} that matches the given {@link RenderState.StateType} or null
@@ -1620,7 +1667,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Clears a given render state index by setting it to null.
-     * 
+     *
      * @param renderStateType
      *            The index of a RenderState to clear
      * @see com.jme.scene.state.RenderState#getType()
@@ -1634,7 +1681,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Clears a given render state index by setting it to null.
-     * 
+     *
      * @param renderStateType
      *            The index of a RenderState to clear
      * @see com.jme.scene.state.RenderState#getType()
@@ -1662,7 +1709,7 @@ public abstract class Spatial implements Serializable, Savable {
      * without prespective (such as GUI or HUD parts) Lastly, there is a special
      * mode, QUEUE_INHERIT, that will ensure that this spatial uses the same
      * mode as the parent Node does.
-     * 
+     *
      * @param renderQueueMode
      *            The mode to use for this Spatial.
      */
@@ -1707,7 +1754,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Sets how lights from parents should be combined for this spatial.
-     * 
+     *
      * @param mode
      *            The light combine mode for this spatial
      * @throws IllegalArgumentException
@@ -1729,7 +1776,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Sets how textures from parents should be combined for this Spatial.
-     * 
+     *
      * @param mode
      *            The new texture combine mode for this spatial.
      * @throws IllegalArgumentException
@@ -1754,7 +1801,7 @@ public abstract class Spatial implements Serializable, Savable {
      * when a check is made to determine if the bounds of the object fall inside
      * a camera's frustum. If a parent is found to fall outside the frustum, the
      * value for this spatial will not be updated.
-     * 
+     *
      * @return The spatial's last frustum intersection result.
      */
     public Camera.FrustumIntersect getLastFrustumIntersection() {
@@ -1766,7 +1813,7 @@ public abstract class Spatial implements Serializable, Savable {
      * that want to start rendering at the middle of a scene tree and don't want
      * the parent of that node to influence culling. (See texture renderer code
      * for example.)
-     * 
+     *
      * @param intersects
      *            the new value
      */
@@ -1777,7 +1824,7 @@ public abstract class Spatial implements Serializable, Savable {
     /**
      * Returns the Spatial's name followed by the class of the spatial <br>
      * Example: "MyNode (com.jme.scene.Spatial)
-     * 
+     *
      * @return Spatial's name followed by the class of the Spatial
      */
     public String toString() {

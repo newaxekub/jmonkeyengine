@@ -6,6 +6,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.jme.scene.state.CullState;
+import com.jme.scene.state.MaterialState;
+import com.jme.scene.state.RenderState;
 import com.jme.system.DisplaySystem;
 import com.jmex.model.collada.schema.extraType;
 
@@ -25,8 +27,12 @@ public class GoogleEarthPlugin implements ExtraPlugin {
                             ColladaMaterial material = (ColladaMaterial)target;
                             CullState cs = DisplaySystem.getDisplaySystem().getRenderer().createCullState();
                             cs.setCullFace(CullState.Face.None);
-                            cs.setEnabled(false);
+                            cs.setEnabled(true);
                             material.setState(cs);
+                            MaterialState ms = (MaterialState) material.getState(RenderState.StateType.Material);
+                            ms.setMaterialFace(MaterialState.MaterialFace.FrontAndBack);
+                            ms.setEnabled(true);
+                            material.setState(ms);
                             return material;
                         }
                     }
