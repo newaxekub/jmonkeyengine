@@ -207,6 +207,8 @@ public abstract class Spatial implements Serializable, Savable {
 
     /** The render states of this spatial. */
     protected transient RenderState[] renderStateList;
+    /** Buffer for collecting render states **/
+    private transient Stack[] parentStates = new Stack[RenderState.StateType.values().length];
 
     protected int renderQueueMode = Renderer.QUEUE_INHERIT;
 
@@ -291,6 +293,7 @@ public abstract class Spatial implements Serializable, Savable {
         worldTranslation = new Vector3f();
         localScale = new Vector3f(1.0f, 1.0f, 1.0f);
         worldScale = new Vector3f(1.0f, 1.0f, 1.0f);
+        loadRenderStack();
     }
 
     /**
@@ -978,7 +981,8 @@ public abstract class Spatial implements Serializable, Savable {
             parent.propagateStatesFromRoot(states);
 
         // push states onto current render state stack
-        for (RenderState.StateType type : RenderState.StateType.values()) {
+        for (int i = 0; i < RenderState.StateType.values().length; ++i) {
+            RenderState.StateType type = RenderState.StateType.values()[i];
             if (getRenderState(type) != null)
                 states[type.ordinal()].push(getRenderState(type));
         }
@@ -1570,30 +1574,34 @@ public abstract class Spatial implements Serializable, Savable {
      *            The list of parent renderstates.
      */
     @SuppressWarnings("unchecked")
-    protected void updateRenderState(Stack[] parentStates) {
-        boolean initiator = (parentStates == null);
+
+    protected void updateRenderState(Stack[] parentStateStack) {
+        boolean initiator = (parentStateStack == null);
 
         // first we need to get all the states from parent to us.
         if (initiator) {
+            // out with the old
+            parentStateStack = parentStates;
             // grab all states from root to here.
-            parentStates = new Stack[RenderState.StateType.values().length];
-            for (int x = 0; x < parentStates.length; x++)
-                parentStates[x] = new Stack<RenderState>();
-            propagateStatesFromRoot(parentStates);
+            for (int x = 0; x < parentStateStack.length; x++)
+                parentStateStack[x].clear();
+            propagateStatesFromRoot(parentStateStack);
         } else {
-            for (RenderState.StateType type : RenderState.StateType.values()) {
+            for (int i = 0; i < RenderState.StateType.values().length; ++i) { // No more iterator creation
+                RenderState.StateType type = RenderState.StateType.values()[i];
                 if (getRenderState(type) != null)
-                    parentStates[type.ordinal()].push(getRenderState(type));
+                    parentStateStack[type.ordinal()].push(getRenderState(type));
             }
         }
 
-        applyRenderState(parentStates);
+        applyRenderState(parentStateStack);
 
         // restore previous if we are not the initiator
         if (!initiator) {
-            for (RenderState.StateType type : RenderState.StateType.values()) {
+            for (int i = 0; i < RenderState.StateType.values().length; ++i) {
+                RenderState.StateType type = RenderState.StateType.values()[i];
                 if (getRenderState(type) != null)
-                	parentStates[type.ordinal()].pop();
+                	parentStateStack[type.ordinal()].pop();
             }
         }
 
@@ -1843,6 +1851,20 @@ public abstract class Spatial implements Serializable, Savable {
         store.multLocal(getWorldRotation());
         store.setTranslation(getWorldTranslation());
         return store;
+    }
+
+    private void loadRenderStack()
+    {
+        for (int i = 0; i < parentStates.length; i++)
+            parentStates[i] = new Stack<RenderState>();
+    }
+    
+    private void readObject(java.io.ObjectInputStream in) throws IOException,
+                                                        ClassNotFoundException
+    {
+        in.defaultReadObject();
+        parentStates = new Stack[RenderState.StateType.values().length];
+        loadRenderStack();
     }
 
     public Class<? extends Spatial> getClassTag() {

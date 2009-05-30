@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2009 jMonkeyEngine
+ * Copyright (c) 2003-2008 jMonkeyEngine
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -77,6 +77,8 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
 
     private static boolean inited = false;
 
+    private boolean hasAttributes = false;
+
     public JOGLShaderObjectsState(JOGLContextCapabilities caps) {
         super();
 
@@ -123,7 +125,6 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
             inited = true;
         }
     }
-
     /**
      * Loads a string into a ByteBuffer
      *
@@ -309,8 +310,8 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
             RenderContext<?> context = DisplaySystem.getDisplaySystem()
                     .getCurrentContext();
             ShaderObjectsStateRecord record = (ShaderObjectsStateRecord) context
-                    .getStateRecord(StateType.GLSLShaderObjects);
-            context.currentStates[StateType.GLSLShaderObjects.ordinal()] = this;
+                    .getStateRecord(RS_GLSL_SHADER_OBJECTS);
+            context.currentStates[RS_GLSL_SHADER_OBJECTS] = this;
 
             if (needSendShader){
                 sendToGL(vertShader, fragShader);
@@ -394,5 +395,19 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
     public int getProgramIdentifier()
     {
         return programID;
+    }
+
+    /**
+     * Set the has attributes flag
+     */
+    public void setHasAttributes(boolean flag) {
+	hasAttributes = flag;
+    }
+
+    /**
+     * Get the has attributes flag
+     */
+    public boolean hasAttributes() {
+	return (hasAttributes);
     }
 }
