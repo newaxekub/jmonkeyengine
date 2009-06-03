@@ -992,7 +992,7 @@ public class JOGLRenderer extends Renderer {
 
         if (!generatingDisplayList) {
             applyStates(tris.states, tris);
-        }
+        }       
         if (Debug.stats) {
             StatCollector.startStat(StatType.STAT_RENDER_TIMER);
         }
@@ -1629,10 +1629,18 @@ public class JOGLRenderer extends Renderer {
                 gl.glEnableClientState(GL.GL_SECONDARY_COLOR_ARRAY);
                 g.getTangentBuffer().rewind();
                 gl.glSecondaryColorPointer(3, GL.GL_FLOAT, 0, g.getTangentBuffer());
+            } else {
+                gl.glDisableClientState(GL.GL_SECONDARY_COLOR_ARRAY);
             }
-            if (g.getBinormalBuffer() != null) {
+
+            JOGLShaderObjectsState shader = (JOGLShaderObjectsState)g.states[RenderState.StateType.GLSLShaderObjects.ordinal()];
+            if (shader != null && shader.isEnabled() &&
+                shader.hasAttributes() && g.getBinormalBuffer() != null) {
                 g.getBinormalBuffer().rewind();
                 gl.glVertexAttribPointer(1, 4, GL.GL_FLOAT, false, 0, g.getBinormalBuffer());
+                gl.glEnableVertexAttribArray(1);
+            } else {
+                gl.glDisableVertexAttribArray(1);
             }
         }
 
