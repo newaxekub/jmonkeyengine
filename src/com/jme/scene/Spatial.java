@@ -604,6 +604,18 @@ public abstract class Spatial implements Serializable, Savable {
                 propagateBoundToRoot();
             }
         }
+        notifyListeners();
+    }
+
+    void notifyListeners() {
+        GeometricUpdateListener l = null;
+
+        if (geometricUpdateListeners != null) {
+            for (int i=0; i<geometricUpdateListeners.size(); i++) {
+                l = (GeometricUpdateListener)geometricUpdateListeners.get(i);
+                l.geometricDataChanged(this);
+            }
+        }
     }
 
     /**
@@ -1858,7 +1870,7 @@ public abstract class Spatial implements Serializable, Savable {
         for (int i = 0; i < parentStates.length; i++)
             parentStates[i] = new Stack<RenderState>();
     }
-    
+
     private void readObject(java.io.ObjectInputStream in) throws IOException,
                                                         ClassNotFoundException
     {
