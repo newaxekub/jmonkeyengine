@@ -607,11 +607,14 @@ public class SharedMesh extends TriMesh {
             if (r.checkAndAdd(this))
                 return;
         }
-
         target.getWorldTranslation().set(getWorldTranslation());
         target.getWorldRotation().set(getWorldRotation());
         target.getWorldScale().set(getWorldScale());
         target.setDefaultColor(getDefaultColor());
+        target.setGlowColor(getGlowColor());
+        target.setGlowEnabled(isGlowEnabled());
+        target.setGlowScale(getGlowScale());
+        target.setRenderQueueMode(getRenderQueueMode());
         System.arraycopy(this.states, 0, target.states, 0, states.length);
 
         r.draw(target);
