@@ -151,6 +151,10 @@ public abstract class DisplaySystem {
             
     private Map<String, Class<? extends CanvasConstructor>> canvasConstructRegistry = new HashMap<String, Class<? extends CanvasConstructor>>();
 
+    private static RenderThreadTag renderThread = new RenderThreadTag();
+
+    private static final boolean checkRenderThread = System.getProperty("jme.checkRenderThread", "false").equalsIgnoreCase("true") ? true : false;
+
     /**
      * A new display system has been created. The default static display system
      * is set to the newly created display system.
@@ -281,6 +285,20 @@ public abstract class DisplaySystem {
      */
     public static DisplaySystem getDisplaySystem() {
         return getSystemProvider().getDisplaySystem();
+    }
+
+    public static void checkForRenderThread() {
+        
+        if (!checkRenderThread || renderThread.get().equals(Boolean.TRUE)) {
+            return;
+        }
+
+        Logger.getLogger(DisplaySystem.class.getName()).severe("JME call NOT made from Render Thread, call made from "+Thread.currentThread().getName());
+        Thread.dumpStack();
+    }
+
+    public void setRenderThread(boolean isRenderer) {
+        renderThread.set(new Boolean(isRenderer));
     }
 
     /**
@@ -911,5 +929,13 @@ public abstract class DisplaySystem {
      * @param locY
      */
     public abstract void moveWindowTo(int locX, int locY);
+
+    private static class RenderThreadTag extends ThreadLocal<Boolean> {
+        @Override
+        protected Boolean initialValue() {
+            return new Boolean(false);
+        }
+
+    }
 }
 

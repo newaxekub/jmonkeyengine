@@ -509,7 +509,7 @@ public abstract class Spatial implements Serializable, Savable {
         }
         if (frustrumIntersects != Camera.FrustumIntersect.Outside) {
             draw(r);
-        }
+        } 
         camera.setPlaneState(state);
     }
 
@@ -801,6 +801,7 @@ public abstract class Spatial implements Serializable, Savable {
      *            the new local rotation.
      */
     public void setLocalRotation(Matrix3f rotation) {
+        DisplaySystem.checkForRenderThread();
         if (localRotation == null)
             localRotation = new Quaternion();
         localRotation.fromRotationMatrix(rotation);
@@ -815,6 +816,7 @@ public abstract class Spatial implements Serializable, Savable {
      *            the quaternion that defines the matrix.
      */
     public void setLocalRotation(Quaternion quaternion) {
+        DisplaySystem.checkForRenderThread();
         localRotation = quaternion;
         this.worldRotation.set(this.localRotation);
     }
@@ -835,6 +837,7 @@ public abstract class Spatial implements Serializable, Savable {
      *            the new local scale, applied to x, y and z
      */
     public void setLocalScale(float localScale) {
+        DisplaySystem.checkForRenderThread();
         this.localScale.x = localScale;
         this.localScale.y = localScale;
         this.localScale.z = localScale;
@@ -848,6 +851,7 @@ public abstract class Spatial implements Serializable, Savable {
      *            the new local scale.
      */
     public void setLocalScale(Vector3f localScale) {
+        DisplaySystem.checkForRenderThread();
         this.localScale = localScale;
         this.worldScale.set(this.localScale);
     }
@@ -870,11 +874,13 @@ public abstract class Spatial implements Serializable, Savable {
      *            the local translation of this node.
      */
     public void setLocalTranslation(Vector3f localTranslation) {
+        DisplaySystem.checkForRenderThread();
         this.localTranslation = localTranslation;
         this.worldTranslation.set(this.localTranslation);
     }
 
     public void setLocalTranslation(float x, float y, float z) {
+        DisplaySystem.checkForRenderThread();
         localTranslation.set(x, y, z);
         worldTranslation.set(localTranslation);
     }
