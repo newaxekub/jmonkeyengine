@@ -47,6 +47,7 @@ import com.jme.math.Ray;
 import com.jme.math.Triangle;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Renderer;
+import com.jme.system.DisplaySystem;
 import com.jme.system.JmeException;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
@@ -190,6 +191,7 @@ public class TriMesh extends Geometry implements Serializable {
     }
 
     public void setIndexBuffer(IntBuffer indices) {
+        DisplaySystem.checkForRenderThread();
         this.indexBuffer = indices;
         recalcTriangleQuantity();
     }
