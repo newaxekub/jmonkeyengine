@@ -191,7 +191,8 @@ public class TriMesh extends Geometry implements Serializable {
     }
 
     public void setIndexBuffer(IntBuffer indices) {
-        DisplaySystem.checkForRenderThread();
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.indexBuffer = indices;
         recalcTriangleQuantity();
     }

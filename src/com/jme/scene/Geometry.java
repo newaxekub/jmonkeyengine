@@ -52,6 +52,7 @@ import com.jme.scene.state.LightState;
 import com.jme.scene.state.LightUtil;
 import com.jme.scene.state.RenderState;
 import com.jme.scene.state.TextureState;
+import com.jme.system.DisplaySystem;
 import com.jme.util.export.InputCapsule;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
@@ -60,7 +61,6 @@ import com.jme.util.export.Savable;
 import com.jme.util.geom.BufferUtils;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.IntBuffer;
 
 /**
  * <code>Geometry</code> defines a leaf node of the scene graph. The leaf node
@@ -241,6 +241,8 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      * @see VBOInfo
      */
     public void setVBOInfo(VBOInfo info) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         vboInfo = info;
         if (vboInfo != null) {
             vboInfo.resizeTextureIds(texBuf.size());
@@ -312,6 +314,8 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      *            the new vertex buffer.
      */
     public void setVertexBuffer(FloatBuffer vertBuf) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.vertBuf = vertBuf;
         if (vertBuf != null)
             vertQuantity = vertBuf.limit() / 3;
@@ -325,6 +329,8 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      * @param fogBuf The fog buffer to use in this geometry
      */
     public void setFogCoordBuffer(FloatBuffer fogBuf) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
     	this.fogBuf = fogBuf;
     }
     
@@ -355,6 +361,8 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      *            the new normal buffer.
      */
     public void setNormalBuffer(FloatBuffer normBuf) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.normBuf = normBuf;
     }
 
@@ -376,6 +384,8 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      *            the new color buffer.
      */
     public void setColorBuffer(FloatBuffer colorBuf) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.colorBuf = colorBuf;
     }
 
@@ -482,6 +492,8 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      *            the texture unit we are providing coordinates for.
      */
     public void setTextureCoords(TexCoords coords, int unit) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         while (unit >= texBuf.size()) {
             texBuf.add(null);
         }
@@ -498,6 +510,8 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      * null.
      */
     public void clearBuffers() {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         reconstruct(null, null, null, null);
     }
 

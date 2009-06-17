@@ -89,6 +89,14 @@ public class Node extends Spatial implements Serializable, Savable {
         logger.info("Node created.");
     }
 
+    public void setLive(boolean live) {
+        super.setLive(live);
+
+        if (children!=null)
+            for(Spatial child : children)
+                child.setLive(live);
+    }
+
     /**
      * 
      * <code>getQuantity</code> returns the number of children this node
@@ -168,6 +176,8 @@ public class Node extends Spatial implements Serializable, Savable {
                 }
             }
         }
+
+        child.setLive(isLive());
         
         if (children == null) return 0;
         return children.size();
@@ -203,6 +213,8 @@ public class Node extends Spatial implements Serializable, Savable {
                 }
             }
         }
+
+        child.setLive(isLive());
 
         if (children == null) return 0;
         return children.size();
@@ -274,6 +286,7 @@ public class Node extends Spatial implements Serializable, Savable {
         Spatial child =  children.remove(index);
         if ( child != null ) {
             child.setParent( null );
+            child.setLive(false);
             logger.info("Child removed.");
         }
         return child;

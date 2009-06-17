@@ -283,6 +283,8 @@ public abstract class Spatial implements Serializable, Savable {
     private ColorRGBA glowColor = new ColorRGBA(1.0f, 1.0f, 0.0f, 0.5f);
     private Vector3f glowScale = new Vector3f(1.2f, 1.2f, 1.2f);
 
+    private boolean isLive = false;
+
     /**
      * Default Constructor.
      */
@@ -307,6 +309,24 @@ public abstract class Spatial implements Serializable, Savable {
     public Spatial(String name) {
         this();
         this.name = name;
+    }
+
+    /**
+     * Internal API for mtgame error checking THIS WILL BE REMOVED !
+     * 
+     * @param live
+     */
+    public void setLive(boolean live) {
+        this.isLive = live;
+    }
+
+    /**
+     * Internal API for mtgame error checking THIS WILL BE REMOVED !
+     *
+     * @param live
+     */
+    public final boolean isLive() {
+        return isLive;
     }
 
     /**
@@ -801,7 +821,8 @@ public abstract class Spatial implements Serializable, Savable {
      *            the new local rotation.
      */
     public void setLocalRotation(Matrix3f rotation) {
-        DisplaySystem.checkForRenderThread();
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         if (localRotation == null)
             localRotation = new Quaternion();
         localRotation.fromRotationMatrix(rotation);
@@ -816,7 +837,8 @@ public abstract class Spatial implements Serializable, Savable {
      *            the quaternion that defines the matrix.
      */
     public void setLocalRotation(Quaternion quaternion) {
-        DisplaySystem.checkForRenderThread();
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         localRotation = quaternion;
         this.worldRotation.set(this.localRotation);
     }
@@ -837,7 +859,8 @@ public abstract class Spatial implements Serializable, Savable {
      *            the new local scale, applied to x, y and z
      */
     public void setLocalScale(float localScale) {
-        DisplaySystem.checkForRenderThread();
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.localScale.x = localScale;
         this.localScale.y = localScale;
         this.localScale.z = localScale;
@@ -851,7 +874,8 @@ public abstract class Spatial implements Serializable, Savable {
      *            the new local scale.
      */
     public void setLocalScale(Vector3f localScale) {
-        DisplaySystem.checkForRenderThread();
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.localScale = localScale;
         this.worldScale.set(this.localScale);
     }
@@ -874,13 +898,15 @@ public abstract class Spatial implements Serializable, Savable {
      *            the local translation of this node.
      */
     public void setLocalTranslation(Vector3f localTranslation) {
-        DisplaySystem.checkForRenderThread();
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.localTranslation = localTranslation;
         this.worldTranslation.set(this.localTranslation);
     }
 
     public void setLocalTranslation(float x, float y, float z) {
-        DisplaySystem.checkForRenderThread();
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         localTranslation.set(x, y, z);
         worldTranslation.set(localTranslation);
     }
