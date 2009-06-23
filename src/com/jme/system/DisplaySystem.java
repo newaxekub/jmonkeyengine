@@ -302,6 +302,14 @@ public abstract class DisplaySystem {
     }
 
     /**
+     * Returns true if the current thread is a render thread
+     * @return
+     */
+    public boolean isRenderThread() {
+        return renderThread.get().booleanValue();
+    }
+
+    /**
      * Sets a new width for the display system
      * @param width
      */

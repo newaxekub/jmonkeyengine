@@ -168,6 +168,7 @@ public class CollisionTreeManager {
         // we didn't have it in the cache, create it if possible.
         if (toReturn == null || !mesh.getCollisionTreeValid()) {
             if (generateTrees) {
+//                System.err.println("CHANGE toReturn (generate) "+mesh.getCollisionTreeValid());
                 return generateCollisionTree(treeType, mesh, false);
             } else {
                 return null;
@@ -177,6 +178,7 @@ public class CollisionTreeManager {
             // this element
             cache.remove(mesh);
             cache.put(mesh, toReturn);
+//                System.err.println("CHANGE toReturn "+toReturn.mesh);
             return toReturn;
         }
     }
@@ -264,6 +266,11 @@ public class CollisionTreeManager {
                         }
                         protectedList.add(((SharedMesh) mesh).getTarget());
                     }
+                } else {
+//                    System.err.println("HERE ----------> REALLY BAD !");
+                    // TODO not sure this is the right thing. Should we return the
+                    // tree from the cache ?
+                    tree.construct(mesh, doSort);
                 }
             } else {
                 tree.construct(mesh, doSort);

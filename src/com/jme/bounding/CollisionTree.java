@@ -145,6 +145,7 @@ public class CollisionTree implements Serializable {
     public void construct(int childIndex, Node parent, boolean doSort) {
 
         Spatial spat = parent.getChild(childIndex);
+//        System.err.println("CREATEING Tree "+spat);
         if (spat instanceof TriMesh) {
             mesh = (TriMesh) spat;
             triIndex = mesh.getTriangleIndices(triIndex);
@@ -162,6 +163,7 @@ public class CollisionTree implements Serializable {
      *            true to sort triangles during creation, false otherwise
      */
     public void construct(TriMesh mesh, boolean doSort) {
+//        System.err.println("CREATEING Tree "+mesh+"  "+this);
         this.mesh = mesh;
         triIndex = mesh.getTriangleIndices(triIndex);
         createTree(0, triIndex.length, doSort);
@@ -352,6 +354,10 @@ public class CollisionTree implements Serializable {
 
         if (collisionTree == null) {
             return false;
+        }
+
+        if (collisionTree.bounds==null || collisionTree.mesh==null || collisionTree.worldBounds==null) {
+            System.err.println(collisionTree.bounds+"  "+collisionTree.mesh+"  "+collisionTree.worldBounds+"  "+this);
         }
 
         // our two collision bounds do not intersect, therefore, our triangles
@@ -634,5 +640,9 @@ public class CollisionTree implements Serializable {
         }
 
         return rtnVal;
+    }
+
+    public String toString() {
+        return super.toString()+" mesh "+mesh+"  bounds "+bounds;
     }
 }

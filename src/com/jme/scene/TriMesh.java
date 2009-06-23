@@ -354,6 +354,7 @@ public class TriMesh extends Geometry implements Serializable {
             return;
         }
 
+//        System.err.println("Checking mesh "+toCheck+" "+otherTree);
         myTree.getBounds().transform(worldRotation, worldTranslation,
                 worldScale, myTree.getWorldBounds());
         myTree.intersect(otherTree, thisIndex, otherIndex);

@@ -37,6 +37,7 @@ import java.nio.FloatBuffer;
 import com.jme.math.Vector3f;
 import com.jme.scene.TexCoords;
 import com.jme.scene.TriMesh;
+import com.jme.system.DisplaySystem;
 import com.jme.util.geom.BufferUtils;
 
 /**
@@ -128,6 +129,8 @@ public class Quad extends TriMesh {
      *            the new height of the <code>Quad</code>.
      */
     public void resize(float width, float height) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.width = width;
         this.height = height;
         getVertexBuffer().clear();
@@ -145,6 +148,8 @@ public class Quad extends TriMesh {
      * @param height the height of the quad.
      */
     public void updateGeometry(float width, float height) {
+        if (isLive())
+            DisplaySystem.checkForRenderThread();
         this.width = width;
         this.height = height;
         setVertexCount(4);
