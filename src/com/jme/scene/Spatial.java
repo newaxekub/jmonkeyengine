@@ -284,6 +284,7 @@ public abstract class Spatial implements Serializable, Savable {
     private Vector3f glowScale = new Vector3f(1.2f, 1.2f, 1.2f);
 
     private boolean isLive = false;
+    private boolean visible = true;
 
     /**
      * Default Constructor.
@@ -313,7 +314,7 @@ public abstract class Spatial implements Serializable, Savable {
 
     /**
      * Internal API for mtgame error checking THIS WILL BE REMOVED !
-     * 
+     *
      * @param live
      */
     public void setLive(boolean live) {
@@ -327,6 +328,22 @@ public abstract class Spatial implements Serializable, Savable {
      */
     public final boolean isLive() {
         return isLive;
+    }
+
+    /**
+     * Set the visible flag for this spatial.
+     * 
+     * @param visible
+     */
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    /**
+     * Get the visible flag for this spatial.
+     */
+    public boolean isVisible() {
+        return visible;
     }
 
     /**
@@ -507,6 +524,11 @@ public abstract class Spatial implements Serializable, Savable {
      */
     public void onDraw(Renderer r) {
         CullHint cm = getCullHint();
+
+        if (!isVisible()) {
+            return;
+        }
+
         if (cm == Spatial.CullHint.Always) {
             setLastFrustumIntersection(Camera.FrustumIntersect.Outside);
             return;

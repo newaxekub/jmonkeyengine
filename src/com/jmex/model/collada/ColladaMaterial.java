@@ -33,6 +33,7 @@
 package com.jmex.model.collada;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.jme.image.Texture;
 import com.jme.image.Texture.MagnificationFilter;
@@ -57,8 +58,10 @@ public class ColladaMaterial {
     RenderState[] stateList;
     ArrayList<Controller> controllerList;
     String shaderFlag = null;
-    
 
+    public HashMap<String, String> glslCode = new HashMap<String, String>();
+    public HashMap<String, Object> glslParams = new HashMap<String, Object>();
+    
     public ColladaMaterial() {
         stateList = new RenderState[RenderState.StateType.values().length];
     }

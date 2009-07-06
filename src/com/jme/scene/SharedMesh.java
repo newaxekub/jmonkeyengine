@@ -615,6 +615,7 @@ public class SharedMesh extends TriMesh {
         target.setGlowEnabled(isGlowEnabled());
         target.setGlowScale(getGlowScale());
         target.setRenderQueueMode(getRenderQueueMode());
+        target.setLightState(getLightState());
         System.arraycopy(this.states, 0, target.states, 0, states.length);
 
         r.draw(target);

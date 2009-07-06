@@ -88,6 +88,7 @@ import com.jme.scene.state.ShadeState;
 import com.jme.scene.state.StencilState;
 import com.jme.scene.state.TextureState;
 import com.jme.scene.state.ZBufferState;
+import com.jme.scene.state.GLSLShaderObjectsState;
 import com.jme.system.DisplaySystem;
 import com.jme.util.TextureManager;
 import com.jme.util.export.binary.BinaryExporter;
@@ -161,6 +162,7 @@ import com.jmex.model.collada.schema.textureType;
 import com.jmex.model.collada.schema.trianglesType;
 import com.jmex.model.collada.schema.vertex_weightsType;
 import com.jmex.model.collada.schema.visual_sceneType;
+import com.jmex.model.collada.schema.glsl_newparam;
 
 /**
  * <code>ColladaNode</code> provides a mechanism to parse and load a COLLADA
@@ -186,6 +188,7 @@ public class ColladaImporter {
     private String name;
     private String[] boneIds;
     private static boolean squelch;
+    private int textureIndex = 0;
 
     // If true, models loaded by ColladaImporter will automatically have
     // geometry optimization applied. default: true.
@@ -1644,10 +1647,138 @@ public class ColladaImporter {
         // process the programmable pipeline
         // profile_GLSL defines all of OpenGL states as well as GLSL shaders.
         if (effect.hasprofile_GLSL()) {
+            // Get the shader code
+            for (int i=0; i<effect.getprofile_GLSL().getcodeCount(); i++) {
+                String shader = effect.getprofile_GLSL().getcodeAt(i).getsid().getValue();
+                String code = effect.getprofile_GLSL().getcodeAt(i).getValue().getValue();
+                //System.out.println("Shader: " + shader);
+                //System.out.println("Code: " + code);
+                mat.glslCode.put(shader, code);
+            }
+
+            for (int i=0; i<effect.getprofile_GLSL().getnewparamCount(); i++) {
+                processGLSLnewparam(effect.getprofile_GLSL().getnewparamAt(i), mat);
+            }
+            
             for (int i = 0; i < effect.getprofile_GLSL().gettechniqueCount(); i++) {
                 processTechniqueGLSL(
                         effect.getprofile_GLSL().gettechniqueAt(i), mat);
             }
+        }
+    }
+
+    class BoolVals {
+        int numVals = 0;
+        boolean val1 = false;
+        boolean val2 = false;
+        boolean val3 = false;
+        boolean val4 = false;
+    }
+
+    class FloatVals {
+        int numVals = 0;
+        float val1 = 0.0f;
+        float val2 = 0.0f;
+        float val3 = 0.0f;
+        float val4 = 0.0f;
+    }
+
+    class IntVals {
+        int numVals = 0;
+        int val1 = 0;
+        int val2 = 0;
+        int val3 = 0;
+        int val4 = 0;
+    }
+
+    class MatVals {
+        int numVals = 0;
+        Matrix3f val1 = new Matrix3f();
+        Matrix4f val2 = new Matrix4f();
+    }
+
+    class SamplerVals {
+        String surface = null;
+        String minFilter = null;
+        String magFilter = null;
+    }
+
+    void processGLSLnewparam(glsl_newparam param, ColladaMaterial mat) {
+        try {
+            //System.out.println("Processing: " + param.getsid());
+
+            if (param.hasbool()) {
+                //System.out.println("Bool: " + param.getbool());
+                BoolVals vals = new BoolVals();
+                vals.numVals = 1;
+                vals.val1 = param.getbool().booleanValue();
+                mat.glslParams.put(param.getsid().getValue(), vals);
+            } else if (param.hasfloat2()) {
+                //System.out.println("Float2: " + param.getfloat2());
+                FloatVals vals = new FloatVals();
+                vals.numVals = 1;
+                vals.val1 = param.getfloat2().floatValue();
+                mat.glslParams.put(param.getsid().getValue(), vals);
+            } else if (param.hasfloat22()) {
+                //System.out.println("Float22: " + param.getfloat22());
+                FloatVals vals = new FloatVals();
+                vals.numVals = 2;
+                String[] strs = param.getfloat22().toString().split("\\ ");
+                vals.val1 = Float.parseFloat(strs[0]);
+                vals.val2 = Float.parseFloat(strs[1]);
+                mat.glslParams.put(param.getsid().getValue(), vals);
+            } else if (param.hasfloat2x2()) {
+                //System.out.println("Float2x2: " + param.getfloat2x2());
+            } else if (param.hasfloat3()) {
+                FloatVals vals = new FloatVals();
+                vals.numVals = 3;
+                String[] strs = param.getfloat3().toString().split("\\ ");
+                vals.val1 = Float.parseFloat(strs[0]);
+                vals.val2 = Float.parseFloat(strs[1]);
+                vals.val3 = Float.parseFloat(strs[2]);
+                mat.glslParams.put(param.getsid().getValue(), vals);
+                //System.out.println("Float3: " + vals.val1 + ", " + vals.val2 + ", " + vals.val3);
+            } else if (param.hasfloat3x3()) {
+                //System.out.println("Float3x3: " + param.getfloat3x3());
+            } else if (param.hasfloat4()) {
+                FloatVals vals = new FloatVals();
+                vals.numVals = 4;
+                String[] strs = param.getfloat4().toString().split("\\ ");
+                vals.val1 = Float.parseFloat(strs[0]);
+                vals.val2 = Float.parseFloat(strs[1]);
+                vals.val3 = Float.parseFloat(strs[2]);
+                vals.val4 = Float.parseFloat(strs[3]);
+                mat.glslParams.put(param.getsid().getValue(), vals);
+                //System.out.println("Float4: " + vals.val1 + ", " + vals.val2 + ", " + vals.val3 + ", " + vals.val4);
+            } else if (param.hasfloat4x4()) {
+                //System.out.println("Float4x4: " + param.getfloat4x4());
+            } else if (param.hasint2()) {
+                //System.out.println("Int2: " + param.getint2());
+            } else if (param.hasint22()) {
+                //System.out.println("Int22: " + param.getint22());
+            } else if (param.hasint3()) {
+                //System.out.println("Int3: " + param.getint3());
+            } else if (param.hasint4()) {
+                //System.out.println("Int4: " + param.getint4());
+            } else if (param.hassampler1D()) {
+            } else if (param.hassampler2D()) {
+                //System.out.println("Sampler2D: " + param.getsid());
+                processSampler2D(param.getsid().toString(), param.getsampler2D(),
+                    mat);
+                SamplerVals sv = new SamplerVals();
+                sv.surface = param.getsampler2D().getsource().toString();
+                sv.minFilter = mat.minFilter;
+                sv.magFilter = mat.magFilter;
+                mat.glslParams.put(param.getsid().getValue(), sv);
+            } else if (param.hassampler3D()) {
+            } else if (param.hassamplerCUBE()) {
+            } else if (param.hassamplerDEPTH()) {
+            } else if (param.hassurface()) {
+                //System.out.println("Surface: " + param.getsid());
+                processSurface(param.getsid().toString(), param.getsurface());
+            }
+        } catch (java.lang.Exception e) {
+            System.out.println(e);
         }
     }
 
@@ -1722,12 +1853,83 @@ public class ColladaImporter {
         }
     }
 
+    private void processShaderParam(String uniform, String key, ColladaMaterial mat) {
+        GLSLShaderObjectsState shader = (GLSLShaderObjectsState) mat.getState(RenderState.StateType.GLSLShaderObjects);
+        TextureState textureState = (TextureState)mat.getState(RenderState.StateType.Texture);
+
+        Object vals = mat.glslParams.get(key);
+
+        if (vals instanceof FloatVals) {
+            FloatVals fv = (FloatVals)vals;
+            if (fv.numVals == 1) {
+                shader.setUniform(uniform, fv.val1);
+            } else if (fv.numVals == 2) {
+                shader.setUniform(uniform, fv.val1, fv.val2);
+            } else if (fv.numVals == 3) {
+                shader.setUniform(uniform, fv.val1, fv.val2, fv.val3);
+            } else if (fv.numVals == 4) {
+                shader.setUniform(uniform, fv.val1, fv.val2, fv.val3, fv.val4);
+            }
+        } else if (vals instanceof BoolVals) {
+
+        } else if (vals instanceof IntVals ) {
+
+        } else if (vals instanceof MatVals) {
+
+        } else if (vals instanceof SamplerVals) {
+            SamplerVals sv = (SamplerVals)vals;
+
+            if (textureState == null) {
+                textureState = DisplaySystem.getDisplaySystem().getRenderer().createTextureState();
+                textureState.setEnabled(true);
+                mat.setState(textureState);
+            }
+            mat.wrapS = "WRAP";
+            mat.wrapT = "WRAP";
+            mat.minFilter = sv.minFilter;
+            mat.magFilter = sv.magFilter;
+            String imageName = (String) resourceLibrary.get(sv.surface);
+            String filename = (String) resourceLibrary.get(imageName);
+            //System.out.println("Texture " + textureIndex + ": " + uniform);
+            shader.setUniform(uniform, textureIndex);
+            loadTexture(textureState, filename, mat, textureIndex++);
+        }
+    }
+
     private void processPassGLSL(passType3 pass, ColladaMaterial mat)
             throws Exception {
         // XXX only a single pass supported currently. If multiple passes
         // XXX are defined under a profile_GLSL the states will be combined
         // XXX to a single pass. If the same render state is defined in
         // XXX different passes, the last pass will override the previous.
+
+        if (pass.hasshader()) {
+            String vertSource = null;
+            String fragSource = null;
+            GLSLShaderObjectsState shader = (GLSLShaderObjectsState) mat.getState(RenderState.StateType.GLSLShaderObjects);
+
+            if (shader == null) {
+                shader = DisplaySystem.getDisplaySystem().getRenderer().createGLSLShaderObjectsState();
+                mat.setState(shader);
+            }
+
+            for (int i=0; i<pass.getshaderCount(); i++) {
+                textureIndex = 0;
+                if (pass.getshaderAt(i).getstage().toString().equals("VERTEXPROGRAM")) {
+                    vertSource = pass.getshaderAt(i).getname().getsource().toString();
+                } else if (pass.getshaderAt(i).getstage().toString().equals("FRAGMENTPROGRAM")) {
+                    fragSource = pass.getshaderAt(i).getname().getsource().toString();
+                }
+
+                for (int j=0; j<pass.getshaderAt(i).getbindCount(); j++) {
+                    processShaderParam(pass.getshaderAt(i).getbindAt(j).getsymbol().toString(), pass.getshaderAt(i).getbindAt(j).getparam().getref().toString(), mat);
+                }
+            }
+            //System.out.println("VERTEX SHADER SOURCE: " + mat.glslCode.get(vertSource));
+            shader.load(mat.glslCode.get(vertSource), mat.glslCode.get(fragSource));
+            shader.setEnabled(true);
+        }
+
         if (pass.hasclip_plane()) {
             ClipState cs = (ClipState) mat.getState(RenderState.StateType.Clip);
             if (cs == null) {
@@ -2891,6 +3093,9 @@ public class ColladaImporter {
      */
     private Spatial processMesh(meshType mesh, geometryType geom)
             throws Exception {
+        Vector3f[] normalBuffer = null;
+        ArrayList<Vector3f[]> texCoordBuffers = null;
+
         // we need to build all the source data objects.
         for (int i = 0; i < mesh.getsourceCount(); i++) {
             sourceType source = mesh.getsourceAt(i);
@@ -2944,6 +3149,19 @@ public class ColladaImporter {
         // information
         if (mesh.hasvertices()) {
             if (mesh.getvertices().hasinput()) {
+                //System.out.println("Vert Input Count: " + mesh.getvertices().getinputCount());
+                texCoordBuffers = new ArrayList<Vector3f[]>();
+                for (int i=0; i<mesh.getvertices().getinputCount(); i++) {
+                    String semantic = mesh.getvertices().getinputAt(i).getsemantic().toString();
+                    if (semantic.equals("POSITION")) {
+                        put(mesh.getvertices().getid().toString(), mesh.getvertices().getinputAt(i).getsource().toString());
+                    } else if (semantic.equals("TEXCOORD")) {
+                        Vector3f[] tc = getTCBuffer(mesh.getvertices().getinputAt(i).getsource().toString());
+                        texCoordBuffers.add(tc);
+                    } else if (semantic.equals("NORMAL")) {
+                        normalBuffer = getNormalBuffer(mesh.getvertices().getinputAt(i).getsource().toString());
+                    }
+                }
                 put(mesh.getvertices().getid().toString(), mesh.getvertices()
                         .getinput().getsource().toString());
             }
@@ -2951,7 +3169,7 @@ public class ColladaImporter {
         // determine what type of geometry this is, and use the
         // lists to build the object.
         if (mesh.hastriangles()) {
-            return processTriMesh(mesh, geom);
+            return processTriMesh(mesh, geom, texCoordBuffers, normalBuffer);
         } else if (mesh.haspolygons()) {
             return processPolygonMesh(mesh, geom);
         } else if (mesh.haslines()) {
@@ -2961,6 +3179,45 @@ public class ColladaImporter {
         }
     }
 
+    private Vector3f[] getTCBuffer(String key) {
+        // build the texture buffer
+        if (key.startsWith("#")) {
+            key = key.substring(1);
+        }
+        Object data = resourceLibrary.get(key);
+        while (data instanceof String) {
+            key = (String) data;
+            if (key.startsWith("#")) {
+                key = key.substring(1);
+            }
+            data = resourceLibrary.get(key);
+        }
+        if (data == null) {
+            logger.warning("Invalid source: " + key);
+            return (null);
+        }
+
+        return ((Vector3f[]) data);
+    }
+
+    private Vector3f[] getNormalBuffer(String key) {
+        if (key.startsWith("#")) {
+            key = key.substring(1);
+        }
+        Object data = resourceLibrary.get(key);
+        while (data instanceof String) {
+            key = (String) data;
+            if (key.startsWith("#")) {
+                key = key.substring(1);
+            }
+            data = resourceLibrary.get(key);
+        }
+        if (data == null) {
+            logger.warning("Invalid source: " + key);
+        }
+
+        return ((Vector3f[])data);
+    }
     /**
      * processTriMesh will process the triangles tag from the mesh section of
      * the COLLADA file. A jME TriMesh is returned that defines the vertices,
@@ -2974,7 +3231,7 @@ public class ColladaImporter {
      * @throws Exception
      *             thrown if there is a problem processing the xml.
      */
-    private Spatial processTriMesh(meshType mesh, geometryType geom)
+    private Spatial processTriMesh(meshType mesh, geometryType geom, ArrayList<Vector3f[]> tcBuffers, Vector3f[] nBuffer)
             throws Exception {
 
         HashMap<Integer, ArrayList<MeshVertPair>> vertMap = new HashMap<Integer, ArrayList<MeshVertPair>>();
@@ -3067,7 +3324,7 @@ public class ColladaImporter {
             for (int i = 0; i < indexBuffer.capacity(); i++) {
                 indexBuffer.put(i);
             }
-            triMesh.setIndexBuffer(indexBuffer);
+            triMesh.setIndexBuffer(indexBuffer);          
             // find the maximum offset to understand the stride
             int maxOffset = -1;
             for (int i = 0; i < tri.getinputCount(); i++) {
@@ -3076,6 +3333,67 @@ public class ColladaImporter {
                     maxOffset = temp;
                 }
             }
+
+            if (nBuffer != null) {
+                Vector3f[] v = (Vector3f[]) nBuffer;
+                StringTokenizer st = new StringTokenizer(tri.getp().getValue());
+                int normCount = tri.getcount().intValue() * 3;
+                FloatBuffer normBuffer = BufferUtils.createVector3Buffer(normCount);
+                for (int j = 0; j < normCount; j++) {
+                    int index = Integer.parseInt(st.nextToken());
+                    if (index < v.length) {
+                        BufferUtils.setInBuffer(v[index], normBuffer, j);
+                    }
+                    for (int k = 0; k < maxOffset; k++) {
+                        if (st.hasMoreTokens()) {
+                            st.nextToken();
+                        }
+                    }
+                }
+                triMesh.setNormalBuffer(normBuffer);
+            }
+
+            if (tcBuffers != null) {
+                for (int i = 0; i < tcBuffers.size(); i++) {
+                    Vector3f[] v = tcBuffers.get(i);
+                    StringTokenizer st = new StringTokenizer(tri.getp().getValue());
+                    int texCount = tri.getcount().intValue() * 3;
+                    FloatBuffer texBuffer = BufferUtils.createVector2Buffer(texCount);
+
+                    // Keep a max to set the wrap mode (if it's 1, clamp, if
+                    // it's > 1 || < 0 wrap it)
+                    float maxX = -10;
+                    float maxY = -10;
+                    float minX = 10;
+                    float minY = 10;
+                    Vector2f tempTexCoord = new Vector2f();
+                    for (int j = 0; j < texCount; j++) {
+                        int index = Integer.parseInt(st.nextToken());
+                        Vector3f value = v[index];
+                        if (value.x > maxX) {
+                            maxX = value.x;
+                        }
+                        if (value.x < minX) {
+                            minX = value.x;
+                        }
+                        if (value.y > maxY) {
+                            maxY = value.y;
+                        }
+                        if (value.y < minY) {
+                            minY = value.y;
+                        }
+                        tempTexCoord.set(value.x, value.y);
+                        BufferUtils.setInBuffer(tempTexCoord, texBuffer, j);
+                        for (int k = 0; k < maxOffset; k++) {
+                            if (st.hasMoreTokens()) {
+                                st.nextToken();
+                            }
+                        }
+                    }
+                    triMesh.setTextureCoords(new TexCoords(texBuffer, 2), i);
+                }
+            }
+
             // next build the other buffers, based on the input semantic
             for (int i = 0; i < tri.getinputCount(); i++) {
                 if ("VERTEX".equals(tri.getinputAt(i).getsemantic().toString())) {
@@ -3194,10 +3512,10 @@ public class ColladaImporter {
                     for (int j = 0; j < normCount; j++) {
                         int index = Integer.parseInt(st.nextToken());
                         if (index < v.length) {
-                            colorBuffer.put((-v[index].x) / 2.0f + 0.5f);
-                            colorBuffer.put((-v[index].y) / 2.0f + 0.5f);
-                            colorBuffer.put((-v[index].z) / 2.0f + 0.5f);
-                            colorBuffer.put(0.0f);
+                            colorBuffer.put((v[index].x) / 2.0f + 0.5f);
+                            colorBuffer.put((v[index].y) / 2.0f + 0.5f);
+                            colorBuffer.put((v[index].z) / 2.0f + 0.5f);
+                            //colorBuffer.put(0.0f);
                         }
                         for (int k = 0; k < maxOffset; k++) {
                             if (st.hasMoreTokens()) {
@@ -3206,6 +3524,50 @@ public class ColladaImporter {
                         }
                     }
                     triMesh.setColorBuffer(colorBuffer);
+                }  else if ("BINORMAL".equals(tri.getinputAt(i).getsemantic()
+                        .toString())) {
+                    // build the tangent buffer
+                    String key = tri.getinputAt(i).getsource().getValue();
+                    if (key.startsWith("#")) {
+                        key = key.substring(1);
+                    }
+                    Object data = resourceLibrary.get(key);
+                    while (data instanceof String) {
+                        key = (String) data;
+                        if (key.startsWith("#")) {
+                            key = key.substring(1);
+                        }
+                        data = resourceLibrary.get(key);
+                    }
+                    if (data == null) {
+                        logger.warning("Invalid source: " + key);
+                        continue;
+                    }
+                    Vector3f[] v = (Vector3f[]) data;
+                    StringTokenizer st = new StringTokenizer(tri.getp()
+                            .getValue());
+                    int normCount = tri.getcount().intValue() * 3;
+                    FloatBuffer colorBuffer = BufferUtils
+                            .createColorBuffer(normCount);
+                    int offset = tri.getinputAt(i).getoffset().intValue();
+                    for (int j = 0; j < offset; j++) {
+                        st.nextToken();
+                    }
+                    for (int j = 0; j < normCount; j++) {
+                        int index = Integer.parseInt(st.nextToken());
+                        if (index < v.length) {
+                            colorBuffer.put((v[index].x) / 2.0f + 0.5f);
+                            colorBuffer.put((v[index].y) / 2.0f + 0.5f);
+                            colorBuffer.put((v[index].z) / 2.0f + 0.5f);
+                            //colorBuffer.put(0.0f);
+                        }
+                        for (int k = 0; k < maxOffset; k++) {
+                            if (st.hasMoreTokens()) {
+                                st.nextToken();
+                            }
+                        }
+                    }
+                    triMesh.setBinormalBuffer(colorBuffer);
                 } else if ("TEXCOORD".equals(tri.getinputAt(i).getsemantic()
                         .toString())) {
                     // build the texture buffer
@@ -4230,7 +4592,40 @@ public class ColladaImporter {
             }
         }
 
-        if (cm != null) {
+        if (cm != null) {      
+            if (target instanceof Geometry) {
+                //System.out.println("Assigning " + cm + " to " + target);
+                Geometry geo = (Geometry)target;
+                for (int i = 0; i < material.getbind_vertex_inputCount(); i++) {
+                    String attribute = material.getbind_vertex_inputAt(i).getsemantic().toString();
+                    String bufferName = material.getbind_vertex_inputAt(i).getinput_semantic().toString();
+                    //System.out.println("Setting Attribute: " + attribute + " to " + bufferName);
+                    FloatBuffer fb = null;
+                    if (bufferName.equals("TANGENT")) {
+                        fb = geo.getColorBuffer();
+                        if (geo instanceof SharedMesh) {
+                            ((SharedMesh)geo).getTarget().setColorBuffer(null);
+                        } else {
+                            geo.setColorBuffer(null);
+                        }
+                    } else if (bufferName.equals("BINORMAL")) {
+                        fb = geo.getBinormalBuffer();
+                        if (geo instanceof SharedMesh) {
+                            ((SharedMesh)geo).getTarget().setBinormalBuffer(null);
+                        } else {
+                            geo.setBinormalBuffer(null);
+                        }
+                    } else if (bufferName.equals("TEXCOORD")) {
+                        //System.out.println("Currect TC: " + geo.getTextureCoords().get(0).coords);
+                    }
+
+                    GLSLShaderObjectsState shader = (GLSLShaderObjectsState)cm.getState(RenderState.StateType.GLSLShaderObjects);
+                    if (shader != null && fb != null) {
+                        shader.setAttributePointer(attribute, 3, false, 0, fb);
+                    }
+                }
+            }
+
             for (RenderState.StateType type : RenderState.StateType.values()) {
                 if (cm.getState(type) != null) {
                     if (type == RenderState.StateType.Blend) {
@@ -4246,6 +4641,11 @@ public class ColladaImporter {
                                 .toByteArray());
                         RenderState rs = (RenderState) BinaryImporter
                                 .getInstance().load(in);
+                        if (rs instanceof GLSLShaderObjectsState) {
+                            GLSLShaderObjectsState oshader = (GLSLShaderObjectsState) cm.getState(type);
+                            GLSLShaderObjectsState shader = (GLSLShaderObjectsState)rs;
+                            shader.load(oshader.getVertexShader(), oshader.getFragmentShader());
+                        }
                         target.setRenderState(rs);
                     } catch (IOException e) {
                         logger.log(Level.WARNING, "Error cloning state", e);
