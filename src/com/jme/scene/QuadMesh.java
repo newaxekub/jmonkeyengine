@@ -39,6 +39,7 @@ import java.nio.IntBuffer;
 import java.util.logging.Logger;
 
 import com.jme.intersection.CollisionResults;
+import com.jme.system.DisplaySystem;
 import com.jme.math.Vector3f;
 import com.jme.renderer.Renderer;
 import com.jme.system.JmeException;
@@ -172,7 +173,11 @@ public class QuadMesh extends Geometry implements Serializable {
     }
 
     public IntBuffer getIndexBuffer() {
-        return indexBuffer;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return indexBuffer.asReadOnlyBuffer();
+        } else {
+            return indexBuffer;
+        }
     }
 
     public void setIndexBuffer(IntBuffer indices) {

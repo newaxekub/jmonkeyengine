@@ -187,7 +187,11 @@ public class TriMesh extends Geometry implements Serializable {
     }
 
     public IntBuffer getIndexBuffer() {
-        return indexBuffer;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return indexBuffer.asReadOnlyBuffer();
+        } else {
+            return indexBuffer;
+        }
     }
 
     public void setIndexBuffer(IntBuffer indices) {

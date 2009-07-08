@@ -48,6 +48,7 @@ import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
 import com.jme.util.export.OutputCapsule;
 import com.jme.util.geom.BufferUtils;
+import com.jme.system.DisplaySystem;
 
 /**
  * <code>Line</code> subclasses geometry and defines a collection of lines.
@@ -181,7 +182,11 @@ public class Line extends Geometry {
      * @return the indices array as an <code>IntBuffer</code>.
      */
     public IntBuffer getIndexBuffer() {
-        return indexBuffer;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return indexBuffer.asReadOnlyBuffer();
+        } else {
+            return indexBuffer;
+        }
     }
 
     /**

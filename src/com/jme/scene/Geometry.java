@@ -303,7 +303,11 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      *         information.
      */
     public FloatBuffer getVertexBuffer() {
-        return vertBuf;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return vertBuf.asReadOnlyBuffer();
+        } else {
+            return vertBuf;
+        }
     }
 
     /**
@@ -340,7 +344,11 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      * @return The per vertex depth values for fog coordinates
      */
     public FloatBuffer getFogBuffer() {
-    	return fogBuf;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return fogBuf.asReadOnlyBuffer();
+        } else {
+            return fogBuf;
+        }
     }
     
     /**
@@ -350,7 +358,11 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      * @return the float buffer containing the geometry information.
      */
     public FloatBuffer getNormalBuffer() {
-        return normBuf;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return normBuf.asReadOnlyBuffer();
+        } else {
+            return normBuf;
+        }
     }
 
     /**
@@ -373,7 +385,11 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
      * @return the buffer that contains this geometry's color information.
      */
     public FloatBuffer getColorBuffer() {
-        return colorBuf;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return colorBuf.asReadOnlyBuffer();
+        } else {
+            return colorBuf;
+        }
     }
 
     /**
@@ -937,7 +953,11 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
     }
 
     public FloatBuffer getTangentBuffer() {
-        return this.tangentBuf;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return tangentBuf.asReadOnlyBuffer();
+        } else {
+            return tangentBuf;
+        }
     }
 
     public void setBinormalBuffer(FloatBuffer binormalBuf) {
@@ -945,7 +965,11 @@ public abstract class Geometry extends Spatial implements Serializable, Savable 
     }
 
     public FloatBuffer getBinormalBuffer() {
-        return binormalBuf;
+        if (isLive() && !DisplaySystem.getDisplaySystem().isRenderThread()) {
+            return binormalBuf.asReadOnlyBuffer();
+        } else {
+            return binormalBuf;
+        }
     }
     
     public void setLightState(LightState lightState) {

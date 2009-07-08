@@ -1640,7 +1640,10 @@ public class JOGLRenderer extends Renderer {
                 gl.glVertexAttribPointer(1, 4, GL.GL_FLOAT, false, 0, g.getBinormalBuffer());
                 gl.glEnableVertexAttribArray(1);
             } else {
-                gl.glDisableVertexAttribArray(1);
+                // First check if we even support shaders
+                if (capabilities.GL_ARB_vertex_program) {
+                    gl.glDisableVertexAttribArray(1);
+                }
             }
         }
 
