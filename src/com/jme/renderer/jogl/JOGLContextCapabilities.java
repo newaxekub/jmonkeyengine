@@ -64,6 +64,8 @@ public final class JOGLContextCapabilities {
 
     public boolean GL_VERSION_1_2;
 
+    public boolean GL_VERSION_2_0;
+
     public boolean GL_ARB_imaging;
 
     public boolean GL_EXT_blend_func_separate;
@@ -158,6 +160,7 @@ public final class JOGLContextCapabilities {
         GL_ARB_vertex_buffer_object = gl
                 .isExtensionAvailable("GL_ARB_vertex_buffer_object");
         GL_VERSION_1_2 = gl.isExtensionAvailable("GL_VERSION_1_2");
+        GL_VERSION_2_0 = gl.isExtensionAvailable("GL_VERSION_2_0");
 
         // See BlendState
         GL_ARB_imaging = gl.isExtensionAvailable("GL_ARB_imaging");

@@ -1641,7 +1641,7 @@ public class JOGLRenderer extends Renderer {
                 gl.glEnableVertexAttribArray(1);
             } else {
                 // First check if we even support shaders
-                if (capabilities.GL_ARB_vertex_program) {
+                if (capabilities.GL_VERSION_2_0) {
                     gl.glDisableVertexAttribArray(1);
                 }
             }
