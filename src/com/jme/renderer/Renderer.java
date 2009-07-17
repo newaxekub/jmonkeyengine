@@ -550,6 +550,13 @@ public abstract class Renderer {
     public abstract boolean supportsVBO();
 
     /**
+     * Return true if the system running this supports OpenGL 2.0
+     *
+     * @return boolean
+     */
+    public abstract boolean supportsOpenGL20();
+
+    /**
      * See Renderer.isHeadless()
      * 
      * @return boolean

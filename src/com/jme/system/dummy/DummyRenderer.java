@@ -484,6 +484,11 @@ public final class DummyRenderer extends Renderer {
     }
 
     @Override
+    public boolean supportsOpenGL20() {
+        return false;
+    }
+
+    @Override
     public boolean isHeadless() {
         return false;
     }

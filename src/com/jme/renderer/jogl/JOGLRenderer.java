@@ -1341,6 +1341,15 @@ public class JOGLRenderer extends Renderer {
     }
 
     /**
+     * Return true if the system running this supports OpenGL 2.0
+     *
+     * @return boolean true if OpenGL 2.0 supported
+     */
+    public boolean supportsOpenGL20() {
+        return capabilities.GL_VERSION_2_0;
+    }
+
+    /**
      * re-initializes the GL context for rendering of another piece of geometry.
      */
     protected void postdrawGeometry(Geometry g) {
