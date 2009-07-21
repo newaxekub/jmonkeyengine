@@ -304,6 +304,7 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
      */
     public void apply() {
         final GL gl = GLU.getCurrentGL();
+        boolean forceRefresh = false;
 
         if (isSupported()) {
             //Ask for the current state record
@@ -315,6 +316,7 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
 
             if (needSendShader){
                 sendToGL(vertShader, fragShader);
+                forceRefresh = true;
             }
 
             if (shaderDataLogic != null) {
@@ -333,7 +335,7 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
                                     shaderAttributes.get(i);
                             if (shaderVariable.needsRefresh) {
                                 JOGLShaderUtil.updateAttributeLocation(
-                                        shaderVariable, programID);
+                                        shaderVariable, programID, forceRefresh);
                                 shaderVariable.needsRefresh = false;
                             }
                             JOGLShaderUtil
@@ -345,7 +347,7 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
                                     shaderUniforms.get(i);
                             if (shaderVariable.needsRefresh) {
                                 JOGLShaderUtil.updateUniformLocation(
-                                        shaderVariable, programID);
+                                        shaderVariable, programID, forceRefresh);
                                 JOGLShaderUtil
                                         .updateShaderUniform(shaderVariable);
                                 shaderVariable.needsRefresh = false;

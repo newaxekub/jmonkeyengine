@@ -98,10 +98,10 @@ public class JOGLShaderUtil {
      * @param programID shader program context ID
      */
     public static void updateUniformLocation(ShaderVariable variable,
-            int programID) {
+            int programID, boolean forceRefresh) {
         final GL gl = GLU.getCurrentGL();
 
-        if (variable.variableID == -1) {
+        if (variable.variableID == -1 || forceRefresh) {
             variable.variableID = gl
                     .glGetUniformLocationARB(programID, variable.name); // TODO Check variable.name
 
@@ -209,10 +209,10 @@ public class JOGLShaderUtil {
      * @param programID shader program context ID
      */
     public static void updateAttributeLocation(ShaderVariable variable,
-            int programID) {
+            int programID, boolean forceRefresh) {
         final GL gl = GLU.getCurrentGL();
 
-        if (variable.variableID == -1) {
+        if (variable.variableID == -1 || forceRefresh) {
             variable.variableID = gl
                     .glGetAttribLocationARB(programID, variable.name); // TODO Check variable.name
 
