@@ -1346,7 +1346,8 @@ public class JOGLRenderer extends Renderer {
      * @return boolean true if OpenGL 2.0 supported
      */
     public boolean supportsOpenGL20() {
-        return capabilities.GL_VERSION_2_0;
+        return (capabilities.GL_VERSION_2_0 || capabilities.GL_VERSION_2_1 ||
+                capabilities.GL_VERSION_3_0);
     }
 
     /**
@@ -1650,7 +1651,7 @@ public class JOGLRenderer extends Renderer {
                 gl.glEnableVertexAttribArray(1);
             } else {
                 // First check if we even support shaders
-                if (capabilities.GL_VERSION_2_0) {
+                if (supportsOpenGL20()) {
                     gl.glDisableVertexAttribArray(1);
                 }
             }

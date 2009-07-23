@@ -47,6 +47,7 @@ import com.jme.intersection.PickResults;
 import com.jme.math.Ray;
 import com.jme.renderer.Renderer;
 import com.jme.scene.state.RenderState;
+import com.jme.scene.state.BlendState;
 import com.jme.util.export.JMEExporter;
 import com.jme.util.export.JMEImporter;
 import com.jme.util.export.Savable;
@@ -178,6 +179,8 @@ public class Node extends Spatial implements Serializable, Savable {
         }
 
         child.setLive(isLive());
+
+        traverseGraph(child, false, (BlendState)child.getRenderState(RenderState.StateType.Blend));
         
         if (children == null) return 0;
         return children.size();
@@ -216,8 +219,57 @@ public class Node extends Spatial implements Serializable, Savable {
 
         child.setLive(isLive());
 
+        traverseGraph(child, false, (BlendState)child.getRenderState(RenderState.StateType.Blend));
+
         if (children == null) return 0;
         return children.size();
+    }
+
+    /**
+     * Examine this node and travese it's children
+     */
+    void traverseGraph(Spatial sg, boolean ortho, BlendState bs) {
+
+        examineSpatial(sg, ortho, bs);
+        if (sg instanceof Node) {
+            Node node = (Node) sg;
+            for (int i = 0; i < node.getQuantity(); i++) {
+                Spatial child = node.getChild(i);
+                BlendState cbs = (BlendState) child.getRenderState(RenderState.StateType.Blend);
+                if (cbs == null) {
+                    traverseGraph(child, ortho, bs);
+                } else {
+                    traverseGraph(child, ortho, cbs);
+                }
+            }
+        }
+    }
+
+    /**
+     * Examine the given node
+     */
+    void examineSpatial(Spatial s, boolean ortho, BlendState bs) {
+        setRenderQueue(s, ortho, bs);
+        s.setCullHint(Spatial.CullHint.Never);
+    }
+
+    /**
+     * This mehod checks for transpaency attributes
+     */
+    void setRenderQueue(Spatial s, boolean ortho, BlendState bs) {
+        if (ortho) {
+            s.setRenderQueueMode(com.jme.renderer.Renderer.QUEUE_ORTHO);
+        } else {
+            if (bs != null) {
+                if (bs.isBlendEnabled()) {
+                    s.setRenderQueueMode(com.jme.renderer.Renderer.QUEUE_TRANSPARENT);
+                } else {
+                    s.setRenderQueueMode(com.jme.renderer.Renderer.QUEUE_OPAQUE);
+                }
+            } else {
+                s.setRenderQueueMode(com.jme.renderer.Renderer.QUEUE_OPAQUE);
+            }
+        }
     }
 
     /**
@@ -573,8 +625,8 @@ public class Node extends Spatial implements Serializable, Savable {
      */
     @Override
     public void updateWorldBound() {
-        if ((lockedMode & Spatial.LOCKED_BOUNDS) != 0) return;
-        if (children == null) {
+       if ((lockedMode & Spatial.LOCKED_BOUNDS) != 0) return;
+       if (children == null) {
             return;
         }
         BoundingVolume worldBound = null;
