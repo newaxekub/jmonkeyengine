@@ -2571,12 +2571,15 @@ public class ColladaImporter {
           ms.setShininess(pt.getshininess().getfloat2().getValue().floatValue());
         }
 
+        System.out.println("TC0: " + pt.hastransparent());
         if (pt.hastransparent()) {
+            System.out.println("TC1: " + pt.gettransparent().hascolor());
             if (pt.gettransparent().hascolor() &&
                     !pt.gettransparency().getfloat2().getValue().toString().equals("0")) {
                 ColorRGBA constantColor = getColor(pt.gettransparent().getcolor());
                 ColorRGBA diffuse = ms.getDiffuse();
-                diffuse.a = 1.0f - constantColor.r;
+                diffuse.a = Float.parseFloat(pt.gettransparency().getfloat2().getValue().toString())* constantColor.r;
+                System.out.println("Transparency: " + diffuse);
                 ms.setDiffuse(diffuse);
                 BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
                 as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
