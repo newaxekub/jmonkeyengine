@@ -221,6 +221,13 @@ public class JOGLRenderer extends Renderer {
     }
 
     /**
+     * Return the context capabilities
+     */
+    public JOGLContextCapabilities getContextCaps() {
+        return (capabilities);
+    }
+
+    /**
      * <code>setCamera</code> sets the camera this renderer is using. It
      * asserts that the camera is of type <code>JOGLCamera</code>.
      *
