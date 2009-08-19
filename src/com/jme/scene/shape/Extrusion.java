@@ -115,6 +115,17 @@ public class Extrusion extends TriMesh {
     }
 
     /**
+     *
+     * @param name
+     * @param shape
+     * @param path
+     * @param upList a list of up vectors
+     */
+    public Extrusion(String name, Line shape, List<Vector3f> path, List<Vector3f> upList) {
+        super(name);
+        updateGeometry(shape, path, false, upList);
+    }
+    /**
      * Update vertex, color, index and texture buffers (0) to contain an
      * extrusion of shape along path.
      * 
@@ -146,6 +157,16 @@ public class Extrusion extends TriMesh {
      */
     public void updateGeometry(Line shape, List<Vector3f> path, boolean closed,
             Vector3f up) {
+        updateGeometry(shape, path, closed, up, null);
+    }
+
+    public void updateGeometry(Line shape, List<Vector3f> path, boolean closed,
+            List<Vector3f> upList) {
+        updateGeometry(shape, path, closed, null, upList);
+    }
+    
+    private void updateGeometry(Line shape, List<Vector3f> path, boolean closed,
+            Vector3f up, List<Vector3f> upList) {
         FloatBuffer shapeBuffer = shape.getVertexBuffer();
         FloatBuffer shapeNormalBuffer = shape.getNormalBuffer();
 
@@ -189,6 +210,10 @@ public class Extrusion extends TriMesh {
                     direction.set(nextPoint).subtractLocal(point);
                 } else {
                     direction.set(point).subtractLocal(lastPoint);
+                }
+
+                if (upList!=null) {
+                    up = upList.get(i);
                 }
                 rotation.lookAt(direction, up);
 
