@@ -2558,31 +2558,32 @@ public class ThreadSafeColladaImporter {
           ms.setShininess(pt.getshininess().getfloat2().getValue().floatValue());
         }
 
-        System.out.println("TC0: " + pt.hastransparent());
         if (pt.hastransparent()) {
-            System.out.println("TC1: " + pt.gettransparent().hascolor());
-            if (pt.gettransparent().hascolor() &&
+            boolean enable = false;
+            if (pt.gettransparent().hasopaque() && pt.gettransparent().getopaque().toString().equals("RGB_ZERO")) {
+                if (pt.gettransparent().hascolor() &&
+                    !pt.gettransparency().getfloat2().getValue().toString().equals("1")) {
+                    float alpha = pt.gettransparency().getfloat2().getValue().floatValue();
+                    ColorRGBA diffuse = ms.getDiffuse();
+                    diffuse.a = 1.0f - alpha;
+                    ms.setDiffuse(diffuse);
+                    enable = true;
+                }
+            } else if (pt.gettransparent().hascolor() &&
                     !pt.gettransparency().getfloat2().getValue().toString().equals("0")) {
-                ColorRGBA constantColor = getColor(pt.gettransparent().getcolor());
+                float alpha = pt.gettransparency().getfloat2().getValue().floatValue();
                 ColorRGBA diffuse = ms.getDiffuse();
-                diffuse.a = Float.parseFloat(pt.gettransparency().getfloat2().getValue().toString())* constantColor.r;
-                System.out.println("Transparency: " + diffuse);
+                diffuse.a = 1.0f - alpha;
                 ms.setDiffuse(diffuse);
+                enable = true;
+            }
+
+            if (enable || pt.gettransparent().hastexture()) {
                 BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
                 as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
                 as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
                 as.setBlendEnabled(true);
-                as.setEnabled(true);
                 mat.setState(as);
-//            } else if (pt.gettransparent().hastexture()) {
-//                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
-//                as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
-//                as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-//                as.setBlendEnabled(true);
-//                as.setReference(0.14f);
-//                as.setTestEnabled(true);
-//                as.setTestFunction(BlendState.TF_GEQUAL);
-//                mat.setState(as);
             }
         }
 
@@ -2594,10 +2595,6 @@ public class ThreadSafeColladaImporter {
         // lambert shading, create a FLAT shade state and material state
         // with
         // defined colors.
-        ShadeState ss = DisplaySystem.getDisplaySystem().getRenderer()
-                .createShadeState();
-        ss.setShadeMode(ShadeState.ShadeMode.Flat);
-        mat.setState(ss);
         // obtain the colors for the material
         MaterialState ms = DisplaySystem.getDisplaySystem().getRenderer()
                 .createMaterialState();
@@ -2625,30 +2622,33 @@ public class ThreadSafeColladaImporter {
         }
 
         if (lt.hastransparent()) {
-            if (lt.gettransparent().hascolor() &&
-                    !lt.gettransparency().getfloat2().getValue().toString().equals("0")) {
-                float alpha = lt.gettransparency().getfloat2().getValue().floatValue();
-                ColorRGBA diffuse = ms.getDiffuse();
-                diffuse.a = 1.0f - alpha;
-                ms.setDiffuse(diffuse);
+            boolean enable = false;
+            if (lt.gettransparent().hasopaque() && lt.gettransparent().getopaque().toString().equals("RGB_ZERO")) {
+                if (lt.gettransparent().hascolor() &&
+                    !lt.gettransparency().getfloat2().getValue().toString().equals("1")) {
+                    float alpha = lt.gettransparency().getfloat2().getValue().floatValue();
+                    ColorRGBA diffuse = ms.getDiffuse();
+                    diffuse.a = alpha;
+                    ms.setDiffuse(diffuse);
+                    enable = true;
+                }
+            } else if (lt.gettransparent().hascolor() &&
+                        !lt.gettransparency().getfloat2().getValue().toString().equals("0")) {
+                    float alpha = lt.gettransparency().getfloat2().getValue().floatValue();
+                    ColorRGBA diffuse = ms.getDiffuse();
+                    diffuse.a = 1.0f - alpha;
+                    ms.setDiffuse(diffuse);
+                    enable = true;
+            }
 
+            if (enable || lt.gettransparent().hastexture()) {
                 BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
                 as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
                 as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
                 as.setBlendEnabled(true);
                 mat.setState(as);
-//            } else if (lt.gettransparent().hastexture()) {
-//                BlendState as = DisplaySystem.getDisplaySystem().getRenderer().createBlendState();
-//                as.setSrcFunction(BlendState.SourceFunction.SourceAlpha);
-//                as.setDstFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-//                as.setBlendEnabled(true);
-//                as.setReference(0.14f);
-//                as.setTestEnabled(true);
-//                as.setTestFunction(BlendState.TF_GEQUAL);
-//                mat.setState(as);
             }
         }
-
         mat.setState(ms);
         // Ignored: reflective attributes, transparent attributes
     }
