@@ -201,7 +201,7 @@ public class BoundingSphere extends BoundingVolume {
         recurseMini(buf, buf.limit() / 3, 0, 0);
     }
 
-    private static Vector3f tempA = new Vector3f(), tempB = new Vector3f(), tempC = new Vector3f(), tempD = new Vector3f();
+    private Vector3f tempA = new Vector3f(), tempB = new Vector3f(), tempC = new Vector3f(), tempD = new Vector3f();
     /**
      * Used from calcWelzl. This function recurses to calculate a minimum
      * bounding sphere a few points at a time.
