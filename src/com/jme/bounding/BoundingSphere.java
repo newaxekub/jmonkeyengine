@@ -121,14 +121,47 @@ public class BoundingSphere extends BoundingVolume {
 
     /**
      * <code>computeFromPoints</code> creates a new Bounding Sphere from a
-     * given set of points. It uses the <code>calcWelzl</code> method as
-     * default.
+     * given set of points. 
      *
      * @param points
      *            the points to contain.
      */
     public void computeFromPoints(FloatBuffer points) {
-        calcWelzl(points);
+        // The caclWelzl does not work
+//        calcWelzl(points);
+        fixedComputeFromPoints(points);
+    }
+
+    private void fixedComputeFromPoints(FloatBuffer points) {
+	int i;
+        Vector3f point = new Vector3f();
+	float dis,dis_sq,rad_sq,oldc_to_new_c;
+        points.rewind();
+
+        center.x = points.get();
+        center.y = points.get();
+        center.z = points.get();
+        radius = 0.0f;
+
+	for(i=1;i<points.limit()/3;i++) {
+            point.set(points.get(), points.get(), points.get());
+	    rad_sq = radius * radius;
+	    dis_sq =  (point.x - center.x)*(point.x - center.x) +
+		(point.y - center.y)*(point.y - center.y) +
+		(point.z - center.z)*(point.z - center.z);
+
+	    // change sphere so one side passes through the point and
+	    // other passes through the old sphere
+	    if( dis_sq > rad_sq) {
+		dis = (float)Math.sqrt( dis_sq);
+		radius = (radius + dis)*.5f;
+		oldc_to_new_c = dis - radius;
+                center.x = (radius*center.x + oldc_to_new_c*point.x)/dis;
+                center.y = (radius*center.y + oldc_to_new_c*point.y)/dis;
+                center.z = (radius*center.z + oldc_to_new_c*point.z)/dis;
+	    }
+	}
+
     }
 
     /**
@@ -183,6 +216,8 @@ public class BoundingSphere extends BoundingVolume {
     }
 
     /**
+     * WARNING = THIS METHOD CALCULATES INCORRECT BOUNDS !
+     *
      * Calculates a minimum bounding sphere for the set of points. The algorithm
      * was originally found at
      * http://www.flipcode.com/cgi-bin/msg.cgi?showThread=COTD-SmallestEnclosingSpheres&forum=cotd&id=-1
@@ -191,7 +226,7 @@ public class BoundingSphere extends BoundingVolume {
      * @param points
      *            The points to calculate the minimum bounds from.
      */
-    public void calcWelzl(FloatBuffer points) {
+    private void calcWelzl(FloatBuffer points) {
         if (center == null)
             center = new Vector3f();
         FloatBuffer buf = BufferUtils.createFloatBuffer(points.limit());
