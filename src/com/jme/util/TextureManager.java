@@ -484,6 +484,10 @@ final public class TextureManager {
         InputStream is = null;
         try {
             is = file.openStream();
+            if (is==null) {
+                logger.log(Level.WARNING, "Null stream for URL "+file.toExternalForm());
+                return TextureState.getDefaultTextureImage();
+            }
             return loadImage(fileExt, is, flipped);
         } catch (IOException e) {
             logger
