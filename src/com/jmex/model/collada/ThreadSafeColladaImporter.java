@@ -263,7 +263,7 @@ public class ThreadSafeColladaImporter {
         resourceLibrary = new HashMap<String, Object>();
         subMaterialLibrary = new HashMap<TriMesh, String>();
         long startTime = System.nanoTime();
-        collada_schema_1_4_1Doc doc = new collada_schema_1_4_1Doc();
+        collada_schema_1_4_1Doc doc = new collada_schema_1_4_1Doc(); 
         logger.info("Doc creation took "+(System.nanoTime()-startTime)/1000000);
         try {
             startTime = System.nanoTime();
@@ -274,7 +274,7 @@ public class ThreadSafeColladaImporter {
             processCollada(root);
             logger.info("Parse took "+(System.nanoTime()-startTime)/1000000);
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "Unable to load Collada file. ", ex);
+            logger.log(Level.SEVERE, "Unable to load Collada file. ", ex);
             return;
         }
     }
