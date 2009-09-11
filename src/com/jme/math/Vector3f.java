@@ -62,12 +62,12 @@ public class Vector3f implements Externalizable, Savable, Cloneable {
 
     private static final long serialVersionUID = 1L;
 
-	public final static Vector3f ZERO = new Vector3f(0, 0, 0);
+    public final static Vector3f ZERO = new ImmutableVector3f(0, 0, 0);
 
-	public final static Vector3f UNIT_X = new Vector3f(1, 0, 0);
-	public final static Vector3f UNIT_Y = new Vector3f(0, 1, 0);
-    public final static Vector3f UNIT_Z = new Vector3f(0, 0, 1);
-    public final static Vector3f UNIT_XYZ = new Vector3f(1, 1, 1);
+    public final static Vector3f UNIT_X = new ImmutableVector3f(1, 0, 0);
+    public final static Vector3f UNIT_Y = new ImmutableVector3f(0, 1, 0);
+    public final static Vector3f UNIT_Z = new ImmutableVector3f(0, 0, 1);
+    public final static Vector3f UNIT_XYZ = new ImmutableVector3f(1, 1, 1);
     
 	/**
      * the x value of the vector.
@@ -1007,5 +1007,119 @@ public class Vector3f implements Externalizable, Savable, Cloneable {
                 return;
         }
         throw new IllegalArgumentException("index must be either 0, 1 or 2");
+    }
+
+    /**
+     * An immutable vector throws an exception if anyone tries to change it.
+     */
+    private static class ImmutableVector3f extends Vector3f {
+        public ImmutableVector3f(float x, float y, float z) {
+            super (x, y, z);
+        }
+
+        @Override
+        public Vector3f addLocal(Vector3f vec) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f addLocal(float addX, float addY, float addZ) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f crossLocal(Vector3f v) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f crossLocal(float otherX, float otherY, float otherZ) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f divideLocal(float scalar) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f divideLocal(Vector3f scalar) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f multLocal(float scalar) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f multLocal(Vector3f vec) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f negateLocal() {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f normalizeLocal() {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public void read(JMEImporter e) throws IOException {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f set(float x, float y, float z) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f set(Vector3f vect) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public void set(int index, float value) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public void setX(float x) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public void setY(float y) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public void setZ(float z) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f subtractLocal(Vector3f vec) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public Vector3f subtractLocal(float subtractX, float subtractY, float subtractZ) {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
+
+        @Override
+        public void zero() {
+            throw new IllegalStateException("Cannot write to immutable vector");
+        }
     }
 }
