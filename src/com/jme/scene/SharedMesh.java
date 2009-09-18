@@ -121,6 +121,7 @@ public class SharedMesh extends TriMesh {
             this.setRenderQueueMode(target.renderQueueMode);
             this.setTextureCombineMode(target.textureCombineMode);
             this.setZOrder(target.getZOrder());
+            this.setDefaultColor(target.getDefaultColor());
             for (RenderState.StateType type : RenderState.StateType.values()) {
                 RenderState state = target.getRenderState( type );
                 if (state != null) {
