@@ -1013,6 +1013,11 @@ public class Vector3f implements Externalizable, Savable, Cloneable {
      * An immutable vector throws an exception if anyone tries to change it.
      */
     private static class ImmutableVector3f extends Vector3f {
+        /** Default constructor needed for Externalizable */
+        public ImmutableVector3f() {
+
+        }
+
         public ImmutableVector3f(float x, float y, float z) {
             super (x, y, z);
         }
@@ -1069,11 +1074,6 @@ public class Vector3f implements Externalizable, Savable, Cloneable {
 
         @Override
         public void read(JMEImporter e) throws IOException {
-            throw new IllegalStateException("Cannot write to immutable vector");
-        }
-
-        @Override
-        public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
             throw new IllegalStateException("Cannot write to immutable vector");
         }
 
