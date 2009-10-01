@@ -250,7 +250,7 @@ public class Node extends Spatial implements Serializable, Savable {
      */
     void examineSpatial(Spatial s, boolean ortho, BlendState bs) {
         setRenderQueue(s, ortho, bs);
-        s.setCullHint(Spatial.CullHint.Never);
+        //s.setCullHint(Spatial.CullHint.Never);
     }
 
     /**

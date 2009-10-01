@@ -2608,9 +2608,17 @@ public class ThreadSafeColladaImporter {
                 }
             }
             if (pt.gettransparent().hastexture() || diffuse.a < 1.0f || alphaTexture) {
-                as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
-                as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-                as.setBlendEnabled(true);
+                String at = System.getProperty("Collada.useAlphaTest");
+                if (at != null && at.equals("true")) {
+                    as.setBlendEnabled(false);
+                    as.setReference(0.5f);
+                    as.setTestFunction(BlendState.TestFunction.GreaterThan);
+                    as.setTestEnabled(true);
+                } else {
+                    as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
+                    as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+                    as.setBlendEnabled(true);
+                }
                 mat.setState(as);
             }
         }
@@ -2697,9 +2705,17 @@ public class ThreadSafeColladaImporter {
                 }
             }
             if (lt.gettransparent().hastexture() || diffuse.a < 1.0f || alphaTexture) {
-                as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
-                as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
-                as.setBlendEnabled(true);
+                String at = System.getProperty("Collada.useAlphaTest");
+                if (at != null && at.equals("true")) {
+                    as.setBlendEnabled(false);
+                    as.setReference(0.5f);
+                    as.setTestFunction(BlendState.TestFunction.GreaterThan);
+                    as.setTestEnabled(true);
+                } else {
+                    as.setSourceFunction(BlendState.SourceFunction.SourceAlpha);
+                    as.setDestinationFunction(BlendState.DestinationFunction.OneMinusSourceAlpha);
+                    as.setBlendEnabled(true);
+                }
                 mat.setState(as);
             }
         }
