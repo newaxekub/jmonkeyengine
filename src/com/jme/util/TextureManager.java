@@ -90,7 +90,7 @@ final public class TextureManager {
     private static final Logger logger = Logger.getLogger(TextureManager.class
             .getName());
 
-    private static SavableHashMap<TextureKey, Texture> m_tCache = new SavableHashMap<TextureKey, Texture>();
+    private static final SavableHashMap<TextureKey, Texture> m_tCache = new SavableHashMap<TextureKey, Texture>();
     private static HashMap<String, ImageLoader> loaders = new HashMap<String, ImageLoader>();
     private static ArrayList<Integer> cleanupStore = new ArrayList<Integer>();
 
@@ -409,7 +409,9 @@ final public class TextureManager {
         if (TextureState.getDefaultTexture() == null
                 || (t != TextureState.getDefaultTexture() && t.getImage() != TextureState
                         .getDefaultTextureImage())) {
-            m_tCache.put(t.getTextureKey(), t);
+            synchronized(m_tCache) {
+                m_tCache.put(t.getTextureKey(), t);
+            }
         }
     }
 
@@ -793,26 +795,32 @@ final public class TextureManager {
         if (texture == null)
             return false;
 
-        Collection<TextureKey> c = m_tCache.keySet();
-        Iterator<TextureKey> it = c.iterator();
-        TextureKey key;
-        Texture next;
-        while (it.hasNext()) {
-            key = it.next();
-            next = m_tCache.get(key);
-            if (texture.equals(next)) {
-                return releaseTexture(key);
+        synchronized(m_tCache) {
+            Collection<TextureKey> c = m_tCache.keySet();
+            Iterator<TextureKey> it = c.iterator();
+            TextureKey key;
+            Texture next;
+            while (it.hasNext()) {
+                key = it.next();
+                next = m_tCache.get(key);
+                if (texture.equals(next)) {
+                    return releaseTexture(key);
+                }
             }
         }
         return false;
     }
 
     public static boolean releaseTexture(TextureKey tKey) {
-        return m_tCache.remove(tKey) != null;
+        synchronized(m_tCache) {
+            return m_tCache.remove(tKey) != null;
+        }
     }
 
     public static void clearCache() {
-        m_tCache.clear();
+        synchronized(m_tCache) {
+            m_tCache.clear();
+        }
     }
 
     /**
@@ -835,12 +843,14 @@ final public class TextureManager {
     }
 
     public static void registerForCleanup(TextureKey textureKey, int textureId) {
-        Texture t = m_tCache.get(textureKey);
-        if (t != null) {
-            t.setTextureId(textureId);
-        }
+        synchronized(m_tCache) {
+            Texture t = m_tCache.get(textureKey);
+            if (t != null) {
+                t.setTextureId(textureId);
+            }
 
-        cleanupStore.add(textureId);
+            cleanupStore.add(textureId);
+        }
     }
 
     public static void doTextureCleanup() {
@@ -872,15 +882,19 @@ final public class TextureManager {
     }
 
     public static Texture findCachedTexture(TextureKey textureKey) {
-        return m_tCache.get(textureKey);
+        synchronized(m_tCache) {
+            return m_tCache.get(textureKey);
+        }
     }
 
     public static void preloadCache(Renderer r) {
         TextureState ts = r.createTextureState();
-        for (Texture t : m_tCache.values()) {
-            if (t.getTextureKey().location != null) {
-                ts.setTexture(t);
-                ts.load(0);
+        synchronized(m_tCache) {
+            for (Texture t : m_tCache.values()) {
+                if (t.getTextureKey().location != null) {
+                    ts.setTexture(t);
+                    ts.load(0);
+                }
             }
         }
     }
@@ -902,12 +916,14 @@ final public class TextureManager {
     public static void readCache(File location) throws IOException
     {
         BinaryImporter importer = new BinaryImporter();
-        m_tCache = (SavableHashMap<TextureKey, Texture>) importer.load(location);
+        m_tCache.clear();
+        m_tCache.putAll((SavableHashMap<TextureKey, Texture>) importer.load(location));
     }
 
     public static void readCache(URL location) throws IOException
     {
         BinaryImporter importer = new BinaryImporter();
-        m_tCache = (SavableHashMap<TextureKey, Texture>) importer.load(location);
+        m_tCache.clear();
+        m_tCache.putAll((SavableHashMap<TextureKey, Texture>) importer.load(location));
     }
 }
