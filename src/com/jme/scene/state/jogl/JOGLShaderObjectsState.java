@@ -38,10 +38,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 
 import com.jme.renderer.RenderContext;
 import com.jme.renderer.jogl.JOGLContextCapabilities;
+import com.jme.renderer.jogl.JOGLRenderer;
 import com.jme.scene.state.GLSLShaderObjectsState;
 import com.jme.scene.state.StateRecord;
 import com.jme.scene.state.jogl.records.ShaderObjectsStateRecord;
@@ -50,6 +52,7 @@ import com.jme.system.DisplaySystem;
 import com.jme.system.JmeException;
 import com.jme.util.geom.BufferUtils;
 import com.jme.util.shader.ShaderVariable;
+import com.jme.util.shader.uniformtypes.ShaderVariableMatrix4;
 
 /**
  * Implementation of the GL_ARB_shader_objects extension.
@@ -76,6 +79,12 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
     private static int maxVertexAttribs;
 
     private static boolean inited = false;
+    
+    
+    public JOGLShaderObjectsState() {
+        this( ( ( JOGLRenderer ) DisplaySystem.getDisplaySystem().
+        getRenderer()).getContextCapabilities() );
+    }
 
     private boolean hasAttributes = false;
 
@@ -307,6 +316,7 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
         boolean forceRefresh = false;
 
         if (isSupported()) {
+            try {
             //Ask for the current state record
             RenderContext<?> context = DisplaySystem.getDisplaySystem()
                     .getCurrentContext();
@@ -361,7 +371,42 @@ public class JOGLShaderObjectsState extends GLSLShaderObjectsState {
 
             if (!record.isValid())
                 record.validate();
+        
+            } catch (GLException ex) {
+                StringBuffer out = new StringBuffer();
+                out.append("Vertex Program:\n" + getVertexShader() + "\n");
+                out.append("Fragment Program:\n" + getFragmentShader() + "\n");
+
+                out.append("Shader attributes:\n");
+                for (ShaderVariable sv : shaderAttributes) {
+                    out.append("    " + toString(sv) + "\n");
+                }
+
+                out.append("Shader uniforms:\n");
+                for (ShaderVariable sv : shaderUniforms) {
+                    out.append("    " + toString(sv) + "\n");
+
+                }
+
+                logger.log(Level.WARNING, out.toString(), ex);
+                throw ex;
+            }
         }
+    }
+
+    private String toString(ShaderVariable sv) {
+        StringBuffer out = new StringBuffer();
+        out.append(sv.toString() + " : ");
+        out.append(sv.name + ", ");
+        out.append("id: " + sv.variableID + ", ");
+        out.append("needsRefresh: " + sv.needsRefresh + ", ");
+
+        if (sv instanceof ShaderVariableMatrix4) {
+            ShaderVariableMatrix4 svm4 = (ShaderVariableMatrix4) sv;
+            out.append("size: " + svm4.matrixBuffer.limit());
+        }
+
+        return out.toString();
     }
 
     @Override
