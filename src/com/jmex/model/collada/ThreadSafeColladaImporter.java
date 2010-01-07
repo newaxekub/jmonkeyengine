@@ -213,6 +213,15 @@ public class ThreadSafeColladaImporter {
      */
     private static final long serialVersionUID = -4024091270314000507L;
 
+    // Flags so we only log unsuported feature errors once
+    private boolean reportedAnimationClips=false;
+    private boolean reportedForceFields=false;
+    private boolean reportedAnimationTransforms=false;
+    private boolean reportedRawDataImages=false;
+    private boolean reportedSplines=false;
+    private boolean reportedSkinType=false;
+    private boolean reportedLines=false;
+
     /**
      * Default constructor instantiates a ColladaImporter object. A basic Node
      * structure is built and no data is loaded until the <code>load</code>
@@ -568,8 +577,9 @@ public class ThreadSafeColladaImporter {
             }
         }
         if (root.haslibrary_animation_clips()) {
-            if (!squelch) {
+            if (!squelch && !reportedAnimationClips) {
                 logger.warning("Animation Clips not currently supported");
+                reportedAnimationClips = true;
             }
         }
         if (root.haslibrary_cameras()) {
@@ -583,8 +593,9 @@ public class ThreadSafeColladaImporter {
             }
         }
         if (root.haslibrary_force_fields()) {
-            if (!squelch) {
+            if (!squelch && !reportedForceFields) {
                 logger.warning("Forcefields not currently supported");
+                reportedForceFields = true;
             }
         }
         if (root.haslibrary_lights()) {
@@ -1020,9 +1031,10 @@ public class ThreadSafeColladaImporter {
                         System.arraycopy(floatArray, 0, xRot, 0, xRot.length);
                         put(source.getid().toString(), xRot);
                     } else {
-                        if (!squelch) {
+                        if (!squelch && !reportedAnimationTransforms) {
                             logger.warning(p.gettype() + " not yet supported "
                                     + "for animation transforms.");
+                            reportedAnimationTransforms = true;
                         }
                     }
                 } else if ("ROTY.ANGLE".equals(p.getname().toString())) {
@@ -1031,9 +1043,10 @@ public class ThreadSafeColladaImporter {
                         System.arraycopy(floatArray, 0, yRot, 0, yRot.length);
                         put(source.getid().toString(), yRot);
                     } else {
-                        if (!squelch) {
+                        if (!squelch && !reportedAnimationTransforms) {
                             logger.warning(p.gettype() + " not yet supported "
                                     + "for animation transforms.");
+                            reportedAnimationTransforms = true;
                         }
                     }
                 } else if ("ROTZ.ANGLE".equals(p.getname().toString())) {
@@ -1042,9 +1055,10 @@ public class ThreadSafeColladaImporter {
                         System.arraycopy(floatArray, 0, zRot, 0, zRot.length);
                         put(source.getid().toString(), zRot);
                     } else {
-                        if (!squelch) {
+                        if (!squelch && !reportedAnimationTransforms) {
                             logger.warning(p.gettype() + " not yet supported "
                                     + "for animation transforms.");
+                            reportedAnimationTransforms = true;
                         }
                     }
                 } else if ("TRANS.X".equals(p.getname().toString())) {
@@ -1054,9 +1068,10 @@ public class ThreadSafeColladaImporter {
                                 xTrans.length);
                         put(source.getid().toString(), xTrans);
                     } else {
-                        if (!squelch) {
+                        if (!squelch && !reportedAnimationTransforms) {
                             logger.warning(p.gettype() + " not yet supported "
                                     + "for animation transforms.");
+                            reportedAnimationTransforms = true;
                         }
                     }
                 } else if ("TRANS.Y".equals(p.getname().toString())) {
@@ -1066,9 +1081,10 @@ public class ThreadSafeColladaImporter {
                                 yTrans.length);
                         put(source.getid().toString(), yTrans);
                     } else {
-                        if (!squelch) {
+                        if (!squelch && !reportedAnimationTransforms) {
                             logger.warning(p.gettype() + " not yet supported "
                                     + "for animation transforms.");
+                            reportedAnimationTransforms = true;
                         }
                     }
                 } else if ("TRANS.Z".equals(p.getname().toString())) {
@@ -1078,15 +1094,17 @@ public class ThreadSafeColladaImporter {
                                 zTrans.length);
                         put(source.getid().toString(), zTrans);
                     } else {
-                        if (!squelch) {
+                        if (!squelch && !reportedAnimationTransforms) {
                             logger.warning(p.gettype() + " not yet supported "
                                     + "for animation transforms.");
+                            reportedAnimationTransforms = true;
                         }
                     }
                 } else {
-                    if (!squelch) {
+                    if (!squelch && !reportedAnimationTransforms) {
                         logger.warning(p.getname() + " not yet supported "
                                 + "for animation source.");
+                            reportedAnimationTransforms = true;
                     }
                 }
             }
@@ -1511,8 +1529,9 @@ public class ThreadSafeColladaImporter {
      */
     private void processImage(imageType image) throws Exception {
         if (image.hasdata()) {
-            if (!squelch) {
+            if (!squelch && !reportedRawDataImages) {
                 logger.warning("Raw data images not supported.");
+                reportedRawDataImages = true;
             }
         }
         if (image.hasinit_from()) {
@@ -2581,7 +2600,14 @@ public class ThreadSafeColladaImporter {
 
         // set the shininess value of the material
         if (pt.hasshininess()) {
-          ms.setShininess(pt.getshininess().getfloat2().getValue().floatValue());
+          float shininess = pt.getshininess().getfloat2().getValue().floatValue();
+          if (shininess<0.0f || shininess>128.0f) {
+              logger.warning("Shininess "+shininess+" out of range (0-128), clamping value");
+              if (shininess<0.0f)
+                  shininess=0f;
+              else shininess=128f;
+          }
+          ms.setShininess(shininess);
         }
 
         float transparency = 1.0f;
@@ -2824,8 +2850,9 @@ public class ThreadSafeColladaImporter {
             }
             // splines are not currently supported.
             if (geom.hasspline()) {
-                if (!squelch) {
+                if (!squelch && !reportedSplines) {
                     logger.warning("splines not yet supported.");
+                    reportedSplines = true;
                 }
             }
         }
@@ -2911,9 +2938,10 @@ public class ThreadSafeColladaImporter {
             } else if (mesh instanceof Node) {
                 skins = (Node) mesh;
             } else {
-                if (!squelch) {
+                if (!squelch && !reportedSkinType) {
                     logger.warning(key + " mesh is of unsupported skin type: "
                             + mesh);
+                    reportedSkinType = true;
                 }
                 return;
             }
@@ -4240,8 +4268,9 @@ public class ThreadSafeColladaImporter {
      * @return the jME tri mesh representing the COLLADA mesh.
      */
     private Spatial processLines(meshType mesh, geometryType geom) {
-        if (!squelch) {
+        if (!squelch && !reportedLines) {
             logger.warning("Line are not supported.");
+            reportedLines = true;
         }
         return null;
     }
