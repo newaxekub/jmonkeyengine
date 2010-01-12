@@ -175,8 +175,10 @@ import com.jmex.model.collada.schema.glsl_newparam;
  * @author Mark Powell, Rikard Herlitz, and others
  */
 public class ThreadSafeColladaImporter {
-    private static final Logger logger = Logger.getLogger(ThreadSafeColladaImporter.class
+    private static final Logger globalLogger = Logger.getLogger(ThreadSafeColladaImporter.class
             .getName());
+    private InstanceLogger logger = new InstanceLogger();
+    
     // asset information
     private String modelAuthor;
     private String tool;
@@ -273,20 +275,29 @@ public class ThreadSafeColladaImporter {
         subMaterialLibrary = new HashMap<TriMesh, String>();
         long startTime = System.nanoTime();
         collada_schema_1_4_1Doc doc = new collada_schema_1_4_1Doc(); 
-        logger.info("Doc creation took "+(System.nanoTime()-startTime)/1000000);
+        globalLogger.info("Doc creation took "+(System.nanoTime()-startTime)/1000000);
         try {
             startTime = System.nanoTime();
             COLLADAType root = new COLLADAType(doc.load(source));
-            logger.info("Load took "+(System.nanoTime()-startTime)/1000000);
-            logger.info("Version: " + root.getversion().getValue());
+            globalLogger.info("Load took "+(System.nanoTime()-startTime)/1000000);
+            globalLogger.info("Version: " + root.getversion().getValue());
             startTime = System.nanoTime();
             processCollada(root);
-            logger.info("Parse took "+(System.nanoTime()-startTime)/1000000);
+            globalLogger.info("Parse took "+(System.nanoTime()-startTime)/1000000);
         } catch (Exception ex) {
             System.out.println(ex);
             logger.log(Level.SEVERE, "Unable to load Collada file. ", ex);
             return;
         }
+    }
+
+    /**
+     * Set the listener to track loader errors. Use null to disable the listener
+     *
+     * @param listener
+     */
+    public void setErrorListener(LoaderErrorListener listener) {
+        logger.setErrorListener(listener);
     }
 
     /**
@@ -1214,7 +1225,7 @@ public class ThreadSafeColladaImporter {
                 if (animLib.getanimationAt(i).hasextra()) {
                     for (int j = 0; j < animLib.getanimationAt(i)
                             .getextraCount(); j++) {
-                        logger.info("Processing extra in animation library.");
+                        globalLogger.info("Processing extra in animation library.");
                         ExtraPluginManager.processExtra(bac, animLib
                                 .getanimationAt(i).getextraAt(j));
                     }
@@ -3361,7 +3372,7 @@ public class ThreadSafeColladaImporter {
                                         .getInstance().load(in);
                                 triMesh.setRenderState(rs);
                             } catch (IOException e) {
-                                logger
+                                globalLogger
                                         .throwing(
                                                 this.getClass().toString(),
                                                 "processTriMesh(meshType mesh, geometryType geom)",
@@ -3858,7 +3869,7 @@ public class ThreadSafeColladaImporter {
                                         .getInstance().load(in);
                                 triMesh.setRenderState(rs);
                             } catch (IOException e) {
-                                logger
+                                globalLogger
                                         .throwing(
                                                 this.getClass().toString(),
                                                 "processTriMesh(meshType mesh, geometryType geom)",
@@ -4058,7 +4069,7 @@ public class ThreadSafeColladaImporter {
                         }
                     }
                     triMesh.setTangentBuffer(normBuffer);
-                    logger.info("setting tangent buffer: " + normBuffer);
+                    globalLogger.info("setting tangent buffer: " + normBuffer);
                 } else if ("BINORMAL".equals(poly.getinputAt(i).getsemantic()
                         .toString())) {
                     // build the tangent buffer
@@ -4801,5 +4812,48 @@ public class ThreadSafeColladaImporter {
 
     public ThreadSafeColladaImporter getInstance() {
         return instance;
+    }
+
+    /**
+     * A logger that logs errors per instance of this class and also passes
+     * the log messages to the global logger for this class
+     */
+    class InstanceLogger {
+
+        private LoaderErrorListener listener = null;
+
+        public void warning(String msg) {
+            globalLogger.warning(msg);
+            if (listener!=null)
+                listener.error(Level.WARNING, msg, null);
+        }
+
+        public void severe(String msg) {
+            globalLogger.severe(msg);
+            if (listener!=null)
+                listener.error(Level.SEVERE, msg, null);
+        }
+
+        public void log(Level level, String msg, Throwable throwable) {
+            globalLogger.log(level, msg, throwable);
+            if (listener!=null)
+                listener.error(level, msg, throwable);
+        }
+
+        void setErrorListener(LoaderErrorListener listener) {
+            this.listener = listener;
+        }
+    }
+
+    public interface LoaderErrorListener {
+        /**
+         * Called when the loader experiences an error. Once this callback
+         * returns loading will continue to the best of the loaders ability
+         *
+         * @param level the severity of the error
+         * @param msg the error message
+         * @param throwable any associated exception, may be null
+         */
+        public void error(Level level, String msg, Throwable throwable);
     }
 }
