@@ -122,6 +122,18 @@ public class JOGLAWTCanvas extends GLCanvas implements JMECanvas,
         }
     }
 
+    @Override
+    public void reshape(int x, int y, int width, int height) {
+        super.reshape(x, y, width, height);
+
+        // if this canvas is ignoring repaint requests, force an immediate
+        // display() call, to guarantee that listeners will be notified of
+        // the repaint
+        if (getIgnoreRepaint()) {
+            display();
+        }
+    }
+
     /* JMECanvas ---------------------------------------------------------- */
 
     /**
