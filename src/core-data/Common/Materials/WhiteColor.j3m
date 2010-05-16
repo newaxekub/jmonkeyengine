@@ -1,0 +1,5 @@
+Material White Color : Common/MatDefs/Misc/SolidColor.j3md {
+     MaterialParameters {
+         m_Color : 1 1 1 1
+     }
+}

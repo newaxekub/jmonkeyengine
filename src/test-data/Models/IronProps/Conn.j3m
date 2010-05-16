@@ -1,0 +1,8 @@
+Material Conn : phong_lighting.j3md {
+    MaterialParameters {
+         m_Shininess : 4.0
+         m_DiffuseMap : ConnDiffuse.jpg
+         m_NormalMap : ConnNormal.png
+         m_SpecularMap : ConnSpecular.jpg
+    }
+}

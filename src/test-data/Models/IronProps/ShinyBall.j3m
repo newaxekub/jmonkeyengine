@@ -1,0 +1,8 @@
+Material Shiny Ball : phong_lighting.j3md {
+    MaterialParameters {
+         m_Shininess : 4.0
+         m_DiffuseMap : SphereDiffuse.dds
+         m_NormalMap : SphereNormal.dds
+         m_SpecularMap : SphereSpecular.dds
+    }
+}
