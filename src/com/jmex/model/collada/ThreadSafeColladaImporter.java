@@ -31,6 +31,7 @@
  */
 package com.jmex.model.collada;
 
+import com.jme.animation.AnimationController;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -1111,6 +1112,33 @@ public class ThreadSafeColladaImporter {
                             reportedAnimationTransforms = true;
                         }
                     }
+                } else if ("ANGLE".equals(p.getname().toString())) {
+                    if ("float".equals(p.gettype().toString())) {
+                        float[] angle = new float[floatArray.length];
+                        System.arraycopy(floatArray, 0, angle, 0,
+                                angle.length);
+                        put(source.getid().toString(), angle);
+                    } else {
+                        if (!squelch && !reportedAnimationTransforms) {
+                            logger.warning(p.gettype() + " not yet supported "
+                                    + "for animation transforms.");
+                            reportedAnimationTransforms = true;
+                        }
+                    }
+                } else if ("X".equals(p.getname().toString())) {
+                    if ("float".equals(p.gettype().toString())) {
+                        float[] trans = new float[floatArray.length];
+                        System.arraycopy(floatArray, 0, trans, 0,
+                                trans.length);
+                        put(source.getid().toString(), trans);
+
+                    } else {
+                        if (!squelch && !reportedAnimationTransforms) {
+                            logger.warning(p.gettype() + " not yet supported "
+                                    + "for animation transforms.");
+                            reportedAnimationTransforms = true;
+                        }
+                    }
                 } else {
                     if (!squelch && !reportedAnimationTransforms) {
                         logger.warning(p.getname() + " not yet supported "
@@ -1218,6 +1246,8 @@ public class ThreadSafeColladaImporter {
             }
             for (int i = 0; i < animLib.getanimationCount(); i++) {
                 BoneAnimation bac = processAnimation(animLib.getanimationAt(i));
+                float keyCount[] = bac.getKeyFrameTimes();
+
                 bac.setInterpolate(false);
                 bac.optimize(true);
                 put(bac.getName(), bac);
@@ -1320,6 +1350,50 @@ public class ThreadSafeColladaImporter {
                                     .getsource().toString().contains(
                                             "Translate-Z-")) {
                                 transz = (float[]) object;
+ 
+ // Morris Ford - 2010-03-22 - Rotate-X-, etc. does not appear
+ // This is with ColladaMaya 3.05B - may change otherwise
+                            } else if (animation.getsamplerAt(j).getinputAt(i)
+                                    .getsource().toString().contains(
+                                            "rotateX")) {
+                                rotx = (float[]) object;
+                            } else if (animation.getsamplerAt(j).getinputAt(i)
+                                    .getsource().toString().contains(
+                                            "rotateY")) {
+                                roty = (float[]) object;
+                            } else if (animation.getsamplerAt(j).getinputAt(i)
+                                    .getsource().toString().contains(
+                                            "rotateZ")) {
+                                rotz = (float[]) object;
+                            } else if (animation.getsamplerAt(j).getinputAt(i)
+                                    .getsource().toString().contains(
+                                            "translateX")) {
+                                transx = (float[]) object;
+                            } else if (animation.getsamplerAt(j).getinputAt(i)
+                                    .getsource().toString().contains(
+                                            "translateY")) {
+                                transy = (float[]) object;
+                            } else if (animation.getsamplerAt(j).getinputAt(i)
+                                    .getsource().toString().contains(
+                                            "translateZ")) {
+                                transz = (float[]) object;
+// Morris Ford - ColladaMaya reports translate info in one clump
+                            } else if (animation.getsamplerAt(j).getinputAt(i)
+                                    .getsource().toString().contains(
+                                            "translate_")) {
+                                float[] floatArray = (float[]) object;
+                                float[] transX = new float[floatArray.length / 3];
+                                float[] transY = new float[floatArray.length / 3];
+                                float[] transZ = new float[floatArray.length / 3];
+                                for(int k = 0; k < floatArray.length / 3; k++)
+                                    {
+                                    transX[k] = floatArray[0 + (3 * k)];
+                                    transY[k] = floatArray[1 + (3 * k)];
+                                    transZ[k] = floatArray[2 + (3 * k)];
+                                    }
+                                transx = transX;
+                                transy = transY;
+                                transz = transZ;
                             } else {
                                 if (!squelch) {
                                     logger
@@ -1375,23 +1449,59 @@ public class ThreadSafeColladaImporter {
             float[] rotz, float[] transx, float[] transy, float[] transz) {
         Quaternion rot = new Quaternion();
         int index = 0;
+// Morris Ford - 20100323 - Changed this to take all three rots and translates into account
+        if(rotx != null || roty != null || rotz != null)
+            {
+            if (rotx != null)
+                {
+                index = rotx.length;
+                }
+            else if(roty != null)
+                {
+                index = roty.length;
+                }
+            else if(rotz != null)
+                {
+                index = rotz.length;
+                }
+            }
+        else if(transx != null || transy != null || transz != null)
+            {
+            if (transx != null)
+                {
+                index = transx.length;
+                }
+            else if (transy != null)
+                {
+                index = transy.length;
+                }
+            else if (transz != null)
+                {
+                index = transz.length;
+                }
+            }
+
+/*
         if (rotx != null) {
             index = rotx.length;
         } else if (transx != null) {
             index = transx.length;
         }
+*/
+
+// Added radians conversion - 20100325
         Matrix4f[] transforms = new Matrix4f[index];
         float[] angles = new float[3];
         for (int i = 0; i < transforms.length; i++) {
             angles[0] = angles[1] = angles[2] = 0;
             if (rotx != null) {
-                angles[0] = rotx[i];
+                angles[0] = (float)Math.toRadians(rotx[i]);
             }
             if (roty != null) {
-                angles[1] = roty[i];
+                angles[1] = (float)Math.toRadians(roty[i]);
             }
             if (rotz != null) {
-                angles[2] = rotz[i];
+                angles[2] = (float)Math.toRadians(rotz[i]);
             }
             rot.fromAngles(angles);
             transforms[i] = rot.toRotationMatrix(new Matrix4f());
@@ -4376,15 +4486,15 @@ public class ThreadSafeColladaImporter {
                 if (!squelch) {
                     logger.warning("Bone " + key
                             + " is not attached to any vertices.");
+                    }
                 }
-            }
             if (!(parent instanceof Bone)) {
                 if (skeletonNames == null) {
                     skeletonNames = new ArrayList<String>();
-                }
+                    }
                 skeletonNames.add(key);
+                }
             }
-        }
         if (xmlNode.hasextra()) {
             for (int i = 0; i < xmlNode.getextraCount(); i++) {
                 try {
@@ -4392,20 +4502,43 @@ public class ThreadSafeColladaImporter {
                             xmlNode.getextraAt(i));
                     if (o instanceof Node) {
                         child = (Node) o;
-                    }
-                } catch (Exception e) {
+                        }
+                    } catch (Exception e) {
                     if (!squelch) {
                         logger.log(Level.WARNING,
                                 "Error processing extra information", e);
+                        }
                     }
                 }
             }
-        }
         if (child == null) {
             child = new Node(childName);
-        }
+            }
+
+// Morris Ford - 20100324 - trying to get the animation controllers into the model
+// This code looks for animation controllers and tries to match them to the node being processed
+
+        ArrayList animations = getControllerNames();
+        if(animations != null)
+            {
+            AnimationController ac = new AnimationController();
+            for(int i = 0; i < animations.size(); i++)
+                {
+                System.out.println(" -->>-->> animation " + animations.get(i).toString());
+                String theBoneAniName = (String)animations.get(i);
+
+                if(theBoneAniName.contains(childName))
+                    {
+                    BoneAnimation theBoneAni = getAnimationController(theBoneAniName);
+                    ac.addAnimation(theBoneAni);
+                    }
+                }
+            child.addController(ac);
+            }
+
         parent.attachChild(child);
         put(childName, child);
+
         if (xmlNode.hasinstance_camera()) {
             for (int i = 0; i < xmlNode.getinstance_cameraCount(); i++) {
                 processInstanceCamera(xmlNode.getinstance_cameraAt(i), child);
@@ -4648,7 +4781,7 @@ public class ThreadSafeColladaImporter {
                 spatial = new SharedNode(key, (Node) spatial);
             }
 
-
+            
             node.attachChild(spatial);
             if (geometry.hasbind_material()) {
                 processBindMaterial(geometry.getbind_material(), spatial);
