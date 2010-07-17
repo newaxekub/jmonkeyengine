@@ -909,8 +909,19 @@ public abstract class AbstractCamera implements Camera {
                 .set( direction.x, direction.y, direction.z );
         worldPlane[NEAR_PLANE].setConstant( dirDotLocation + frustumNear );
 
-        updateMatrices = true;
-        updateSMatrices = true;
+        // OWL synchronization: at this point we know we are on the render
+        // thread, so nothing should be changing out from under us. Grab the
+        // matrix update lock and make copies of all the values needed for the
+        // matrix updates
+        synchronized (updateMatricesLock) {
+            updateDirection = direction.clone();
+            updateLocation = location.clone();
+            updateLeft = left.clone();
+            updateUp = up.clone();
+
+            updateMatrices = true;
+            updateSMatrices = true;
+        }
     }
 
     /**
@@ -946,60 +957,70 @@ public abstract class AbstractCamera implements Camera {
 
 
     public Matrix4f getProjectionMatrix() {
-        if (isParallelProjection()) {
-            _projection.loadIdentity();
-            _projection.m00 = 2.0f / (frustumRight - frustumLeft);
-            _projection.m11 = 2.0f / (frustumBottom - frustumTop);
-            _projection.m22 = -2.0f / (frustumFar - frustumNear);
-            _projection.m33 = 1f;
-            _projection.m30 = -(frustumRight + frustumLeft) / (frustumRight - frustumLeft);
-            _projection.m31 = -(frustumBottom + frustumTop) / (frustumBottom - frustumTop);
-            _projection.m32 = -(frustumFar + frustumNear) / (frustumFar - frustumNear);
-        } else {
-            // XXX: Cache results or is this low cost enough to happen every time it is called?
-            _projection.loadIdentity();
-            _projection.m00 = (2.0f * frustumNear) / (frustumRight - frustumLeft);
-            _projection.m11 = (2.0f * frustumNear) / (frustumTop - frustumBottom);
-            _projection.m20 = (frustumRight + frustumLeft) / (frustumRight - frustumLeft);
-            _projection.m21 = (frustumTop + frustumBottom) / (frustumTop - frustumBottom);
-            _projection.m22 = -(frustumFar + frustumNear) / (frustumFar - frustumNear);
-            _projection.m32 = -(2.0f * frustumFar * frustumNear) / (frustumFar - frustumNear);
-            _projection.m23 = -1.0f;
-            _projection.m33 = -0.0f;
+        synchronized (updateMatricesLock) {
+            if (isParallelProjection()) {
+                _projection.loadIdentity();
+                _projection.m00 = 2.0f / (frustumRight - frustumLeft);
+                _projection.m11 = 2.0f / (frustumBottom - frustumTop);
+                _projection.m22 = -2.0f / (frustumFar - frustumNear);
+                _projection.m33 = 1f;
+                _projection.m30 = -(frustumRight + frustumLeft) / (frustumRight - frustumLeft);
+                _projection.m31 = -(frustumBottom + frustumTop) / (frustumBottom - frustumTop);
+                _projection.m32 = -(frustumFar + frustumNear) / (frustumFar - frustumNear);
+            } else {
+                // XXX: Cache results or is this low cost enough to happen every time it is called?
+                _projection.loadIdentity();
+                _projection.m00 = (2.0f * frustumNear) / (frustumRight - frustumLeft);
+                _projection.m11 = (2.0f * frustumNear) / (frustumTop - frustumBottom);
+                _projection.m20 = (frustumRight + frustumLeft) / (frustumRight - frustumLeft);
+                _projection.m21 = (frustumTop + frustumBottom) / (frustumTop - frustumBottom);
+                _projection.m22 = -(frustumFar + frustumNear) / (frustumFar - frustumNear);
+                _projection.m32 = -(2.0f * frustumFar * frustumNear) / (frustumFar - frustumNear);
+                _projection.m23 = -1.0f;
+                _projection.m33 = -0.0f;
+            }
+            return _projection;
         }
-        return _projection;
     }
 
     public Matrix4f getModelViewMatrix() {
-        // XXX: Cache results or is this low cost enough to happen every time it is called?
-        _modelView.loadIdentity();
-        _modelView.m00 = -left.x;
-        _modelView.m10 = -left.y;
-        _modelView.m20 = -left.z;
+        synchronized (updateMatricesLock) {
+            // XXX: Cache results or is this low cost enough to happen every time it is called?
+            _modelView.loadIdentity();
+            _modelView.m00 = -updateLeft.x;
+            _modelView.m10 = -updateLeft.y;
+            _modelView.m20 = -updateLeft.z;
 
-        _modelView.m01 = up.x;
-        _modelView.m11 = up.y;
-        _modelView.m21 = up.z;
+            _modelView.m01 = updateUp.x;
+            _modelView.m11 = updateUp.y;
+            _modelView.m21 = updateUp.z;
 
-        _modelView.m02 = -direction.x;
-        _modelView.m12 = -direction.y;
-        _modelView.m22 = -direction.z;
+            _modelView.m02 = -updateDirection.x;
+            _modelView.m12 = -updateDirection.y;
+            _modelView.m22 = -updateDirection.z;
 
-        _transMatrix.loadIdentity();
-        _transMatrix.m30 = -location.x;
-        _transMatrix.m31 = -location.y;
-        _transMatrix.m32 = -location.z;
+            _transMatrix.loadIdentity();
+            _transMatrix.m30 = -updateLocation.x;
+            _transMatrix.m31 = -updateLocation.y;
+            _transMatrix.m32 = -updateLocation.z;
 
-        _transMatrix.multLocal(_modelView);
-        _modelView.set(_transMatrix);
+            _transMatrix.multLocal(_modelView);
+            _modelView.set(_transMatrix);
 
-        return _modelView;
+            return _modelView;
+        }
     }
 
-    private static final Quaternion tmp_quat = new Quaternion();
-
+    private final Object updateMatricesLock = new Object();
     private boolean updateMatrices = true;
     private boolean updateSMatrices = true;
+    
+    // thread-safe copies for use during update
+    private Vector3f updateLeft;
+    private Vector3f updateUp;
+    private Vector3f updateDirection;
+    private Vector3f updateLocation;
+
     private final Matrix4f modelViewProjectionInverse = new Matrix4f();
     private final Matrix4f modelViewProjection = new Matrix4f();
 
@@ -1011,16 +1032,23 @@ public abstract class AbstractCamera implements Camera {
         if ( store == null ) {
             store = new Vector3f();
         }
-        checkViewProjection();
-        if ( updateMatrices ) {
-            modelViewProjection.invert( modelViewProjectionInverse );
-            updateMatrices = false;
-        }
-        tmp_quat.set(
+
+        Quaternion tmp_quat = new Quaternion();
+
+        synchronized (updateMatricesLock) {
+            checkViewProjection();
+            if ( updateMatrices ) {
+                modelViewProjection.invert( modelViewProjectionInverse );
+                updateMatrices = false;
+            }
+
+            tmp_quat.set(
                 ( screenPosition.x / getWidth() - viewPortLeft ) / ( viewPortRight - viewPortLeft ) * 2 - 1,
                 ( screenPosition.y / getHeight() - viewPortBottom ) / ( viewPortTop - viewPortBottom ) * 2 - 1,
                 zPos * 2 - 1, 1 );
-        modelViewProjectionInverse.mult( tmp_quat, tmp_quat );
+            modelViewProjectionInverse.mult( tmp_quat, tmp_quat );
+        }
+
         tmp_quat.multLocal( 1.0f / tmp_quat.w );
         store.x = tmp_quat.x;
         store.y = tmp_quat.y;
@@ -1043,9 +1071,15 @@ public abstract class AbstractCamera implements Camera {
         if ( store == null ) {
             store = new Vector3f();
         }
-        checkViewProjection();
-        tmp_quat.set( worldPosition.x, worldPosition.y, worldPosition.z, 1 );
-        modelViewProjection.mult( tmp_quat, tmp_quat );
+
+        Quaternion tmp_quat = new Quaternion();
+
+        synchronized (updateMatricesLock) {
+            checkViewProjection();
+            tmp_quat.set( worldPosition.x, worldPosition.y, worldPosition.z, 1 );
+            modelViewProjection.mult( tmp_quat, tmp_quat );
+        }
+
         tmp_quat.multLocal( 1.0f / tmp_quat.w );
         store.x = ( ( tmp_quat.x + 1 ) * ( viewPortRight - viewPortLeft ) / 2 ) * getWidth();
         store.y = ( ( tmp_quat.y + 1 ) * ( viewPortTop - viewPortBottom ) / 2 ) * getHeight();
@@ -1055,7 +1089,8 @@ public abstract class AbstractCamera implements Camera {
     }
 
     /**
-     * update modelViewProjection if necessary.
+     * update modelViewProjection if necessary. Must be called while holding
+     * updateMatricesLock
      */
     private void checkViewProjection() {
         if ( updateSMatrices ) {
