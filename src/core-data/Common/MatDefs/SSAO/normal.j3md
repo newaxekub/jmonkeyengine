@@ -1,0 +1,21 @@
+MaterialDef Normal {
+
+    MaterialParameters {
+    }
+
+    Technique {
+        VertexShader GLSL100:   Common/MatDefs/SSAO/normal.vert
+        FragmentShader GLSL100: Common/MatDefs/SSAO/normal.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldViewMatrix
+        }
+
+        RenderState {         
+        }
+    }
+
+    Technique FixedFunc {
+    }
+}
