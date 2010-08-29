@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2009-2010 jMonkeyEngine
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+ * Neither the name of 'jMonkeyEngine' nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE index PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp Index Version 2.0//EN" "http://java.sun.com/products/javahelp/index_2_0.dtd">
+<index version="2.0">
+    <indexitem text="About jMonkeyPlatform" target="com.jme3.gde.core.about"/>
+    <indexitem text="Creating a Project (online)" target="com.jme3.gde.core.projectcreation"/>
+    <indexitem text="The SceneViewer" target="com.jme3.gde.core.sceneviewer"/>
+    <indexitem text="The SceneExplorer (online)" target="com.jme3.gde.core.sceneexplorer"/>
+    <indexitem text="Importing Models (online)" target="com.jme3.gde.core.importing"/>
+    <indexitem text="Code Editor (online)" target="com.jme3.gde.core.codeeditor"/>
+    <indexitem text="Version Control (online)" target="com.jme3.gde.core.versioncontrol"/>
+    <indexitem text="Debugging, Testing (online)" target="com.jme3.gde.core.debugging"/>
+    <indexitem text="Deployment (online)" target="com.jme3.gde.core.deployment"/>
+    <indexitem text="Updating jMP" target="com.jme3.gde.core.updating"/>
+
+    <indexitem text="Hello SimpleApplication" target="com.jme3.tutorials.helloapplication"/>
+    <indexitem text="Hello Node" target="com.jme3.tutorials.hellonode"/>
+    <indexitem text="Hello Assets" target="com.jme3.tutorials.helloassets"/>
+    <indexitem text="Hello Event Loop" target="com.jme3.tutorials.helloloop"/>
+    <indexitem text="Hello Input System" target="com.jme3.tutorials.helloinput"/>
+    <indexitem text="Hello Material" target="com.jme3.tutorials.hellomaterial"/>
+    <indexitem text="Hello Animation" target="com.jme3.tutorials.helloanimation"/>
+    <indexitem text="Hello Picking" target="com.jme3.tutorials.hellopicking"/>
+    <indexitem text="Hello Collision" target="com.jme3.tutorials.hellocollision"/>
+    <indexitem text="Hello Audio" target="com.jme3.tutorials.helloaudio"/>
+    <indexitem text="Hello Effects" target="com.jme3.tutorials.helloeffects"/>
+    <indexitem text="Hello Physics" target="com.jme3.tutorials.hellophysics"/>
+
+    <indexitem text="About jMP Plugin Development" target="com.jme3.gde.development"/>
+    <indexitem text="Creating a plugin (online)" target="com.jme3.gde.development.setup"/>
+    <indexitem text="Creating components (online)" target="com.jme3.gde.development.general"/>
+    <indexitem text="Accessing the Scene (online)" target="com.jme3.gde.development.scene"/>
+    <indexitem text="Extending the SceneExplorer (online)" target="com.jme3.gde.development.explorer"/>
+    <indexitem text="Creating a library plugin from a jar file" target="com.jme3.gde.development.extensionlibrary"/>
+    <indexitem text="Integrate a new model filetype and loader" target="com.jme3.gde.development.modelloader"/>
+</index>

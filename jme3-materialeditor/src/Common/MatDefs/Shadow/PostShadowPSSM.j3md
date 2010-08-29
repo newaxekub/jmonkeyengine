@@ -1,0 +1,46 @@
+MaterialDef Post Shadow {
+
+    MaterialParameters {
+        Texture2D m_ShadowMap0
+        Texture2D m_ShadowMap1
+        Texture2D m_ShadowMap2
+        Texture2D m_ShadowMap3
+        Texture2D m_ShadowMap4
+        Texture2D m_ShadowMap5
+        Texture2D m_ShadowMap6
+        Texture2D m_ShadowMap7
+        
+        Int m_NbSplits
+        Float shadowIntensity
+        FloatArray m_Splits
+
+        Matrix4 m_LightViewProjectionMatrix0
+        Matrix4 m_LightViewProjectionMatrix1
+        Matrix4 m_LightViewProjectionMatrix2
+        Matrix4 m_LightViewProjectionMatrix3
+        Matrix4 m_LightViewProjectionMatrix4
+        Matrix4 m_LightViewProjectionMatrix5
+        Matrix4 m_LightViewProjectionMatrix6
+        Matrix4 m_LightViewProjectionMatrix7
+
+    }
+
+    Technique {
+        VertexShader GLSL100:   Common/MatDefs/Shadow/PostShadowPSSM.vert
+        FragmentShader GLSL100: Common/MatDefs/Shadow/PostShadowPSSM.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldMatrix
+        }
+
+        Defines {
+            
+        }
+
+        RenderState {
+            Blend Modulate
+        }
+    }
+
+}

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2009-2010 jMonkeyEngine
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+ * Neither the name of 'jMonkeyEngine' nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE map PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp Map Version 2.0//EN" "http://java.sun.com/products/javahelp/map_2_0.dtd">
+<map version="2.0">
+    <mapID target="com.jme3.gde.core.about" url="core-about.html"/>
+    <mapID target="com.jme3.gde.core.projectcreation" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:project_creation?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.core.sceneviewer" url="core-sceneviewer.html"/>
+    <mapID target="com.jme3.gde.core.sceneexplorer" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:scene_explorer?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.core.importing" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:model_loader_and_viewer?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.core.codeeditor" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:code_editor?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.core.versioncontrol" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:version_control?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.core.debugging" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:debugging_profiling_testing?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.core.deployment" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:application_deployment?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.core.updating" url="core-updating.html"/>
+
+    <mapID target="com.jme3.tutorials.helloapplication" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_simpleapplication?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.hellonode" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_node?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.helloassets" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_asset?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.helloloop" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_main_event_loop?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.helloinput" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_input_system?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.hellomaterial" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_material?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.helloanimation" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_animation?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.hellopicking" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_picking?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.hellocollision" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_collision?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.helloaudio" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_audio?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.helloeffects" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_effects?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.tutorials.hellophysics" url="http://jmonkeyengine.com/wiki/doku.php/jme3:beginner:hello_physics?do=export_xhtmlbody"/>
+
+    <mapID target="com.jme3.gde.development" url="core-development.html"/>
+    <mapID target="com.jme3.gde.development.setup" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:development:setup?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.development.general" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:development:general?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.development.scene" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:development:scene?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.development.explorer" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:development:sceneexplorer?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.development.extensionlibrary" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:development:extension_library?do=export_xhtmlbody"/>
+    <mapID target="com.jme3.gde.development.modelloader" url="http://www.jmonkeyengine.com/wiki/doku.php/jme3:jmonkeyplatform:development:model_loader?do=export_xhtmlbody"/>
+</map>

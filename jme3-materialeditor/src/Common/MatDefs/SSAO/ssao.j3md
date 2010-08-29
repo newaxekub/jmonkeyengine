@@ -1,0 +1,31 @@
+MaterialDef SSAO {
+
+    MaterialParameters {
+        Texture2D m_Texture
+        Texture2D m_Normals
+        Texture2D m_DepthTexture
+        Vector3 frustumCorner      
+        Float m_SampleRadius
+        Float m_Intensity
+        Float m_Scale
+        Float m_Bias
+        Boolean m_UseAo
+        Boolean m_UseOnlyAo
+        Vector2 m_FrustumNearFar
+    }
+
+    Technique {
+        VertexShader GLSL100:   Common/MatDefs/SSAO/ssao.vert
+        FragmentShader GLSL100: Common/MatDefs/SSAO/ssao.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldViewMatrix
+            Resolution
+            
+        }
+    }
+
+    Technique FixedFunc {
+    }
+}

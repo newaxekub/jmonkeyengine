@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ Copyright (c) 2009-2010 jMonkeyEngine
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
+
+ * Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+ * Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+ * Neither the name of 'jMonkeyEngine' nor the names of its contributors
+   may be used to endorse or promote products derived from this software
+   without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+ TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<!DOCTYPE toc PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp TOC Version 2.0//EN" "http://java.sun.com/products/javahelp/toc_2_0.dtd">
+<toc version="2.0">
+    <tocitem text="jMonkeyPlatform Core">
+        <tocitem text="About jMonkeyPlatform" target="com.jme3.gde.core.about"/>
+        <tocitem text="Creating a Project (online)" target="com.jme3.gde.core.projectcreation"/>
+        <tocitem text="The SceneViewer" target="com.jme3.gde.core.sceneviewer"/>
+        <tocitem text="The SceneExplorer (online)" target="com.jme3.gde.core.sceneexplorer"/>
+        <tocitem text="Importing Models (online)" target="com.jme3.gde.core.importing"/>
+        <tocitem text="Code Editor (online)" target="com.jme3.gde.core.codeeditor"/>
+        <tocitem text="Version Control (online)" target="com.jme3.gde.core.versioncontrol"/>
+        <tocitem text="Debugging, Testing (online)" target="com.jme3.gde.core.debugging"/>
+        <tocitem text="Deployment (online)" target="com.jme3.gde.core.deployment"/>
+        <tocitem text="Updating jMP" target="com.jme3.gde.core.updating"/>
+    </tocitem>
+    <tocitem text="jMonkeyEngine3 Tutorials (online)">
+        <tocitem text="Hello SimpleApplication" target="com.jme3.tutorials.helloapplication"/>
+        <tocitem text="Hello Node" target="com.jme3.tutorials.hellonode"/>
+        <tocitem text="Hello Assets" target="com.jme3.tutorials.helloassets"/>
+        <tocitem text="Hello Event Loop" target="com.jme3.tutorials.helloloop"/>
+        <tocitem text="Hello Input System" target="com.jme3.tutorials.helloinput"/>
+        <tocitem text="Hello Material" target="com.jme3.tutorials.hellomaterial"/>
+        <tocitem text="Hello Animation" target="com.jme3.tutorials.helloanimation"/>
+        <tocitem text="Hello Picking" target="com.jme3.tutorials.hellopicking"/>
+        <tocitem text="Hello Collision" target="com.jme3.tutorials.hellocollision"/>
+        <tocitem text="Hello Audio" target="com.jme3.tutorials.helloaudio"/>
+        <tocitem text="Hello Effects" target="com.jme3.tutorials.helloeffects"/>
+        <tocitem text="Hello Physics" target="com.jme3.tutorials.hellophysics"/>
+    </tocitem>
+    <tocitem text="jMP Plugin Development" expand="false">
+        <tocitem text="About jMP Plugin Development" target="com.jme3.gde.development"/>
+        <tocitem text="Creating a plugin (online)" target="com.jme3.gde.development.setup"/>
+        <tocitem text="Creating components (online)" target="com.jme3.gde.development.general"/>
+        <tocitem text="Accessing the Scene (online)" target="com.jme3.gde.development.scene"/>
+        <tocitem text="Extending the SceneExplorer (online)" target="com.jme3.gde.development.explorer"/>
+        <tocitem text="Recipes (online)" expand="false">
+            <tocitem text="Creating a library plugin from a jar file" target="com.jme3.gde.development.extensionlibrary"/>
+            <tocitem text="Integrate a new model filetype and loader" target="com.jme3.gde.development.modelloader"/>
+        </tocitem>
+    </tocitem>
+</toc>
