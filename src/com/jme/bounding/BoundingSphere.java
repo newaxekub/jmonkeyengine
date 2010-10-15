@@ -639,7 +639,11 @@ public class BoundingSphere extends BoundingVolume {
         if ( rCenter == null ) {
             rVal.setCenter( rCenter = new Vector3f() );
         }
-        if (length > radiusEpsilon) {
+
+        // OWL issue #121: unless the centers are very close to exactly the
+        // same, calculate the new center as the midpoint between the new
+        // high and low points
+        if (length > FastMath.FLT_EPSILON) {
             float coeff = (length + radiusDiff) / (2.0f * length);
             rCenter.set(center.addLocal(diff.multLocal(coeff)));
         } else {
