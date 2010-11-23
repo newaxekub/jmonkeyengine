@@ -1,0 +1,268 @@
+
+
+
+<h1><a name="custom_mesh_shapes" id="custom_mesh_shapes">Custom Mesh Shapes</a></h1>
+<div class="level1">
+
+<p>
+
+<img src="/wiki/lib/exe/fetch.php">
+</p>
+
+<p>
+Use the Mesh class to create custom shapes that go beyond Quad, Box, Cylinder, and Sphere, even procedural shapes are possible. Thank you to KayTrance for providing the sample code!
+</p>
+
+<p>
+In this tutorial, we (re)create a very simple rectangular mesh, and we have a look at different ways of coloring it. A flat rectangle may not look useful because it&#039;s exactly the same as a <code>com.jme3.scene.shape.Quad</code>. We choose this simple example in order to show you how to build any shape out of triangles – without the distractions of more complex shapes. 
+
+</p>
+<ul>
+<li class="level1"><div class="li"> Full code sample: <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://code.google.com/p/jmonkeyengine/source/browse/branches/jme3/src/test/jme3test/model/shape/TestCustomMesh.java"><param name="text" value="<html><u>TestCustomMesh.java</u></html>"><param name="textColor" value="blue"></object></div>
+</li>
+</ul>
+
+</div>
+<!-- SECTION "Custom Mesh Shapes" [1-815] -->
+<h2><a name="polygon_meshes" id="polygon_meshes">Polygon Meshes</a></h2>
+<div class="level2">
+
+<p>
+
+Polygon meshes are made up of triangles. The corners of the triangles are vertices. So, when ever you create a new shape, you break it down into triangles. 
+</p>
+
+<p>
+Let&#039;s look at a cube. A cube is made up of 6 rectangles. Each rectangle can be broken down into two triangles. This means you need 12 triangles to create a cube mesh. You also need to know the 8 corner coordinates (vertices). The trick is that you have to specify the vertices in a certain order: Each triangle separately, counter-clockwise. 
+</p>
+
+<p>
+Sounds worse than it is – here is an example: 
+</p>
+
+</div>
+<!-- SECTION "Polygon Meshes" [816-1394] -->
+<h2><a name="creating_a_quad_mesh" id="creating_a_quad_mesh">Creating a Quad Mesh</a></h2>
+<div class="level2">
+
+<p>
+
+Okay, we want to create a Quad. A quad has four vertices, and is made up of two triangles.
+</p>
+
+<p>
+The base class for creating meshes is <code>com.jme3.scene.Mesh</code>. 
+</p>
+<pre class="code java">Mesh m <span class="sy0">=</span> <span class="kw1">new</span> Mesh<span class="br0">&#40;</span><span class="br0">&#41;</span>;</pre>
+</div>
+<!-- SECTION "Creating a Quad Mesh" [1395-1625] -->
+<h3><a name="vertices" id="vertices">Vertices</a></h3>
+<div class="level3">
+
+<p>
+
+To define your own shape, determine its vertex positions in space. Store them in an array using com.jme3.math.Vector3f. For a Quad, we need four vertices: Bottom left, bottom right, top left, top right. We name the array <code>vertices[]</code>.
+</p>
+<pre class="code java">Vector3f <span class="br0">&#91;</span><span class="br0">&#93;</span> vertices <span class="sy0">=</span> <span class="kw1">new</span> Vector3f<span class="br0">&#91;</span><span class="nu0">4</span><span class="br0">&#93;</span>;
+vertices<span class="br0">&#91;</span>0<span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector3f<span class="br0">&#40;</span>0,0,0<span class="br0">&#41;</span>;
+vertices<span class="br0">&#91;</span><span class="nu0">1</span><span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector3f<span class="br0">&#40;</span><span class="nu0">3</span>,0,0<span class="br0">&#41;</span>;
+vertices<span class="br0">&#91;</span><span class="nu0">2</span><span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector3f<span class="br0">&#40;</span>0,<span class="nu0">3</span>,0<span class="br0">&#41;</span>;
+vertices<span class="br0">&#91;</span><span class="nu0">3</span><span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector3f<span class="br0">&#40;</span><span class="nu0">3</span>,<span class="nu0">3</span>,0<span class="br0">&#41;</span>;</pre>
+</div>
+<!-- SECTION "Vertices" [1626-2084] -->
+<h3><a name="texture_coordinates" id="texture_coordinates">Texture Coordinates</a></h3>
+<div class="level3">
+
+<p>
+
+Next, define the Quad&#039;s 2D texture coordinates for each vertex, in the same order: Bottom left, bottom right, top left, top right. We name this array <code>texCoord[]</code>
+</p>
+<pre class="code java">Vector2f<span class="br0">&#91;</span><span class="br0">&#93;</span> texCoord <span class="sy0">=</span> <span class="kw1">new</span> Vector2f<span class="br0">&#91;</span><span class="nu0">4</span><span class="br0">&#93;</span>;
+texCoord<span class="br0">&#91;</span>0<span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector2f<span class="br0">&#40;</span>0,0<span class="br0">&#41;</span>;
+texCoord<span class="br0">&#91;</span><span class="nu0">1</span><span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector2f<span class="br0">&#40;</span><span class="nu0">1</span>,0<span class="br0">&#41;</span>;
+texCoord<span class="br0">&#91;</span><span class="nu0">2</span><span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector2f<span class="br0">&#40;</span>0,<span class="nu0">1</span><span class="br0">&#41;</span>;
+texCoord<span class="br0">&#91;</span><span class="nu0">3</span><span class="br0">&#93;</span> <span class="sy0">=</span> <span class="kw1">new</span> Vector2f<span class="br0">&#40;</span><span class="nu0">1</span>,<span class="nu0">1</span><span class="br0">&#41;</span>;</pre>
+</div>
+<!-- SECTION "Texture Coordinates" [2085-2473] -->
+<h3><a name="connecting_the_dots" id="connecting_the_dots">Connecting the Dots</a></h3>
+<div class="level3">
+
+<p>
+
+Next we turn the unrelated coordinates into triangles – We define the order in which the mesh is constructed. Think of these indexes as coming in groups of three. Each group of indexes describes one triangle. Note that the vertices are giving counter-clockwise! 
+</p>
+<pre class="code java"><span class="kw4">int</span> <span class="br0">&#91;</span><span class="br0">&#93;</span> indexes <span class="sy0">=</span> <span class="br0">&#123;</span> <span class="nu0">2</span>,0,<span class="nu0">1</span>, <span class="nu0">1</span>,<span class="nu0">3</span>,<span class="nu0">2</span> <span class="br0">&#125;</span>;</pre><ul>
+<li class="level1"><div class="li"> The 2,0,1 triangle starts at top left, continues bottom left, and ends at bottom right. </div>
+</li>
+<li class="level1"><div class="li"> The 1,3,2 triangle start at bottom right, continues top right, and ends at top left.</div>
+</li>
+</ul>
+<pre class="code">
+2\2--3
+| \  | Counter-clockwise
+|  \ |         
+0--1\1
+</pre>
+
+</div>
+<!-- SECTION "Connecting the Dots" [2474-3081] -->
+<h3><a name="setting_the_mesh_buffer" id="setting_the_mesh_buffer">Setting the Mesh Buffer</a></h3>
+<div class="level3">
+
+<p>
+
+The Mesh data is stored in a buffer.
+</p>
+<ol>
+<li class="level1"><div class="li"> Using <code>com.jme3.util.BufferUtils</code>, we create three buffers for the three types of information we have: </div>
+<ul>
+<li class="level2"><div class="li"> vertex positions, </div>
+</li>
+<li class="level2"><div class="li"> texture coordinates, </div>
+</li>
+<li class="level2"><div class="li"> indices.</div>
+</li>
+</ul>
+</li>
+<li class="level1"><div class="li"> We assign the data to the appropriate type of buffer inside the mesh object. The three buffer types are taken from an enum in <code>com.jme3.scene.VertexBuffer.Type</code>.</div>
+</li>
+<li class="level1"><div class="li"> The third parameter describes the number of components of the values. Vertex postions are 3 float values, texture coordinates are 2 float values, and the indices are single ints. </div>
+</li>
+</ol>
+<pre class="code java">m.<span class="me1">setBuffer</span><span class="br0">&#40;</span>Type.<object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aposition+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>, <span class="nu0">3</span>, BufferUtils.<span class="me1">createFloatBuffer</span><span class="br0">&#40;</span>vertices<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+m.<span class="me1">setBuffer</span><span class="br0">&#40;</span>Type.<span class="me1">TexCoord</span>, <span class="nu0">2</span>, BufferUtils.<span class="me1">createFloatBuffer</span><span class="br0">&#40;</span>texCoord<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+m.<span class="me1">setBuffer</span><span class="br0">&#40;</span>Type.<span class="me1">Index</span>,    <span class="nu0">1</span>, BufferUtils.<span class="me1">createIntBuffer</span><span class="br0">&#40;</span>indexes<span class="br0">&#41;</span><span class="br0">&#41;</span>;</pre>
+<p>
+Our Mesh is ready! Now we want to see it.
+</p>
+
+</div>
+<!-- SECTION "Setting the Mesh Buffer" [3082-3961] -->
+<h2><a name="using_the_mesh_in_a_scene" id="using_the_mesh_in_a_scene">Using the Mesh in a Scene</a></h2>
+<div class="level2">
+
+<p>
+We create a <code>com.jme3.scene.Geometry</code>, apply a simple color material to it, and attach it to the rootNode to make it appear in the scene.
+</p>
+<pre class="code java">Geometry geom <span class="sy0">=</span> <span class="kw1">new</span> Geometry<span class="br0">&#40;</span><span class="st0">&quot;OurMesh&quot;</span>, m<span class="br0">&#41;</span>;
+Material mat <span class="sy0">=</span> <span class="kw1">new</span> Material<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Common/MatDefs/Misc/SolidColor.j3md&quot;</span><span class="br0">&#41;</span>;
+mat.<span class="me1">setColor</span><span class="br0">&#40;</span><span class="st0">&quot;m_Color&quot;</span>, ColorRGBA.<span class="me1">Blue</span><span class="br0">&#41;</span>;
+geom.<span class="me1">setMaterial</span><span class="br0">&#40;</span>mat<span class="br0">&#41;</span>;
+rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>geom<span class="br0">&#41;</span>;</pre>
+<p>
+Ta-daa!
+</p>
+
+</div>
+<!-- SECTION "Using the Mesh in a Scene" [3962-4390] -->
+<h2><a name="optionalvertex_colors" id="optionalvertex_colors">Optional: Vertex Colors</a></h2>
+<div class="level2">
+
+<p>
+
+Vertex coloring is a simple way of coloring meshes. Instead of just assigning one solid color, each vertex (corner) has a color assigned. The faces between the vertices are then colored with a gradient.
+</p>
+
+<p>
+We will use the same mesh <code>m</code> as defined above, but with a special VertexColor material.
+</p>
+<pre class="code java">Geometry coloredMesh <span class="sy0">=</span> <span class="kw1">new</span> Geometry <span class="br0">&#40;</span><span class="st0">&quot;ColoredMesh&quot;</span>, m<span class="br0">&#41;</span>;
+Material matVC <span class="sy0">=</span> <span class="kw1">new</span> Material<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Common/MatDefs/Misc/VertexColor.j3md&quot;</span><span class="br0">&#41;</span>;</pre>
+<p>
+We create a float array color buffer. 
+
+</p>
+<ul>
+<li class="level1"><div class="li"> We assign 4 color values, RGBA, to each vertex.</div>
+<ul>
+<li class="level2"><div class="li"> To loop over the 4 color values, we use a color index <pre class="code java"><span class="kw4">int</span> colorIndex <span class="sy0">=</span> 0;</pre></div>
+</li>
+</ul>
+</li>
+<li class="level1"><div class="li"> The color buffer contains four color values for each vertex.</div>
+<ul>
+<li class="level2"><div class="li"> The Quad in this example has 4 vertices. <pre class="code java"><span class="kw4">float</span><span class="br0">&#91;</span><span class="br0">&#93;</span> colorArray <span class="sy0">=</span> <span class="kw1">new</span> <span class="kw4">float</span><span class="br0">&#91;</span><span class="nu0">4</span><span class="sy0">*</span><span class="nu0">4</span><span class="br0">&#93;</span>;</pre></div>
+</li>
+<li class="level2"><div class="li"> Tip: If your mesh has a different number of vertices, you would write: <pre class="code java"><span class="kw4">float</span><span class="br0">&#91;</span><span class="br0">&#93;</span> colorArray <span class="sy0">=</span> <span class="kw1">new</span> <span class="kw4">float</span><span class="br0">&#91;</span>yourVertexCount <span class="sy0">*</span> <span class="nu0">4</span><span class="br0">&#93;</span></pre></div>
+</li>
+</ul>
+</li>
+</ul>
+
+<p>
+
+We loop over the colorArray buffer to quickly set some RGBA value for each vertex. As usual, RGBA color values range from 0.0f to 1.0f. The values we use here are quite arbitrary, we are just trying to give every vertex a different RGBA value (a purplish gray, purple, a greenish gray, green, in the screenshot), without writing too much code. For your own mesh, you&#039;d choose the values the color buffer depending on which color you want the mesh to have.
+</p>
+<pre class="code java"><span class="kw1">for</span><span class="br0">&#40;</span><span class="kw4">int</span> i <span class="sy0">=</span> 0; i <span class="sy0">&lt;</span> <span class="nu0">4</span>; i<span class="sy0">++</span><span class="br0">&#41;</span><span class="br0">&#123;</span>
+   <span class="co1">// Red value (is increased by .2 on each next vertex here)</span>
+   colorArray<span class="br0">&#91;</span>colorIndex<span class="sy0">++</span><span class="br0">&#93;</span><span class="sy0">=</span> 0.1f<span class="sy0">+</span><span class="br0">&#40;</span>.2f<span class="sy0">*</span>i<span class="br0">&#41;</span>;
+   <span class="co1">// Green value (is reduced by .2 on each next vertex)</span>
+   colorArray<span class="br0">&#91;</span>colorIndex<span class="sy0">++</span><span class="br0">&#93;</span><span class="sy0">=</span> 0.9f<span class="sy0">-</span><span class="br0">&#40;</span>0.2f<span class="sy0">*</span>i<span class="br0">&#41;</span>;
+   <span class="co1">// Blue value (remains the same in our case)</span>
+   colorArray<span class="br0">&#91;</span>colorIndex<span class="sy0">++</span><span class="br0">&#93;</span><span class="sy0">=</span> 0.5f;
+   <span class="co1">// Alpha value (no transparency set here)</span>
+   colorArray<span class="br0">&#91;</span>colorIndex<span class="sy0">++</span><span class="br0">&#93;</span><span class="sy0">=</span> 1.0f;
+<span class="br0">&#125;</span></pre>
+<p>
+
+Next, set the color buffer. An RGBA color value contains four float components, thus the parameter <code>4</code>. 
+</p>
+<pre class="code java">m.<span class="me1">setBuffer</span><span class="br0">&#40;</span>Type.<object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Acolor+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>, <span class="nu0">4</span>, colorArray<span class="br0">&#41;</span>;
+coloredMesh.<span class="me1">setMaterial</span><span class="br0">&#40;</span>matVC<span class="br0">&#41;</span>;</pre>
+<p>
+Now you see a gradient color extending from each vertex.
+</p>
+
+</div>
+<!-- SECTION "Optional: Vertex Colors" [4391-6526] -->
+<h3><a name="optionalpoint_mode" id="optionalpoint_mode">Optional: Point Mode</a></h3>
+<div class="level3">
+
+<p>
+
+Alternatively, you can show the vertices as colored points instead of coloring the faces.
+</p>
+<pre class="code java">Geometry coloredMesh <span class="sy0">=</span> <span class="kw1">new</span> Geometry <span class="br0">&#40;</span><span class="st0">&quot;ColoredMesh&quot;</span>, cMesh<span class="br0">&#41;</span>;
+...
+<span class="me1">m</span>.<span class="me1">setMode</span><span class="br0">&#40;</span>Mesh.<span class="me1">Mode</span>.<span class="me1">Points</span><span class="br0">&#41;</span>;
+m.<span class="me1">setPointSize</span><span class="br0">&#40;</span>10f<span class="br0">&#41;</span>;
+m.<span class="me1">updateBound</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+m.<span class="me1">setStatic</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+Geometry points <span class="sy0">=</span> <span class="kw1">new</span> Geometry<span class="br0">&#40;</span><span class="st0">&quot;Points&quot;</span>, m<span class="br0">&#41;</span>;
+points.<span class="me1">setMaterial</span><span class="br0">&#40;</span>mat<span class="br0">&#41;</span>;
+rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>points<span class="br0">&#41;</span>;
+&nbsp;
+rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>coloredMesh<span class="br0">&#41;</span>;</pre>
+<p>
+This will result in a 10 px dot being rendered for each of the four vertices. The dot has the vertex color you specified above. The Quad&#039;s faces are not rendered at all. This can be used for a special debugging or editing mode.
+</p>
+
+</div>
+<!-- SECTION "Optional: Point Mode" [6527-7180] -->
+<h2><a name="front_and_back_faces" id="front_and_back_faces">Front and Back Faces</a></h2>
+<div class="level2">
+
+<p>
+
+By default, jME3 optimizes a scene by culling all backfaces. It determines which side the front or backface of a mesh is by the order of the vertices. The frontface is the one where the vertices are specified counter-clockwise.
+</p>
+
+<p>
+This means you mesh, as created above, is invisible when seen from “behind”. This may not be a problem and is often even intended. If you use the custom meshes to form a polyhedron, or flat wallpaper-like object, rendering the backfaces (the inside of the polyhedron) would indeed be a waste of resources. 
+</p>
+
+<p>
+In case that your use case requires the backfaces to be visible, you have two options:
+</p>
+<ul>
+<li class="level1"><div class="li"> If you have a very simple scene, you can just deactivate backface culling for this one mesh&#039;s material. <br/>
+ <code>mat.getAdditionalRenderState().setFaceCullMode(FaceCullMode.Off));</code></div>
+</li>
+<li class="level1"><div class="li"> The recommended solution is to specify each triangle twice, the second time with the opposite order of vertices. The second, reversed triangle makes up the backface. <br/>
+ <code>int[] indexes = { 2,0,1, 1,3,2, 2,3,1, 1,0,2 }; </code></div>
+</li>
+</ul>
+
+</div>
+<!-- SECTION "Front and Back Faces" [7181-] -->
+<p><em><a href="http://jmonkeyengine.org/wiki/doku.php/jme3:advanced:custom_meshes?do=export_xhtmlbody">view online version</a></em></p>

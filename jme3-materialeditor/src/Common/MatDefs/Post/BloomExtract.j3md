@@ -1,0 +1,27 @@
+MaterialDef Bloom {
+
+    MaterialParameters {
+        Texture2D m_Texture
+        Float m_ExposurePow
+        Float m_ExposureCutoff
+        Boolean m_Extract
+        Texture2D m_GlowMap
+    }
+
+    Technique {
+        VertexShader GLSL100:   Common/MatDefs/Post/Post.vert
+        FragmentShader GLSL100: Common/MatDefs/Post/bloomExtract.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+
+        Defines {
+            HAS_GLOWMAP : m_GlowMap
+            DO_EXTRACT : m_Extract
+        }
+    }
+
+    Technique FixedFunc {
+    }
+}

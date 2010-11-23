@@ -1,0 +1,277 @@
+
+
+
+<h1><a name="bloom_and_glow" id="bloom_and_glow">Bloom and Glow</a></h1>
+<div class="level1">
+
+<p>
+
+Bloom is a popular shader effect in 3D games industry. It usually consist in displaying a glowing halo around light sources or bright areas of a scene.
+In practice, the bright areas are extracted from the rendered scene, blurred and finally added up to the render.
+</p>
+
+<p>
+Those images gives an idea of what bloom does. The left image has no bloom effect, the right image does. <br/>
+
+<img src="nbdocs:/com/jme3/gde/core/docs/jme3/advanced/blomsky.png">
+</p>
+
+</div>
+<!-- SECTION "Bloom and Glow" [1-484] -->
+<h1><a name="bloom_usage" id="bloom_usage">Bloom Usage</a></h1>
+<div class="level1">
+<ol>
+<li class="level1"><div class="li"> Create a FilterPostProcessor</div>
+</li>
+<li class="level1"><div class="li"> Create a BloomFilter</div>
+</li>
+<li class="level1"><div class="li"> Add the filter to the processor</div>
+</li>
+<li class="level1"><div class="li"> Add the processor to the viewPort</div>
+</li>
+</ol>
+<pre class="code java"> FilterPostProcessor fpp<span class="sy0">=</span><span class="kw1">new</span> FilterPostProcessor<span class="br0">&#40;</span>assetManager<span class="br0">&#41;</span>;
+ BloomFilter bloom<span class="sy0">=</span><span class="kw1">new</span> BloomFilter<span class="br0">&#40;</span>cam.<span class="me1">getWidth</span><span class="br0">&#40;</span><span class="br0">&#41;</span>,cam.<span class="me1">getHeight</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+ fpp.<span class="me1">addFilter</span><span class="br0">&#40;</span>bloom<span class="br0">&#41;</span>;
+ viewPort.<span class="me1">addProcessor</span><span class="br0">&#40;</span>fpp<span class="br0">&#41;</span>;</pre>
+<p>
+Here are the parameters that you can tweak : 
+</p>
+<table class="inline">
+	<tr class="row0">
+		<th class="col0 leftalign"> Parameter           </th><th class="col1 leftalign"> Method                </th><th class="col2"> Default </th><th class="col3"> Description </th>
+	</tr>
+	<tr class="row1">
+		<td class="col0 leftalign"> blur scale              </td><td class="col1"> <code>setBlurScale(float)</code> </td><td class="col2 leftalign">1.5f  </td><td class="col3"> the scale of the bloom effect, but be careful, high values does artifacts </td>
+	</tr>
+	<tr class="row2">
+		<td class="col0 leftalign"> exposure Power              </td><td class="col1"> <code>setExposurePower(float)</code> </td><td class="col2 leftalign">5.0f  </td><td class="col3"> the glowing channel color is raised to the value power </td>
+	</tr>
+	<tr class="row3">
+		<td class="col0 leftalign"> exposure cut-off              </td><td class="col1"> <code>setExposureCutOff(float)</code> </td><td class="col2 leftalign">0.0f  </td><td class="col3"> the threshold of color to bloom during extraction </td>
+	</tr>
+	<tr class="row4">
+		<td class="col0 leftalign"> bloom intensity              </td><td class="col1"> <code>setBloomIntensity(float)</code> </td><td class="col2 leftalign">2.0f  </td><td class="col3"> the resulting bloom value is multiplied by this intensity </td>
+	</tr>
+</table>
+
+<p>
+
+You&#039;ll probably need to adjust those parameters depending on your scene.
+
+</p>
+
+</div>
+<!-- SECTION "Bloom Usage" [485-1558] -->
+<h1><a name="bloom_with_a_glow_map" id="bloom_with_a_glow_map">Bloom with a glow map</a></h1>
+<div class="level1">
+
+<p>
+
+Sometimes, you want to have more control over what glows and does not glow. 
+The bloom filter supports a glow map or a glow color.
+</p>
+
+</div>
+
+<h5><a name="creating_a_glow-map" id="creating_a_glow-map">Creating a glow-map</a></h5>
+<div class="level5">
+
+<p>
+
+Let&#039;s take the hover tank example bundled with JME3 test data.<br/>
+
+Here you can see the diffuse map of the tank, and the associated glow map that only contains the parts of the texture that will glow and their glowing color: <br/>
+
+<img src="nbdocs:/com/jme3/gde/core/docs/jme3/advanced/tank_diffuse_ss.png">
+<img src="nbdocs:/com/jme3/gde/core/docs/jme3/advanced/tank_glow_map_ss.png">
+</p>
+
+<p>
+Glow maps works with Lighting.j3md, Particles.j3md and SolidColor.j3md material definitions.
+The tank material looks like that : 
+
+</p>
+<pre class="code">
+Material My Material : Common/MatDefs/Light/Lighting.j3md {
+     MaterialParameters {
+        m_SpecularMap : Models/HoverTank/tank_specular.png
+        m_Shininess : 8
+        m_NormalMap : Models/HoverTank/tank_normals.png
+        m_DiffuseMap : Models/HoverTank/tank_diffuse.png
+        m_GlowMap : Models/HoverTank/tank_glow_map_highres.png
+        m_UseMaterialColors : true
+        m_Ambient  : 0.0 0.0 0.0 1.0
+        m_Diffuse  : 1.0 1.0 1.0 1.0
+        m_Specular : 1.0 1.0 1.0 1.0
+     }
+}
+</pre>
+
+<p>
+
+The glow map is defined here : <strong>m_GlowMap : Models/HoverTank/tank_glow_map_highres.png</strong>
+</p>
+
+</div>
+
+<h5><a name="usage" id="usage">Usage</a></h5>
+<div class="level5">
+<ol>
+<li class="level1"><div class="li"> Create a FilterPostProcessor</div>
+</li>
+<li class="level1"><div class="li"> Create a BloomFilter with the GLOW_OBJECTS parameter</div>
+</li>
+<li class="level1"><div class="li"> Add the filter to the processor</div>
+</li>
+<li class="level1"><div class="li"> Add the processor to the viewPort</div>
+</li>
+</ol>
+<pre class="code">
+  FilterPostProcessor fpp=new FilterPostProcessor(assetManager);
+  BloomFilter bf=new BloomFilter(cam.getWidth(), cam.getHeight(), BloomFilter.GLOW_OBJECTS);
+  fpp.addFilter(bf);
+  viewPort.addProcessor(fpp);
+</pre>
+
+<p>
+Here is the result : <br/>
+
+<img src="nbdocs:/com/jme3/gde/core/docs/jme3/advanced/tanlglow1.png">
+</p>
+
+</div>
+<!-- SECTION "Bloom with a glow map" [1559-3306] -->
+<h1><a name="bloom_with_a_glow_color" id="bloom_with_a_glow_color">Bloom with a glow color</a></h1>
+<div class="level1">
+
+<p>
+
+Sometimes you need an entire object to glow, not just parts of it.
+In this case you&#039;ll need to use the glow color parameter.
+</p>
+
+</div>
+
+<h5><a name="usage1" id="usage1">Usage</a></h5>
+<div class="level5">
+<ol>
+<li class="level1"><div class="li"> Create a material for your object and set the m_GlowColor parameter</div>
+</li>
+<li class="level1"><div class="li"> Create a FilterPostProcessor</div>
+</li>
+<li class="level1"><div class="li"> Create a BloomFilter with the GLOW_OBJECTS parameter</div>
+</li>
+<li class="level1"><div class="li"> Add the filter to the processor</div>
+</li>
+<li class="level1"><div class="li"> Add the processor to the viewPort</div>
+</li>
+</ol>
+<pre class="code">
+    Material mat = new Material(getAssetManager(), &quot;Common/MatDefs/Misc/SolidColor.j3md&quot;);
+    mat.setColor(&quot;m_Color&quot;, ColorRGBA.Green);
+    mat.setColor(&quot;m_GlowColor&quot;, ColorRGBA.Green);
+    fpp=new FilterPostProcessor(assetManager);
+    bloom= new BloomFilter(cam.getWidth(), cam.getHeight(), BloomFilter.GLOW_OBJECTS);        
+    fpp.addFilter(bloom);
+    viewPort.addProcessor(fpp);
+</pre>
+
+<p>
+Here is the result on Oto&#039;s plasma ball (before and after) : <br/>
+
+<img src="nbdocs:/com/jme3/gde/core/docs/jme3/advanced/otonobloom.png">
+<img src="nbdocs:/com/jme3/gde/core/docs/jme3/advanced/otoglow.png">
+
+</p>
+
+</div>
+<!-- SECTION "Bloom with a glow color" [3307-4344] -->
+<h1><a name="hints_and_tricks" id="hints_and_tricks">Hints and tricks</a></h1>
+<div class="level1">
+
+</div>
+
+<h5><a name="increasing_the_blur_range_and_reducing_fps_cost" id="increasing_the_blur_range_and_reducing_fps_cost">Increasing the blur range and reducing fps cost</a></h5>
+<div class="level5">
+
+<p>
+
+You can reduce the size of the bloom sampling just by passing the right arguments to the bloom filter constructor like this : <br/>
+
+
+</p>
+<pre class="code java"> BloomFilter bloom<span class="sy0">=</span><span class="kw1">new</span> BloomFilter<span class="br0">&#40;</span>cam.<span class="me1">getWidth</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="sy0">/</span><span class="nu0">2</span>,cam.<span class="me1">getHeight</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="sy0">/</span><span class="nu0">2</span><span class="br0">&#41;</span>;</pre>
+<p>
+
+In this example the sampling size is divided by 4, resulting in less work to blur the scene.
+The resulting texture is then up sampled to the screen size using hardware bilinear filtering. this results in a wider blur range.
+</p>
+
+</div>
+
+<h5><a name="using_classic_bloom_combined_with_a_glow_map" id="using_classic_bloom_combined_with_a_glow_map">Using classic bloom combined with a glow map</a></h5>
+<div class="level5">
+
+<p>
+let&#039;s say you want a global bloom on your scene, but you have also a glowing object on it.
+You can use only one bloom filter for both effects like that
+</p>
+<pre class="code java">BloomFilter bloom<span class="sy0">=</span><span class="kw1">new</span> BloomFilter<span class="br0">&#40;</span>cam.<span class="me1">getWidth</span><span class="br0">&#40;</span><span class="br0">&#41;</span>,cam.<span class="me1">getHeight</span><span class="br0">&#40;</span><span class="br0">&#41;</span>,BloomFilter.<span class="me1">GLOW_BOTH</span><span class="br0">&#41;</span>;</pre>
+<p>
+However, note that both effects will share the same values of attribute, and sometimes, it won&#039;t be what you need.
+</p>
+
+</div>
+
+<h5><a name="making_your_home_brewed_material_definition_support_glow" id="making_your_home_brewed_material_definition_support_glow">Making your home brewed material definition support Glow</a></h5>
+<div class="level5">
+
+<p>
+
+Let&#039;s say you have made a custom material on your own, and that you want it to support glow maps and glow color.
+In your material definition you need to add those lines in the MaterialParameters section :
+</p>
+<pre class="code">
+ MaterialParameters {
+        
+        ....
+
+        // Texture of the glowing parts of the material
+        Texture2D m_GlowMap
+        // The glow color of the object
+        Color m_GlowColor
+    }
+</pre>
+
+<p>
+Then add the following technique : 
+
+</p>
+<pre class="code">
+    Technique Glow {
+
+        LightMode SinglePass
+
+        VertexShader GLSL100:   Common/MatDefs/Misc/SimpleTextured.vert
+        FragmentShader GLSL100: Common/MatDefs/Light/Glow.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+
+        Defines {
+            HAS_GLOWMAP : m_GlowMap
+            HAS_GLOWCOLOR : m_GlowColor
+        }
+    }
+</pre>
+
+<p>
+Then you can use this material with the BloomFilter
+
+</p>
+
+</div>
+<!-- SECTION "Hints and tricks" [4345-] -->
+<p><em><a href="http://jmonkeyengine.org/wiki/doku.php/jme3:advanced:bloom_and_glow?do=export_xhtmlbody">view online version</a></em></p>

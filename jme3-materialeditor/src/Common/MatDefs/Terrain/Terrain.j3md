@@ -1,0 +1,25 @@
+MaterialDef Terrain {
+
+	MaterialParameters {
+		Texture2D m_Alpha
+		Texture2D m_Tex1
+		Texture2D m_Tex2
+		Texture2D m_Tex3
+		Float m_Tex1Scale
+		Float m_Tex2Scale
+		Float m_Tex3Scale
+	}
+
+	Technique {
+		VertexShader GLSL100:   Common/MatDefs/Terrain/Terrain.vert
+		FragmentShader GLSL100: Common/MatDefs/Terrain/Terrain.frag
+		
+		WorldParameters {
+			WorldViewProjectionMatrix
+		}
+	}
+	
+	Technique FixedFunc {
+    }
+
+}

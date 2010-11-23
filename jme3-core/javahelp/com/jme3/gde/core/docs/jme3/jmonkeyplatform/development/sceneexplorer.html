@@ -1,0 +1,106 @@
+
+
+
+<h1><a name="the_sceneexplorer" id="the_sceneexplorer">The SceneExplorer</a></h1>
+<div class="level1">
+
+</div>
+<!-- SECTION "The SceneExplorer" [1-32] -->
+<h2><a name="adding_node_types_to_sceneexplorer" id="adding_node_types_to_sceneexplorer">Adding Node types to SceneExplorer</a></h2>
+<div class="level2">
+
+<p>
+
+If your plugin brings in its own SceneGraph objects you can still have them work like any other SceneExplorer item, including its special properties.
+</p>
+
+<p>
+<br/>
+
+You will have to create your own class that extends org.openide.nodes.Node and implement the interface com.jme3.gde.core.sceneexplorer.nodes.SceneExplorerNode. Then you register that class by adding 
+</p>
+<pre class="code">@org.openide.util.lookup.ServiceProvider(service=com.jme3.gde.core.sceneexplorer.nodes.SceneExplorerNode.class)</pre>
+
+<p>
+ above the “public class MyClass” line in your class. Thats all, your Spatial type will automatically be used and displayed in the SceneExplorer.
+</p>
+
+<p>
+<br/>
+
+Theres also AbstractSceneExplorerNode which brings some other useful features you might want to include like automatic creation of properly threaded properties etc. JmeSpatial for example bases on it. A simple SceneExplorerNode example for an object extending Spatial would be JmeGeometry:
+</p>
+<pre class="code java"><span class="kw1">package</span> <span class="co2">com.jme3.gde.core.sceneexplorer.nodes</span>;
+&nbsp;
+<span class="kw1">import</span> <span class="co2">com.jme3.material.Material</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.Geometry</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.Mesh</span>;
+<span class="kw1">import</span> <span class="co2">java.awt.Image</span>;
+<span class="kw1">import</span> <span class="co2">org.openide.cookies.SaveCookie</span>;
+<span class="kw1">import</span> <span class="co2">org.openide.nodes.Sheet</span>;
+<span class="kw1">import</span> <span class="co2">org.openide.util.ImageUtilities</span>;
+&nbsp;
+@org.<span class="me1">openide</span>.<span class="me1">util</span>.<span class="me1">lookup</span>.<span class="me1">ServiceProvider</span><span class="br0">&#40;</span>service<span class="sy0">=</span>SceneExplorerNode.<span class="kw1">class</span><span class="br0">&#41;</span>
+<span class="kw1">public</span> <span class="kw1">class</span> JmeGeometry <span class="kw1">extends</span> JmeSpatial <span class="br0">&#123;</span>
+&nbsp;
+    <span class="kw1">private</span> <span class="kw1">static</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aimage+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> smallImage <span class="sy0">=</span>
+            ImageUtilities.<span class="me1">loadImage</span><span class="br0">&#40;</span><span class="st0">&quot;com/jme3/gde/core/sceneexplorer/nodes/icons/geometry.gif&quot;</span><span class="br0">&#41;</span>;
+    <span class="kw1">private</span> Geometry geom;
+&nbsp;
+    <span class="kw1">public</span> JmeGeometry<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    <span class="br0">&#125;</span>
+&nbsp;
+    <span class="kw1">public</span> JmeGeometry<span class="br0">&#40;</span>Geometry spatial, SceneExplorerChildren children<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="kw1">super</span><span class="br0">&#40;</span>spatial, children<span class="br0">&#41;</span>;
+        getLookupContents<span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">add</span><span class="br0">&#40;</span>spatial<span class="br0">&#41;</span>;
+        <span class="kw1">this</span>.<span class="me1">geom</span> <span class="sy0">=</span> spatial;
+        setName<span class="br0">&#40;</span>spatial.<span class="me1">getName</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    <span class="br0">&#125;</span>
+&nbsp;
+    @Override
+    <span class="kw1">public</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aimage+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> getIcon<span class="br0">&#40;</span><span class="kw4">int</span> type<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="kw1">return</span> smallImage;
+    <span class="br0">&#125;</span>
+&nbsp;
+    @Override
+    <span class="kw1">public</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aimage+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> getOpenedIcon<span class="br0">&#40;</span><span class="kw4">int</span> type<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="kw1">return</span> smallImage;
+    <span class="br0">&#125;</span>
+&nbsp;
+    @Override
+    <span class="kw1">protected</span> Sheet createSheet<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        Sheet sheet <span class="sy0">=</span> <span class="kw1">super</span>.<span class="me1">createSheet</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+        Sheet.<object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aset+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> set <span class="sy0">=</span> Sheet.<span class="me1">createPropertiesSet</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+        set.<span class="me1">setDisplayName</span><span class="br0">&#40;</span><span class="st0">&quot;Geometry&quot;</span><span class="br0">&#41;</span>;
+        set.<span class="me1">setName</span><span class="br0">&#40;</span>Geometry.<span class="kw1">class</span>.<span class="me1">getName</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        Geometry obj <span class="sy0">=</span> geom;<span class="co1">//getLookup().lookup(Geometry.class);</span>
+        <span class="kw1">if</span> <span class="br0">&#40;</span>obj <span class="sy0">==</span> <span class="kw2">null</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+            <span class="kw1">return</span> sheet;
+        <span class="br0">&#125;</span>
+&nbsp;
+        set.<span class="me1">put</span><span class="br0">&#40;</span>makeProperty<span class="br0">&#40;</span>obj, <span class="kw4">int</span>.<span class="kw1">class</span>, <span class="st0">&quot;getLodLevel&quot;</span>, <span class="st0">&quot;setLodLevel&quot;</span>, <span class="st0">&quot;Lod Level&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        set.<span class="me1">put</span><span class="br0">&#40;</span>makeProperty<span class="br0">&#40;</span>obj, Material.<span class="kw1">class</span>, <span class="st0">&quot;getMaterial&quot;</span>, <span class="st0">&quot;setMaterial&quot;</span>, <span class="st0">&quot;Material&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        set.<span class="me1">put</span><span class="br0">&#40;</span>makeProperty<span class="br0">&#40;</span>obj, Mesh.<span class="kw1">class</span>, <span class="st0">&quot;getMesh&quot;</span>, <span class="st0">&quot;Mesh&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+&nbsp;
+        sheet.<span class="me1">put</span><span class="br0">&#40;</span>set<span class="br0">&#41;</span>;
+        <span class="kw1">return</span> sheet;
+&nbsp;
+    <span class="br0">&#125;</span>
+&nbsp;
+    <span class="kw1">public</span> <span class="kw1">Class</span> getExplorerObjectClass<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="kw1">return</span> Geometry.<span class="kw1">class</span>;
+    <span class="br0">&#125;</span>
+&nbsp;
+    <span class="kw1">public</span> <span class="kw1">Class</span> getExplorerNodeClass<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="kw1">return</span> JmeGeometry.<span class="kw1">class</span>;
+    <span class="br0">&#125;</span>
+&nbsp;
+    <span class="kw1">public</span> org.<span class="me1">openide</span>.<span class="me1">nodes</span>.<span class="me1">Node</span><span class="br0">&#91;</span><span class="br0">&#93;</span> createNodes<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aobject+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> key2, <span class="kw4">boolean</span> readOnly<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        SceneExplorerChildren children<span class="sy0">=</span><span class="kw1">new</span> SceneExplorerChildren<span class="br0">&#40;</span><span class="br0">&#40;</span>com.<span class="me1">jme3</span>.<span class="me1">scene</span>.<span class="me1">Spatial</span><span class="br0">&#41;</span>key<span class="br0">&#41;</span>;
+        children.<span class="me1">setReadOnly</span><span class="br0">&#40;</span>readOnly<span class="br0">&#41;</span>;
+        <span class="kw1">return</span> <span class="kw1">new</span> org.<span class="me1">openide</span>.<span class="me1">nodes</span>.<span class="me1">Node</span><span class="br0">&#91;</span><span class="br0">&#93;</span><span class="br0">&#123;</span><span class="kw1">new</span> JmeGeometry<span class="br0">&#40;</span><span class="br0">&#40;</span>Geometry<span class="br0">&#41;</span> key, children<span class="br0">&#41;</span>.<span class="me1">setReadOnly</span><span class="br0">&#40;</span>readOnly<span class="br0">&#41;</span><span class="br0">&#125;</span>;
+    <span class="br0">&#125;</span>
+<span class="br0">&#125;</span></pre>
+</div>
+<!-- SECTION "Adding Node types to SceneExplorer" [33-] -->
+<p><em><a href="http://jmonkeyengine.org/wiki/doku.php/jme3:jmonkeyplatform:development:sceneexplorer?do=export_xhtmlbody">view online version</a></em></p>

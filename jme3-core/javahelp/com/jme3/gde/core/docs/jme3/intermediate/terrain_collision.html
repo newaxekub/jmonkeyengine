@@ -1,0 +1,305 @@
+
+
+
+<h3><a name="terrain_collision" id="terrain_collision">Terrain Collision</a></h3>
+<div class="level3">
+
+<p>
+
+<strong>*Work in progress</strong>*
+</p>
+
+<p>
+This page will extend (not the Java keyword!) the Hello_Terrain tutorial in a few small ways in order to show you a quick way to create a Collision Shape out of the map we have generated.  A Collision Shape allows a player (who is also a Collision Shape in this tutorial) to collide with the map, i.e. clip, walk on, stand on, etc. in order to create the type of world and interactivity most gamers are familiar with in FPS or MMOs.
+
+</p>
+<div class="tags"><span>
+	<a href="/wiki/doku.php/tag:about?do=showtag&amp;tag=tag%3Aabout" class="wikilink1" title="tag:about" rel="tag">about</a>
+</span></div>
+
+</div>
+<!-- SECTION "Terrain Collision" [1-498] -->
+<h3><a name="sample_code" id="sample_code">Sample Code</a></h3>
+<div class="level3">
+<pre class="code java"><span class="kw1">package</span> <span class="co2">mygame</span>;
+&nbsp;
+<span class="kw1">import</span> <span class="co2">jme3tools.converters.ImageToAwt</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.app.SimpleBulletApplication</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.bullet.collision.shapes.CapsuleCollisionShape</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.bullet.collision.shapes.HeightfieldCollisionShape</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.bullet.nodes.PhysicsCharacterNode</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.bullet.nodes.PhysicsNode</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.KeyInput</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.controls.ActionListener</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.controls.KeyTrigger</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.material.Material</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.math.Vector3f</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.renderer.Camera</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.terrain.geomipmap.TerrainLodControl</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.terrain.heightmap.AbstractHeightMap</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.terrain.heightmap.ImageBasedHeightMap</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.terrain.geomipmap.TerrainQuad</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.texture.Texture</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.texture.Texture.WrapMode</span>;
+<span class="kw1">import</span> <span class="co2">java.util.ArrayList</span>;
+<span class="kw1">import</span> <span class="co2">java.util.List</span>;
+&nbsp;
+<span class="kw1">public</span> <span class="kw1">class</span> Main <span class="kw1">extends</span> SimpleBulletApplication <span class="br0">&#123;</span>
+&nbsp;
+    <span class="kw1">private</span> TerrainQuad terrain;
+    PhysicsCharacterNode player;
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aboolean+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> left <span class="sy0">=</span> <span class="kw2">false</span>, right <span class="sy0">=</span> <span class="kw2">false</span>, up <span class="sy0">=</span> <span class="kw2">false</span>, down <span class="sy0">=</span> <span class="kw2">false</span>;
+    <span class="kw1">private</span> Vector3f walkDirection <span class="sy0">=</span> <span class="kw1">new</span> Vector3f<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+&nbsp;
+    <span class="kw1">public</span> <span class="kw1">static</span> <span class="kw4">void</span> main<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#91;</span><span class="br0">&#93;</span> args<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        Main app <span class="sy0">=</span> <span class="kw1">new</span> Main<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+        app.<span class="me1">start</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    <span class="br0">&#125;</span>
+&nbsp;
+    @Override
+    <span class="kw1">public</span> <span class="kw4">void</span> simpleInitApp<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        setupKeys<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+        setupPlayer<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+&nbsp;
+        Material terrain_mat;
+        PhysicsNode landscape;
+&nbsp;
+        <span class="co3">/** 1. Create terrain material and load four textures into it. */</span>
+        terrain_mat <span class="sy0">=</span> <span class="kw1">new</span> Material<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Common/MatDefs/Terrain/Terrain.j3md&quot;</span><span class="br0">&#41;</span>;
+&nbsp;
+        <span class="co3">/** 1.1) Add ALPHA map (for red-blue-green coded splat textures) */</span>
+        terrain_mat.<span class="me1">setTexture</span><span class="br0">&#40;</span><span class="st0">&quot;m_Alpha&quot;</span>, assetManager.<span class="me1">loadTexture</span><span class="br0">&#40;</span><span class="st0">&quot;Textures/Terrain/splat/alphamap.png&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+&nbsp;
+        <span class="co3">/** 1.2) Add GRASS texture into the red layer (m_Tex1). */</span>
+        Texture grass <span class="sy0">=</span> assetManager.<span class="me1">loadTexture</span><span class="br0">&#40;</span><span class="st0">&quot;Textures/Terrain/splat/grass.jpg&quot;</span><span class="br0">&#41;</span>;
+        grass.<span class="me1">setWrap</span><span class="br0">&#40;</span>WrapMode.<span class="me1">Repeat</span><span class="br0">&#41;</span>;
+        terrain_mat.<span class="me1">setTexture</span><span class="br0">&#40;</span><span class="st0">&quot;m_Tex1&quot;</span>, grass<span class="br0">&#41;</span>;
+        terrain_mat.<span class="me1">setFloat</span><span class="br0">&#40;</span><span class="st0">&quot;m_Tex1Scale&quot;</span>, 64f<span class="br0">&#41;</span>;
+&nbsp;
+        <span class="co3">/** 1.3) Add DIRT texture into the green layer (m_Tex2) */</span>
+        Texture dirt <span class="sy0">=</span> assetManager.<span class="me1">loadTexture</span><span class="br0">&#40;</span><span class="st0">&quot;Textures/Terrain/splat/dirt.jpg&quot;</span><span class="br0">&#41;</span>;
+        dirt.<span class="me1">setWrap</span><span class="br0">&#40;</span>WrapMode.<span class="me1">Repeat</span><span class="br0">&#41;</span>;
+        terrain_mat.<span class="me1">setTexture</span><span class="br0">&#40;</span><span class="st0">&quot;m_Tex2&quot;</span>, dirt<span class="br0">&#41;</span>;
+        terrain_mat.<span class="me1">setFloat</span><span class="br0">&#40;</span><span class="st0">&quot;m_Tex2Scale&quot;</span>, 32f<span class="br0">&#41;</span>;
+&nbsp;
+        <span class="co3">/** 1.4) Add ROAD texture into the blue layer (m_Tex3) */</span>
+        Texture rock <span class="sy0">=</span> assetManager.<span class="me1">loadTexture</span><span class="br0">&#40;</span><span class="st0">&quot;Textures/Terrain/splat/road.jpg&quot;</span><span class="br0">&#41;</span>;
+        rock.<span class="me1">setWrap</span><span class="br0">&#40;</span>WrapMode.<span class="me1">Repeat</span><span class="br0">&#41;</span>;
+        terrain_mat.<span class="me1">setTexture</span><span class="br0">&#40;</span><span class="st0">&quot;m_Tex3&quot;</span>, rock<span class="br0">&#41;</span>;
+        terrain_mat.<span class="me1">setFloat</span><span class="br0">&#40;</span><span class="st0">&quot;m_Tex3Scale&quot;</span>, 128f<span class="br0">&#41;</span>;
+&nbsp;
+        <span class="co3">/** 2. Create the height map */</span>
+        AbstractHeightMap heightmap <span class="sy0">=</span> <span class="kw2">null</span>;
+        Texture heightMapImage <span class="sy0">=</span> assetManager.<span class="me1">loadTexture</span><span class="br0">&#40;</span><span class="st0">&quot;Textures/Terrain/splat/mountains512.png&quot;</span><span class="br0">&#41;</span>;
+        heightmap <span class="sy0">=</span> <span class="kw1">new</span> ImageBasedHeightMap<span class="br0">&#40;</span>
+                ImageToAwt.<span class="me1">convert</span><span class="br0">&#40;</span>heightMapImage.<span class="me1">getImage</span><span class="br0">&#40;</span><span class="br0">&#41;</span>, <span class="kw2">false</span>, <span class="kw2">true</span>, 0<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        heightmap.<span class="me1">load</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+&nbsp;
+        <span class="co3">/** 3. We have prepared material and heightmap. Now we create the actual terrain:
+         * 3.1) We create a TerrainQuad and name it &quot;my terrain&quot;.
+         * 3.2) A good value for terrain tiles is 64x64 -- so we supply 64+1=65.
+         * 3.3) We prepared a heightmap of size 512x512 -- so we supply 512+1=513.
+         * 3.4) At last, we supply the prepared heightmap itself.*/</span>
+        terrain <span class="sy0">=</span> <span class="kw1">new</span> TerrainQuad<span class="br0">&#40;</span><span class="st0">&quot;my terrain&quot;</span>, <span class="nu0">65</span>, <span class="nu0">513</span>, heightmap.<span class="me1">getHeightMap</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+&nbsp;
+        HeightfieldCollisionShape sceneShape <span class="sy0">=</span> <span class="kw1">new</span> HeightfieldCollisionShape<span class="br0">&#40;</span>heightmap.<span class="me1">getHeightMap</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        landscape <span class="sy0">=</span> <span class="kw1">new</span> PhysicsNode<span class="br0">&#40;</span>terrain, sceneShape, 0<span class="br0">&#41;</span>;
+&nbsp;
+&nbsp;
+        <span class="co3">/** 4. The LOD (level of detail) depends on were the camera is: */</span>
+        List<span class="sy0">&lt;</span>Camera<span class="sy0">&gt;</span> cameras <span class="sy0">=</span> <span class="kw1">new</span> ArrayList<span class="sy0">&lt;</span>Camera<span class="sy0">&gt;</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+        cameras.<span class="me1">add</span><span class="br0">&#40;</span>getCamera<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        TerrainLodControl control <span class="sy0">=</span> <span class="kw1">new</span> TerrainLodControl<span class="br0">&#40;</span>terrain, cameras<span class="br0">&#41;</span>;
+        terrain.<span class="me1">addControl</span><span class="br0">&#40;</span>control<span class="br0">&#41;</span>;
+&nbsp;
+        <span class="co3">/** 5. We give the terrain its material, position &amp; scale it, and attach it. */</span>
+        terrain.<span class="me1">setMaterial</span><span class="br0">&#40;</span>terrain_mat<span class="br0">&#41;</span>;
+        landscape.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span>0, <span class="sy0">-</span><span class="nu0">100</span>, 0<span class="br0">&#41;</span>;
+        rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>landscape<span class="br0">&#41;</span>;
+        getPhysicsSpace<span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">add</span><span class="br0">&#40;</span>landscape<span class="br0">&#41;</span>;
+    <span class="br0">&#125;</span>
+&nbsp;
+    @Override
+    <span class="kw1">public</span> <span class="kw4">void</span> simpleUpdate<span class="br0">&#40;</span><span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        Vector3f camDir <span class="sy0">=</span> cam.<span class="me1">getDirection</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">clone</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">multLocal</span><span class="br0">&#40;</span>0.2f<span class="br0">&#41;</span>;
+        Vector3f camLeft <span class="sy0">=</span> cam.<span class="me1">getLeft</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">clone</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">multLocal</span><span class="br0">&#40;</span>0.1f<span class="br0">&#41;</span>;
+        walkDirection.<span class="me1">set</span><span class="br0">&#40;</span>0, 0, 0<span class="br0">&#41;</span>;
+        <span class="kw1">if</span> <span class="br0">&#40;</span>left<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+            walkDirection.<span class="me1">addLocal</span><span class="br0">&#40;</span>camLeft<span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span>
+        <span class="kw1">if</span> <span class="br0">&#40;</span>right<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+            walkDirection.<span class="me1">addLocal</span><span class="br0">&#40;</span>camLeft.<span class="me1">negate</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span>
+        <span class="kw1">if</span> <span class="br0">&#40;</span>up<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+            walkDirection.<span class="me1">addLocal</span><span class="br0">&#40;</span>camDir<span class="br0">&#41;</span>;
+            walkDirection.<span class="me1">y</span> <span class="sy0">=</span> 0;
+        <span class="br0">&#125;</span>
+        <span class="kw1">if</span> <span class="br0">&#40;</span>down<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+            walkDirection.<span class="me1">addLocal</span><span class="br0">&#40;</span>camDir.<span class="me1">negate</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+            walkDirection.<span class="me1">y</span> <span class="sy0">=</span> 0;
+        <span class="br0">&#125;</span>
+        player.<span class="me1">setWalkDirection</span><span class="br0">&#40;</span>walkDirection<span class="br0">&#41;</span>;
+        cam.<span class="me1">setLocation</span><span class="br0">&#40;</span>player.<span class="me1">getLocalTranslation</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    <span class="br0">&#125;</span>
+&nbsp;
+    <span class="kw1">public</span> <span class="kw4">void</span> setupPlayer<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        player <span class="sy0">=</span> <span class="kw1">new</span> PhysicsCharacterNode<span class="br0">&#40;</span><span class="kw1">new</span> CapsuleCollisionShape<span class="br0">&#40;</span>1.2f, 3f, <span class="nu0">1</span><span class="br0">&#41;</span>, .05f<span class="br0">&#41;</span>;
+        player.<span class="me1">setJumpSpeed</span><span class="br0">&#40;</span><span class="nu0">20</span><span class="br0">&#41;</span>;    <span class="co1">//10 default</span>
+        player.<span class="me1">setFallSpeed</span><span class="br0">&#40;</span><span class="nu0">30</span><span class="br0">&#41;</span>;    <span class="co1">//30 default</span>
+        player.<span class="me1">setGravity</span><span class="br0">&#40;</span><span class="nu0">30</span><span class="br0">&#41;</span>;      <span class="co1">//30 default</span>
+        player.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span><span class="kw1">new</span> Vector3f<span class="br0">&#40;</span>0f, 250f, 150f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>player<span class="br0">&#41;</span>;
+        getPhysicsSpace<span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">add</span><span class="br0">&#40;</span>player<span class="br0">&#41;</span>;
+    <span class="br0">&#125;</span>
+&nbsp;
+    <span class="kw1">private</span> <span class="kw4">void</span> setupKeys<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Lefts&quot;</span>, <span class="kw1">new</span> KeyTrigger<span class="br0">&#40;</span>KeyInput.<span class="me1">KEY_A</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Rights&quot;</span>, <span class="kw1">new</span> KeyTrigger<span class="br0">&#40;</span>KeyInput.<span class="me1">KEY_D</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Ups&quot;</span>, <span class="kw1">new</span> KeyTrigger<span class="br0">&#40;</span>KeyInput.<span class="me1">KEY_W</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Downs&quot;</span>, <span class="kw1">new</span> KeyTrigger<span class="br0">&#40;</span>KeyInput.<span class="me1">KEY_S</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Jumps&quot;</span>, <span class="kw1">new</span> KeyTrigger<span class="br0">&#40;</span>KeyInput.<span class="me1">KEY_SPACE</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        inputManager.<span class="me1">addListener</span><span class="br0">&#40;</span>actionListener, <span class="kw1">new</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#91;</span><span class="br0">&#93;</span><span class="br0">&#123;</span><span class="st0">&quot;Lefts&quot;</span>, <span class="st0">&quot;Rights&quot;</span>, <span class="st0">&quot;Ups&quot;</span>,
+                    <span class="st0">&quot;Downs&quot;</span>, <span class="st0">&quot;Jumps&quot;</span><span class="br0">&#125;</span><span class="br0">&#41;</span>;
+    <span class="br0">&#125;</span>
+    <span class="kw1">private</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aactionlistener+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+&nbsp;
+        <span class="kw1">public</span> <span class="kw4">void</span> onAction<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> binding, <span class="kw4">boolean</span> value, <span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+            <span class="kw1">if</span> <span class="br0">&#40;</span>binding.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Lefts&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                <span class="kw1">if</span> <span class="br0">&#40;</span>value <span class="sy0">&amp;&amp;</span> player.<span class="me1">onGround</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                    left <span class="sy0">=</span> <span class="kw2">true</span>;
+                <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="br0">&#123;</span>
+                    left <span class="sy0">=</span> <span class="kw2">false</span>;
+                <span class="br0">&#125;</span>
+            <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">&#40;</span>binding.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Rights&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                <span class="kw1">if</span> <span class="br0">&#40;</span>value <span class="sy0">&amp;&amp;</span> player.<span class="me1">onGround</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                    right <span class="sy0">=</span> <span class="kw2">true</span>;
+                <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="br0">&#123;</span>
+                    right <span class="sy0">=</span> <span class="kw2">false</span>;
+                <span class="br0">&#125;</span>
+            <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">&#40;</span>binding.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Ups&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                <span class="kw1">if</span> <span class="br0">&#40;</span>value <span class="sy0">&amp;&amp;</span> player.<span class="me1">onGround</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                    up <span class="sy0">=</span> <span class="kw2">true</span>;
+                <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="br0">&#123;</span>
+                    up <span class="sy0">=</span> <span class="kw2">false</span>;
+                <span class="br0">&#125;</span>
+            <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">&#40;</span>binding.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Downs&quot;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                <span class="kw1">if</span> <span class="br0">&#40;</span>value <span class="sy0">&amp;&amp;</span> player.<span class="me1">onGround</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                    down <span class="sy0">=</span> <span class="kw2">true</span>;
+                <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="br0">&#123;</span>
+                    down <span class="sy0">=</span> <span class="kw2">false</span>;
+                <span class="br0">&#125;</span>
+            <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="kw1">if</span> <span class="br0">&#40;</span>binding.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Jumps&quot;</span><span class="br0">&#41;</span> <span class="sy0">&amp;&amp;</span> player.<span class="me1">onGround</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+                player.<span class="me1">jump</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+            <span class="br0">&#125;</span>
+        <span class="br0">&#125;</span>
+    <span class="br0">&#125;</span>;
+<span class="br0">&#125;</span></pre>
+</div>
+<!-- SECTION "Sample Code" [499-7447] -->
+<h3><a name="what_s_going_on" id="what_s_going_on">What&#039;s Going On?</a></h3>
+<div class="level3">
+
+<p>
+To try this code, go into a New Project → JME3 → BasicGame using the default settings (if you haven&#039;t already made a default project before) the name should be BasicGame and the package would be called myGame, then just paste this over the entire preconstructed main.java text.  Then Add the jme3-test-data library which is available through your library list.  This should compile and run from there.
+</p>
+
+</div>
+<!-- SECTION "What's Going On?" [7448-7877] -->
+<h3><a name="explaining_the_code" id="explaining_the_code">Explaining the Code</a></h3>
+<div class="level3">
+
+<p>
+I will only briefly describe the sections that are covered in the original Hello_Terrain.  Most detail will be given to the additives.
+</p>
+
+<p>
+Imports are to bring in the appropriate class definitions.
+</p>
+<pre class="code java"><span class="kw1">private</span> TerrainQuad terrain;</pre>
+<p>
+
+Holds our map.
+
+</p>
+<pre class="code java">PhysicsCharacterNode player;</pre>
+<p>
+
+Creates our character in the style of FPS that many gamers are familiar with.
+
+</p>
+<pre class="code java"><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aboolean+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> left <span class="sy0">=</span> <span class="kw2">false</span>, right <span class="sy0">=</span> <span class="kw2">false</span>, up <span class="sy0">=</span> <span class="kw2">false</span>, down <span class="sy0">=</span> <span class="kw2">false</span>;</pre>
+<p>
+
+Variables for creating fluid movement.
+
+</p>
+<pre class="code java"><span class="kw1">private</span> Vector3f walkDirection <span class="sy0">=</span> <span class="kw1">new</span> Vector3f<span class="br0">&#40;</span><span class="br0">&#41;</span>;</pre>
+<p>
+
+The direction we determine from combinations of the booleans.
+</p>
+
+<p>
+
+The main function is standard.
+In simpleInit we run setupKeys() first and create the common WASD and SPACEBAR to jump.
+
+</p>
+<pre class="code">inputManager.addListener(actionListener, new String[]{&quot;Lefts&quot;, &quot;Rights&quot;, &quot;Ups&quot;, &quot;Downs&quot;, &quot;Jumps&quot;})</pre>
+
+<p>
+
+This line indicates our actionListener function and what to do when each command (the string names) is sent.
+</p>
+
+<p>
+The onAction function basically sets the booleans true based on which directions we&#039;re pressing or makes us jump.
+The simpleUpdate function constants changed our direction based on the boolean (ie the directions) we&#039;re pressing.
+</p>
+
+<p>
+The real collisioning happens in these parts;
+
+</p>
+<pre class="code">player = new PhysicsCharacterNode(new CapsuleCollisionShape(1.2f, 3f, 1), .05f);
+rootNode.attachChild(player);
+getPhysicsSpace().add(player);
+
+HeightfieldCollisionShape sceneShape = new HeightfieldCollisionShape(heightmap.getHeightMap());
+landscape = new PhysicsNode(terrain, sceneShape, 0);
+
+landscape.setLocalTranslation(0, -100, 0);
+rootNode.attachChild(landscape);
+getPhysicsSpace().add(landscape);</pre>
+
+<p>
+The first chunk makes our player into a collision shape that&#039;s a capsule, kinda like a human right? And then attaches it to the rootNode and gets it&#039;s physics (important!).
+The second chunk feeds the heightmap we made into a heightfield collision shape generator to create the collidable shape of the land mass.
+The third chunk sets our land and it&#039;s collision down some, attaches em to root, and gets the physics.
+</p>
+
+</div>
+<!-- SECTION "Explaining the Code" [7878-9989] -->
+<h3><a name="conclusion" id="conclusion">Conclusion</a></h3>
+<div class="level3">
+
+<p>
+You should spawn high up in the area and fall down to the map, giving you a few seconds to survey the domain.  Then walk around and see how you like the lay of the land.
+
+</p>
+<hr />
+
+<p>
+See also:
+
+</p>
+<ul>
+<li class="level1"><div class="li"> <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_terrain.html" class="wikilink1" title="jme3:beginner:hello_terrain">Hello Terrain</a>,</div>
+</li>
+<li class="level1"><div class="li"> <a href="/com/jme3/gde/core/docs/jme3/advanced/terrain.html" class="wikilink1" title="jme3:advanced:terrain">Terrain</a></div>
+</li>
+</ul>
+
+</div>
+<!-- SECTION "Conclusion" [9990-] -->
+<p><em><a href="http://jmonkeyengine.org/wiki/doku.php/jme3:intermediate:terrain_collision?do=export_xhtmlbody">view online version</a></em></p>

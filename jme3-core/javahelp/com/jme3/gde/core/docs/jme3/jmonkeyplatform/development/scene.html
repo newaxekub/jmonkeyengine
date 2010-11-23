@@ -1,0 +1,159 @@
+
+
+
+<h1><a name="the_scene" id="the_scene">The Scene</a></h1>
+<div class="level1">
+
+<p>
+
+To reduce system overhead the jMonkeyPlatform Core supplies one scene/jme3 application that is shared between plugins. Furthermore there&#039;s the “SceneExplorer” that shows a visual representation of the scenegraph and its objects properties across plugins.
+</p>
+
+<p>
+<br/>
+
+Note: All info due to change until jMP is stable!
+</p>
+
+</div>
+<!-- SECTION "The Scene" [1-335] -->
+<h2><a name="how_to_access_the_scene" id="how_to_access_the_scene">How to access the Scene</a></h2>
+<div class="level2">
+
+<p>
+
+There are several ways for your plugin to interact with the Scene:
+</p>
+<ul>
+<li class="level1"><div class="li"> It listens for selected spatials / objects and offers options for those</div>
+</li>
+<li class="level1"><div class="li"> It requests the whole scene for itself and loads/arranges the content in it (e.g. a terrain editor or model animation plugin).</div>
+</li>
+</ul>
+
+</div>
+
+<h5><a name="notes" id="notes">Notes</a></h5>
+<div class="level5">
+<ul>
+<li class="level1"><div class="li"> <em>Although the scene can be accessed at any time via SceneApplication.getApplication() it is not recommended to modify the scene like that. Other plugins might be accessing the scene and updates will not be properly recognized.</em></div>
+</li>
+<li class="level1"><div class="li"> <em>Remember the scene runs on the render thread and most everything you do in the plugin (button events etc.) runs on the AWT thread, always encapsulate calls to either side correctly via Callables/Runnables or register as an AppState to the SceneApplication to have an update() call by the render thread.</em></div>
+</li>
+<li class="level1"><div class="li"> <em>The AssetManager of jme3 is threadsafe and can be used from any thread to load assets</em></div>
+</li>
+</ul>
+
+</div>
+<!-- SECTION "How to access the Scene" [336-1300] -->
+<h2><a name="listening_for_node_selection" id="listening_for_node_selection">Listening for Node selection</a></h2>
+<div class="level2">
+
+<p>
+
+In jMP, all objects are wrapped into NetBeans “Nodes” (different thing than jme Nodes!). Such nodes can have properties and icons and can be displayed and selected in the jMP UI. The SceneExplorer shows a tree of Nodes that wrap the Spatials of the current scene and allows manipulating their properties on selection. A jME “Spatial” is wrapped by a “JmeSpatial” node, for example. One advantage of these Nodes is that one can manipulate properties of Spatials directly from the AWT thread.
+</p>
+
+<p>
+<br/>
+
+To listen to the current selection, implement org.openide.util.LookupListener and register like this:
+</p>
+<pre class="code java"><span class="kw1">private</span> <span class="kw1">final</span> Result<span class="sy0">&lt;</span>JmeSpatial<span class="sy0">&gt;</span> result;
+&nbsp;
+<span class="co1">//method to register the listener;</span>
+<span class="kw1">private</span> <span class="kw4">void</span> registerListener<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#123;</span>
+    result <span class="sy0">=</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Autilities+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>.<span class="me1">actionsGlobalContext</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">lookupResult</span><span class="br0">&#40;</span>JmeSpatial.<span class="kw1">class</span><span class="br0">&#41;</span>;
+    result.<span class="me1">addLookupListener</span><span class="br0">&#40;</span><span class="kw1">this</span><span class="br0">&#41;</span>;
+<span class="br0">&#125;</span>
+&nbsp;
+<span class="co1">//implements org.openide.util.LookupListener (called from AWT thread)</span>
+<span class="kw1">public</span> <span class="kw4">void</span> resultChanged<span class="br0">&#40;</span>LookupEvent ev<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    Collection<span class="sy0">&lt;</span>JmeSpatial<span class="sy0">&gt;</span> items <span class="sy0">=</span> <span class="br0">&#40;</span>Collection<span class="sy0">&lt;</span>JmeSpatial<span class="sy0">&gt;</span><span class="br0">&#41;</span> result.<span class="me1">allInstances</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    <span class="kw1">for</span> <span class="br0">&#40;</span>JmeSpatial jmeSpatial <span class="sy0">:</span> items<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="co1">//Using the JmeSpatials properties you can modify the spatial directly from the AWT thread:</span>
+        spatial.<span class="me1">getPropertySets</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#91;</span>0<span class="br0">&#93;</span>.<span class="me1">setValue</span><span class="br0">&#40;</span><span class="st0">&quot;Local Translation&quot;</span>, Vector3f.<span class="me1">ZERO</span><span class="br0">&#41;</span>;
+        <span class="kw1">return</span>;
+    <span class="br0">&#125;</span>
+<span class="br0">&#125;</span></pre>
+<p>
+You can also access the “real” spatial but since its part of the scenegraph you will have to modify it on that thread:
+</p>
+<pre class="code java"><span class="co1">//retrieve the &quot;real&quot; spatial class from the JmeNode</span>
+<span class="kw1">for</span> <span class="br0">&#40;</span>JmeSpatial jmeSpatial <span class="sy0">:</span> items<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    <span class="co1">//the spatial is stored inside the JmeSpatials &quot;Lookup&quot;, a general container for Objects</span>
+    <span class="kw1">final</span> Spatial realSpatial <span class="sy0">=</span> jmeSpatial.<span class="me1">getLookup</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">lookup</span><span class="br0">&#40;</span>Spatial.<span class="kw1">class</span><span class="br0">&#41;</span>;
+    <span class="co1">//use a Callable to execute on the render thread:</span>
+    SceneApplication.<span class="me1">getApplication</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">enqueue</span><span class="br0">&#40;</span><span class="kw1">new</span> Callable<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="kw1">public</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aobject+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> <span class="br0">&#123;</span>
+            realSpatial.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span>Vector3f.<span class="me1">ZERO</span><span class="br0">&#41;</span>;
+            <span class="kw1">return</span> <span class="kw2">null</span>;
+        <span class="br0">&#125;</span>
+    <span class="br0">&#125;</span><span class="br0">&#41;</span>;
+    <span class="kw1">return</span>;
+<span class="br0">&#125;</span></pre>
+</div>
+<!-- SECTION "Listening for Node selection" [1301-3319] -->
+<h2><a name="requesting_the_scene" id="requesting_the_scene">Requesting the Scene</a></h2>
+<div class="level2">
+
+<p>
+
+If your plugin wants to use the scene by itself, it first has to implement SceneListener and register at the scene and then send a SceneRequest to the SceneApplication. When the SceneRequest has been approved and the current Scene has been closed, the SceneListener (your class) is called with its own SceneRequest as a parameter. When another plugin sends a SceneRequest it is also reported to you and its a hint that your RootNode has been removed from the Scene and you are no longer in control of it. You could also hook into the SceneRequests of other plugins to see if/when they are activated to display add-on plugins for that plugin.
+</p>
+
+<p>
+<br/>
+
+The SceneRequest object has to contain several things. A thing that you must supply is a jme “Node” wrapped into a “JmeNode” object. This is your rootNode that you use to display and build your scene. As soon as you control the scene, you will have to control the camera etc. yourself.
+</p>
+<pre class="code java">com.<span class="me1">jme3</span>.<span class="me1">scene</span>.<span class="me1">Node</span> rootNode <span class="sy0">=</span> <span class="kw1">new</span> com.<span class="me1">jme3</span>.<span class="me1">scene</span>.<span class="me1">Node</span><span class="br0">&#40;</span><span class="st0">&quot;MyRootNode&quot;</span><span class="br0">&#41;</span>;
+&nbsp;
+<span class="kw1">private</span> <span class="kw4">void</span> registerSceneListener<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#123;</span>
+    SceneApplication.<span class="me1">getApplication</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">addSceneListener</span><span class="br0">&#40;</span><span class="kw1">this</span><span class="br0">&#41;</span>;
+<span class="br0">&#125;</span>
+&nbsp;
+<span class="kw1">private</span> <span class="kw4">void</span> requestScene<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#123;</span>
+    <span class="co1">//create a jmeNode from the rootNode using the NodeUtility</span>
+    JmeNode jmeNode <span class="sy0">=</span> NodeUtility.<span class="me1">createNode</span><span class="br0">&#40;</span>rootNode<span class="br0">&#41;</span>;
+    <span class="co1">//create the scene request</span>
+    SceneRequest request<span class="sy0">=</span><span class="kw1">new</span> SceneRequest<span class="br0">&#40;</span><span class="kw1">this</span>, jmeNode, assetManager<span class="br0">&#41;</span>;
+    <span class="co1">//request the scene</span>
+    SceneApplication.<span class="me1">getApplication</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">requestScene</span><span class="br0">&#40;</span>request<span class="br0">&#41;</span>;
+<span class="br0">&#125;</span>
+&nbsp;
+<span class="co1">//implements SceneListener (called from render thread)</span>
+<span class="kw1">public</span> <span class="kw4">void</span> sceneRequested<span class="br0">&#40;</span>SceneRequest request<span class="br0">&#41;</span><span class="br0">&#123;</span>
+    <span class="co1">//check if its our request</span>
+    <span class="kw1">if</span> <span class="br0">&#40;</span>request.<span class="me1">getRequester</span><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="sy0">==</span> <span class="kw1">this</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="co1">//we now own the scene</span>
+    <span class="br0">&#125;</span>
+<span class="br0">&#125;</span>
+&nbsp;
+<span class="kw1">public</span> <span class="kw4">boolean</span> sceneClose<span class="br0">&#40;</span>SceneRequest request<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    <span class="kw1">if</span> <span class="br0">&#40;</span>request.<span class="me1">getRequester</span><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="sy0">==</span> <span class="kw1">this</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="co1">//we have to close the scene, if we cannot, return false</span>
+        <span class="kw1">if</span><span class="br0">&#40;</span>isNotSaved<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span><span class="br0">&#123;</span>
+            <span class="kw1">return</span> <span class="kw2">false</span>;
+        <span class="br0">&#125;</span>
+    <span class="br0">&#125;</span>
+    <span class="kw1">return</span> <span class="kw2">true</span>;
+<span class="br0">&#125;</span></pre>
+</div>
+<!-- SECTION "Requesting the Scene" [3320-5282] -->
+<h2><a name="handy_things_in_jmonkeyplatform_core" id="handy_things_in_jmonkeyplatform_core">Handy things in jMonkeyPlatform Core</a></h2>
+<div class="level2">
+<ul>
+<li class="level1"><div class="li"> com.jme3.gde.core.scene.controller</div>
+<ul>
+<li class="level2"><div class="li"> AbstractCameraController → A basic camera control for plugins, used by SimpleSceneComposer and “View Model”</div>
+</li>
+<li class="level2"><div class="li"> SceneToolController → A basic controller for having selection, cursor etc. displayed in the scene, used by SimpleSceneComposer</div>
+</li>
+</ul>
+</li>
+</ul>
+
+</div>
+<!-- SECTION "Handy things in jMonkeyPlatform Core" [5283-] -->
+<p><em><a href="http://jmonkeyengine.org/wiki/doku.php/jme3:jmonkeyplatform:development:scene?do=export_xhtmlbody">view online version</a></em></p>

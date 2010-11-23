@@ -1,478 +1,260 @@
-<?xml version="1.0"?>
-<project name="jME" default="compile">
-  <description>
-    Ant Build File for the jME API.
-    $Id$
-  </description>
-  <!-- Since we have developers who use different tab-stop settings in their
-       editors and IDE's, please use spaces, not tabs, for indentation.
-       (Your editor or IDE has a setting to automatically change your tab
-       keystrokes into spaces). -->
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="jme-gde" basedir=".">
+    <description>Builds the module suite jme-gde.</description>
+    <import file="nbproject/build-impl.xml"/>
+    <!--Load ant extensions-->
+    <path id="ant-import.classpath">
+        <fileset dir="ant-lib/" includes="*.jar"/>
+    </path>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="ant-import.classpath"/>
+    <taskdef name="deb" classname="com.googlecode.ant_deb_task.Deb" classpathref="ant-import.classpath"/>
+    <taskdef name="desktopentry" classname="com.googlecode.ant_deb_task.DesktopEntry" classpathref="ant-import.classpath"/>
 
-  <property file="build.properties" />
-  <!-- This is because build-import.xml uses ${name}: -->
-  <property name="name" value="${ant.project.name}"/>
+    <!--zips up the templates and adds them to the template project-->
+    <target name="zip-templates" description="Updates the template zip files">
+        <zip basedir="BasicGameTemplate/" destfile="jme3-templates/src/com/jme3/gde/templates/BasicGameProject.zip">
+            <exclude name="**/build/"/>
+            <exclude name="**/dist/"/>
+            <exclude name="**/nbproject/private/"/>
+        </zip>
+        <zip basedir="JME3TestsTemplate/" destfile="jme3-tests-template/src/com/jme3/gde/templates/tests/JmeTestsProject.zip">
+            <exclude name="**/build/"/>
+            <exclude name="**/dist/"/>
+            <exclude name="**/nbproject/private/"/>
+        </zip>
+    </target>
 
-  <!--    defaults for build.properties:-->
-  <import file="build-import.xml" />
+    <!--override build to include netbeans config file creation-->
+    <target name="build" depends="-create-netbeans-config, suite.build">
+    </target>
 
-  <property name="class" location="${build}" />
-  <property name="jars" location="${release}" />
-  <property name="webstart" location="jnlp" />
+    <!--replaces default values in jmonkeyplatform.conf file with run.args.extra from project.properties-->
+    <target name="-create-netbeans-config">
+        <property file="nbproject/project.properties"/>
+        <mkdir dir="build/launcher/etc"/>
+        <copy file="${harness.dir}/etc/app.conf" tofile="build/launcher/etc/${app.name}.conf">
+            <filterchain>
+                <replacestring from="$${branding.token}" to="${branding.token}"/>
+                <replacestring from="-J-Xmx64m" to="${run.args.extra}"/>
+            </filterchain>
+        </copy>
+    </target>
 
-  <property name="keyStore" value="jmeKeyStore" />
-  <property name="storepass" value="..." />
-  <property name="keypass" value="..." />
-  <property name="keystore" value="..." />
-  <property name="ftpuser" value="..." />
-  <property name="ftppassword" value="..." />
-  <property name="ftphost" value="ftp.jmonkeyengine.com" />
-    <!-- You may prefer to set javac.debug to false to reduce size. -->
-  <property name="javac.debug" value="true" />
-  <property name="javac.maxmem" value="256m" />
-  <property name="javac.source" value="1.5" />
-  <property name="javac.target" value="1.5" />
-    <!-- N.b. the .source and .target setting are NOT for source and target
-         directories, but for source and target JVM versions. -->
-  <property name="javac.debuglevel" value="lines,source" />
-    <!-- Having line numbers in debug output is useful for the 99.9%
-         of non-public builds, esp. for custom-builders who have
-         runtime problems.   - blaine  -->
-  <!--    end of defaults -->
+    <!--creates update center version via hudson build server-->
+    <target name="dist-gde-hudson" depends="suite.clean, -revert-svn-changes, zip-templates, -set-impl-version-hudson, suite.nbms, -unset-impl-version-hudson">
+    </target>
 
-  <path id="classpath">
-    <fileset dir="${libs}">
-      <include name="**/*.jar" />
-    </fileset>
-    <pathelement path="${class}" />
-  </path>
+    <!--zip up mac version using command line tool-->
+    <target name="jmp-release-mac" depends="build-mac" description="Build Mac OS X Application and zip it">
+        <exec executable="zip" dir="dist/">
+            <arg value="-yr"/>
+            <arg value="${app.release.name}-MacOSX.zip"/>
+            <arg value="jmonkeyplatform.app"/>
+            <arg value="../README.TXT"/>
+        </exec>
+    </target>
 
-  <target name="init">
-    <echo message="${keyStore}" />
-    <mkdir dir="${src}" />
-    <mkdir dir="${class}" />
-    <mkdir dir="${data}" />
-    <mkdir dir="${doc}" />
-    <available property="_rtlp.param" value="_rtlogprops.present"
-               file="logging.properties"/>
-    <property name="_rtlp.param" value="_dummy"/>
-    <antcall target="-gen-rtlogprops">
-      <param name="${_trlp.param}" value="true"/>
-    </antcall>
-  </target>
+    <target name="set-impl-version">
+        <property file="nbproject/project.properties"/>
+        <antcall target="-create-jme3-svn-properties" inheritall="true">
+            <param name="jme3_dir" value="../jme3/"/>
+        </antcall>
+        <foreach target="-do-impl-version" list="${modules}" delimiter=":" param="module_dir" inheritall="true">
+            <param name="set_impl_version" value="true"/>
+        </foreach>
+    </target>
 
-  <!-- Compiles all the jME classes, including com.jmex.* -->
-  <target name="compile" depends="init" description="generate jme classes">
-    <copy todir="${class}">
-      <fileset dir="${src}" includes="com/**" excludes="**/.*/**, **/*.java"/>
-    </copy>
-    <javac source="${javac.source}" target="${javac.target}"
-           debuglevel="${javac.debuglevel}"
-      srcdir="${src}" destdir="${class}" includes="com/**/*.java"
-      classpathref="classpath" listfiles="no" fork="true"
-      memoryMaximumSize="${javac.maxmem}" debug="${javac.debug}"/>
-  </target>
+    <target name="unset-impl-version">
+        <property file="nbproject/project.properties"/>
+        <foreach target="-do-impl-version" list="${modules}" delimiter=":" param="module_dir" inheritall="true">
+            <param name="set_impl_version" value="false"/>
+        </foreach>
+    </target>
 
-  <target name="run-testchooser" depends="compile-test" description="Runs the TestChooser">
-    <condition property="jogl.arch.suffix" value="amd64">
-      <os arch="amd64"/>
-    </condition>
-    <property name="jogl.arch.suffix" value="i586"/>
-    <pathconvert property="native.libpath" setonempty="false">
-      <filelist dir="${libs}">
-        <file name="jogl/native/windows_${jogl.arch.suffix}"/>
-        <file name="jogl/native/macosx"/>
-        <file name="jogl/native/linux_${jogl.arch.suffix}"/>
-        <file name="lwjgl/native/linux"/>
-        <file name="lwjgl/native/macosx"/>
-        <file name="lwjgl/native/windows"/>
-        <file name="swt/linux"/>
-        <file name="swt/macosx-carbon"/>
-        <file name="swt/macosx-cocoa"/>
-        <file name="swt/windows"/>
-      </filelist>
-    </pathconvert>
-    <java classname="jmetest.TestChooser" fork="true" classpathref="classpath">
-      <jvmarg value="-Djava.library.path=${native.libpath}"/>
-    </java>
-  </target>
+    <target name="-set-impl-version-hudson">
+        <property file="nbproject/project.properties"/>
+        <antcall target="-create-jme3-svn-properties" inheritall="true">
+            <param name="jme3_dir" value="../../jme3/workspace/"/>
+        </antcall>
+        <foreach target="-do-impl-version" list="${modules}" delimiter=":" param="module_dir" inheritall="true">
+            <param name="set_impl_version" value="true"/>
+        </foreach>
+    </target>
 
-  <target name="-enforce.jar.deps">
-    <dependset>
-      <srcfileset dir="build" includes="com/**"/>
-      <targetfileset dir="${jars}" excludes="**/.*/**" includes="*.jar"/>
-    </dependset>
-  </target>
+    <target name="-unset-impl-version-hudson">
+        <property file="nbproject/project.properties"/>
+        <foreach target="-do-impl-version" list="${modules}" delimiter=":" param="module_dir" inheritall="true">
+            <param name="set_impl_version" value="false"/>
+        </foreach>
+    </target>
 
-  <!-- Jar files for different parts of the jME API -->
+    <!--sets/unsets implementation version to svn revision for plugins-->
+    <target name="-do-impl-version">
+        <!--jme3 libraries-->
+        <if>
+            <or>
+                <equals arg1="${module_dir}" arg2="jme3-core-libraries"/>
+                <equals arg1="${module_dir}" arg2="jme3-project-libraries"/>
+            </or>
+            <then>
+                <!--set jme3 libraries svn revision-->
+                <property prefix="svn" file="build/jme3-lib-svn.properties"/>
+            </then>
+            <else>
+                <!--jme3 core-->
+                <if>
+                    <or>
+                        <equals arg1="${module_dir}" arg2="jme3-core-baselibs"/>
+                        <equals arg1="${module_dir}" arg2="jme3-project-baselibs"/>
+                    </or>
+                    <then>
+                        <!--set jme3 svn revision-->
+                        <property prefix="svn" file="build/jme3-svn.properties"/>
+                    </then>
+                    <else>
+                        <!--jme3 test data-->
+                        <if>
+                            <equals arg1="${module_dir}" arg2="jme3-project-testdata"/>
+                            <then>
+                                <!--set jme3 testdata svn revision-->
+                                <property prefix="svn" file="build/jme3-testdata-svn.properties"/>
+                            </then>
+                            <else>
+                                <!--jme3 tests-->
+                                <if>
+                                    <equals arg1="${module_dir}" arg2="jme3-tests-template"/>
+                                    <then>
+                                        <!--set jme3 tests svn revision-->
+                                        <property prefix="svn" file="build/jme3-tests-svn.properties"/>
+                                    </then>
+                                    <!--"normal" module-->
+                                    <else>
+                                        <!--load svn revision of this modules folder if we are setting the value-->
+                                        <if>
+                                            <equals arg1="${set_impl_version}" arg2="true"/>
+                                            <then>
+                                                <exec executable="svn" output="build/${module_dir}-svn.properties" dir="${module_dir}">
+                                                    <arg value="info" />
+                                                </exec>
+                                                <replace file="build/${module_dir}-svn.properties" token=" " value=""/>
+                                            </then>
+                                        </if>
+                                        <!--set svn revision of module-->
+                                        <property prefix="svn" file="build/${module_dir}-svn.properties"/>
+                                    </else>
+                                </if>
+                            </else>
+                        </if>
+                    </else>
+                </if>
+            </else>
+        </if>
 
-  <target name="dist-core" depends="compile, -enforce.jar.deps"
-         description="generate jme jar file">
-    <jar destfile="${jars}/jme.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jme/**/*.class, com/jme/**/*.tga, com/jme/**/*.png, com/jme/**/*.gif, com/jme/**/*.vert, com/jme/**/*.frag,com/jmex/pool/**/*.class" />
-  </target>
-  <target name="dist-audio" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (audio)">
-    <jar destfile="${jars}/jme-audio.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true"
-         includes="com/jmex/audio/**/*.class" />
-  </target>
-  <target name="dist-awt" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (awt)">
-    <jar destfile="${jars}/jme-awt.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jmex/awt/**/*.class" />
-  </target>
-  <target name="dist-swt" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (swt)">
-    <jar destfile="${jars}/jme-swt.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jmex/swt/**/*.class" />
-  </target>
-  <target name="dist-editors" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (editors)">
-    <jar destfile="${jars}/jme-editors.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jmex/editors/**/*.class" />
-  </target>
-  <target name="dist-effects" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (effects)">
-    <jar destfile="${jars}/jme-effects.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true"
-         includes="com/jmex/effects/**/*.class, com/jmex/effects/**/data/*" />
-  </target>
-  <target name="dist-font" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (font)">
-    <jar destfile="${jars}/jme-font.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jmex/font2d/**/*.class, com/jmex/font3d/**/*.class, com/jmex/angelfont/**/*.class, com/jmex/angelfont/**/*.png, com/jmex/angelfont/**/*.fnt" />
-  </target>
-  <target name="dist-gamestates" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (gamestates)">
-    <jar destfile="${jars}/jme-gamestates.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jmex/game/**/*.class" />
-  </target>
-  <target name="dist-model" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (model)">
-    <jar destfile="${jars}/jme-model.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jmex/model/**/*.class"
-         excludes="com/jmex/model/collada/**, com/jmex/model/ogrexml/**" />
-  </target>
-  <target name="dist-collada" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (collada)">
-    <jar destfile="${jars}/jme-collada.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true"
-         includes="com/jmex/model/collada/*.class">
-      <zipfileset src="lib/jme-colladabinding.jar"
-                  excludes="META-INF/readme.txt"/>
-    </jar>
-  </target>
-  <target name="dist-scene" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (scene)">
-    <jar destfile="${jars}/jme-scene.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true" includes="com/jmex/scene/**/*.class" />
-  </target>
-  <target name="dist-terrain" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (terrain)">
-    <jar destfile="${jars}/jme-terrain.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true"
-         includes="com/jmex/terrain/**/*.class" />
-  </target>
-  <target name="dist-ogrexml" depends="compile, -enforce.jar.deps"
-          description="generate jme jar file (ogrexml)">
-    <jar destfile="${jars}/jme-ogrexml.jar" basedir="${class}" update="no"
-         duplicate="fail" compress="true"
-         includes="com/jmex/model/ogrexml/**/*.class" />
-  </target>
+        <if>
+            <equals arg1="${set_impl_version}" arg2="true"/>
+            <then>
+                <echo>Setting implementation version for ${module_dir} to revision: ${svn.LastChangedRev}</echo>
+                <replace  file="${module_dir}/manifest.mf" token="OpenIDE-Module-Implementation-Version: 0" value="OpenIDE-Module-Implementation-Version: ${svn.LastChangedRev}"/>
+            </then>
+            <else>
+                <echo>Removing implementation version for ${module_dir} from revision: ${svn.LastChangedRev}</echo>
+                <replace file="${module_dir}/manifest.mf" token="OpenIDE-Module-Implementation-Version: ${svn.LastChangedRev}" value="OpenIDE-Module-Implementation-Version: 0"/>
+            </else>
+        </if>
 
-  <!-- Creates all the jME jars -->
-  <target name="dist-all" depends="dist-core, dist-terrain, dist-ogrexml, dist-audio, dist-awt, dist-swt, dist-effects, dist-model, dist-collada, dist-editors, dist-font, dist-gamestates, dist-scene" description="Generate all jar files" />
+    </target>
 
-  <target name="webdist-all" depends="dist-all" description="sign JARs for JNLP distribution">
-    <signjar jar="${jars}/jme.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-awt.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-swt.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-audio.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-editors.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-effects.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-font.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-gamestates.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-model.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-collada.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-scene.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-terrain.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jme-ogrexml.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-  </target>
+    <!--reverts svn changes (in case the revision numbers haven't been reset-->
+    <target name="-revert-svn-changes">
+        <!--remove changes from jMP (old version numbers)-->
+        <exec executable="svn" dir=".">
+            <arg value="revert" />
+            <arg value="." />
+            <arg value="-R" />
+        </exec>
+        <!--update gde svn revision-->
+        <exec executable="svn" dir=".">
+            <arg value="update" />
+        </exec>
+    </target>
 
-  <target name="doc" depends="compile"
-          description="generate the javadoc documentation">
-    <dependset>
-      <srcfileset dir="${src}/com" excludes="**/.*/**"/>
-      <targetfileset dir="${doc}"/>
-    </dependset>
-    <available property="_passname" value="_docs.uptodate"
-               file="${doc}/index.html"/>
-    <property name="_passname" value="dummy"/>
-    <antcall target="-doc">
-      <param name="${_passname}" value="true"/>
-    </antcall>
-  </target>
+    <!--creates properties files containing svn info for the jme3 folders-->
+    <target name="-create-jme3-svn-properties">
+        <mkdir dir="build"/>
+        <!--jme3 svn properties-->
+        <exec executable="svn" dir="${jme3_dir}" output="build/jme3-svn.properties">
+            <arg value="info" />
+        </exec>
+        <replace file="build/jme3-svn.properties" token=" " value=""/>
+        <!--jme3 test data svn properties-->
+        <exec executable="svn" dir="${jme3_dir}/src/test-data/" output="build/jme3-testdata-svn.properties">
+            <arg value="info" />
+        </exec>
+        <replace file="build/jme3-testdata-svn.properties" token=" " value=""/>
+        <!--jme3 libraries svn properties-->
+        <exec executable="svn" dir="${jme3_dir}/lib/" output="build/jme3-lib-svn.properties">
+            <arg value="info" />
+        </exec>
+        <replace file="build/jme3-lib-svn.properties" token=" " value=""/>
+        <!--jme3 tests svn properties-->
+        <exec executable="svn" dir="${jme3_dir}/src/test/" output="build/jme3-tests-svn.properties">
+            <arg value="info" />
+        </exec>
+        <replace file="build/jme3-tests-svn.properties" token=" " value=""/>
+    </target>
 
-  <!-- Generates javadoc unless param is set -->
-  <target name="-doc" unless="_docs.uptodate">
-    <delete dir="${doc}"/>  <!-- The dependset leaves empty directories -->
-    <javadoc destdir="${doc}" useExternalFile="yes" author="true" version="true" use="true" package="yes" windowtitle="jME API" bottom="Copyright 2003-2010 jMonkeyEngine" maxmemory="256m">
-      <fileset dir="${src}/com" excludes="**/.*/**" includes="**/*.java" />
-    </javadoc>
-  </target>
+    <target name="create-private-config">
+        <exec executable="mkdir" dir="./nbproject/" failonerror="false">
+            <arg value="private" />
+        </exec>
+        <exec executable="echo" dir="." output="./nbproject/private/platform-private.properties">
+            <arg value="nbplatform.default.netbeans.dest.dir=/var/lib/hudson/.netbeans/6.9/NetBeans 6.9.app/Contents/Resources/NetBeans"/>
+        </exec>
+        <exec executable="echo" dir="." output="./nbproject/private/platform-private.properties" append="true">
+            <arg value="nbplatform.default.harness.dir=/var/lib/hudson/.netbeans/6.9/NetBeans 6.9.app/Contents/Resources/NetBeans/harness"/>
+        </exec>
+    </target>
+    
+    <!--creates a debian package from the installer-->
+    <target name="create-deb-package" depends="suite.build-zip">
+        <unzip src="${dist.dir}/${app.name}.zip" dest="${dist.dir}/${app.name}">
+            <globmapper from="${app.name}/*" to="*"/>
+        </unzip>
+        <desktopentry
+            toFile="build/jmonkeyplatform.desktop"
+            name="jMonkeyPlatform"
+            comment="jMonkeyEngine3 Game SDK."
+            exec="/usr/local/jmonkeyplatform/bin/jmonkeyplatform"
+            icon="/usr/local/jmonkeyplatform/jmonkeyplatform.png"
+            categories="Development;Java"
+        />
+        <deb toDir="dist"
+            package="jme3-sdk"
+            version="0.6.1"
+            section="devel"
+            depends="sun-java6-jdk"
+            maintainer="jMonkeyEngine"
+            homepage="http://www.jmonkeyengine.com"
+            postrm="debscripts/postrm"
+            >
+            <tarfileset dir="dist/jmonkeyplatform/" prefix="usr/local/jmonkeyplatform">
+                <exclude name="bin/**"/>
+            </tarfileset>
+            <tarfileset dir="dist/jmonkeyplatform/bin" prefix="usr/local/jmonkeyplatform/bin" filemode="755">
+                <exclude name="*.exe"/>
+            </tarfileset>
+            <tarfileset file="build/jmonkeyplatform.desktop" prefix="usr/share/applications"/>
+            <tarfileset file="jmonkeyplatform.png" prefix="usr/local/jmonkeyplatform"/>
+            <description synopsis="jMonkeyEngine3 SDK is a complete solution for Java OpenGL game development.">
+jMonkeyEngine 3 was rebuilt from the ground up to be a modern 3D game engine,
+compatible with OpenGL 2.0 and above.
+Its architecture is shader-based, making it fully capable of current and
+next generation graphics standards. The jMonkeyPlatform gives you a complete IDE
+for coding and for managing and creating game assets.</description>
+        </deb>
+    </target>
 
-  <!-- Removes all compiled files and documentation, but leaves any created jars -->
-  <target name="clean" description="clean up">
-    <delete dir="${class}" />
-    <delete dir="${doc}" />
-    <delete>
-      <fileset dir="${src}" includes="**/*.class" />
-      <fileset dir="${release}" includes="jme*.jar" />
-      <fileset dir="${webstart}" includes="*.jar" />
-    </delete>
-  </target>
-
-  <target name="rebuild" depends="clean, compile"
-          description="build from clean"/>
-
-  <!-- *** jmetest-related build targets -->
-
-  <target name="compile-test" depends="compile" description="generate jme test classes">
-    <javac source="${javac.source}" target="${javac.target}"
-           debuglevel="${javac.debuglevel}"
-      srcdir="${src}" destdir="${class}" includes="jmetest/**/*.java"
-      classpathref="classpath" fork="true" memoryMaximumSize="${javac.maxmem}"
-      debug="${javac.debug}"/>
-    <!-- copy the resources into the build directory -->
-    <copy todir="${class}">
-      <fileset dir="${src}" includes="jmetest/**"
-               excludes="**/.*/**, **/*.java"/>
-    </copy>
-  </target>
-
-  <target name="dist-test" depends="dist-all, compile-test"
-    description="generate jme test class and data jars + dependent distro jars">
-    <!-- Jar the demo classes -->
-
-    <pathconvert property="jarclasspathlibs" pathsep=" " dirsep="/">
-      <path>
-        <fileset dir="${libs}">
-          <include name="*.jar" />
-        </fileset>
-      </path>
-      <mapper type="regexp" from=".*(lib.*)" to="\1" />
-    </pathconvert>
-    <pathconvert property="jarclasspathrelease" pathsep=" " dirsep="/">
-      <path>
-        <fileset dir="${jars}">
-          <include name="*.jar" />
-          <exclude name="jmetest.jar" />
-        </fileset>
-      </path>
-      <mapper type="regexp" from=".*target.(.*)" to="\1" />
-    </pathconvert>
-    <echo>${jarclasspathlibs} ${jarclasspathrelease}</echo>
-
-    <dependset>
-      <srcfileset dir="build"/>
-      <targetfileset dir="${jars}" excludes="**/.*/**" includes="jmetest*.jar"/>
-    </dependset>
-
-    <jar destfile="${jars}/jmetest.jar" basedir="${class}"
-         duplicate="fail" compress="true"
-         excludes="jmetest/**/data/**, com/**" index="yes">
-      <manifest>
-        <attribute name="Implementation-Title" value="${ant.project.name}" />
-        <attribute name="Implementation-Vendor" value="${vendor}" />
-        <attribute name="Version" value="${major}.${minor}" />
-        <attribute name="Class-Path" value="${jarclasspathlibs} ${jarclasspathrelease}" />
-        <attribute name="Main-Class" value="${mainclass}" />
-      </manifest>
-    </jar>
-
-    <!-- Jar the demo data -->
-    <jar destfile="${jars}/jmetest-data-cursor.jar" basedir="${class}"
-         duplicate="fail" compress="true" includes="jmetest/data/cursor/**" />
-    <jar destfile="${jars}/jmetest-data-images.jar" basedir="${class}"
-         duplicate="fail" compress="true" includes="jmetest/data/images/**" />
-    <jar destfile="${jars}/jmetest-data-model.jar" basedir="${class}"
-         duplicate="fail" compress="true" includes="jmetest/data/model/**" />
-    <jar destfile="${jars}/jmetest-data-skybox1.jar" basedir="${class}"
-         duplicate="fail" compress="true" includes="jmetest/data/skybox1/**" />
-    <jar destfile="${jars}/jmetest-data-sound.jar" basedir="${class}"
-         duplicate="fail" compress="true" includes="jmetest/data/sound/**" />
-    <jar destfile="${jars}/jmetest-data-texture.jar" basedir="${class}"
-         duplicate="fail" compress="true" includes="jmetest/data/texture/**" />
-  </target>
-
-  <target name="webdist-test" depends="dist-test" description="sign test jars for Webstart distribution">
-    <signjar jar="${jars}/jmetest.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jmetest-data-cursor.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jmetest-data-images.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jmetest-data-model.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jmetest-data-skybox1.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jmetest-data-sound.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${jars}/jmetest-data-texture.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-  </target>
-
-  <!-- Jar and sign all the libraries required by jME -->
-  <target name="webdist-nativelibs" description="jar and sign native libraries for Webstart distribution">
-    <dependset>
-      <srcfileset dir="lib"/>
-      <targetfileset dir="${webstart}" excludes="**/.*/**" includes="*.jar"/>
-    </dependset>
-
-    <!-- WHY ARE ALL THE NATIVE FILES update="yes"?
-         We are specifying exactly what we want in them, so we should not be
-         recreating them. -->
-
-    <!--  Jar and sign the Windows libraries -->
-    <jar destfile="${webstart}/lwjgl-windows.jar" duplicate="fail" update="yes"
-         basedir="lib/lwjgl/native/windows" includes="lwjgl.dll" />
-  	<jar destfile="${webstart}/lwjgl-windows.jar" duplicate="fail" update="yes"
-         basedir="lib/lwjgl/native/windows" includes="lwjgl64.dll" />
-    <jar destfile="${webstart}/openal-windows.jar" duplicate="fail" update="yes"
-         basedir="lib/lwjgl/native/windows" includes="OpenAL32.dll" />
-  	<jar destfile="${webstart}/openal-windows.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/windows" includes="OpenAL64.dll" update="yes" />
-    <jar destfile="${webstart}/jinput-windows.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/windows" includes="jinput-dx8.dll" update="yes" />
-    <jar destfile="${webstart}/jinput-windows.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/windows" includes="jinput-raw.dll" update="yes" />
-    <signjar jar="${webstart}/lwjgl-windows.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${webstart}/openal-windows.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${webstart}/jinput-windows.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-
-    <!-- Jar and sign Linux native libraries -->
-    <jar destfile="${webstart}/lwjgl-linux.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/linux" includes="liblwjgl.so" update="yes" />
-    <jar destfile="${webstart}/lwjgl-linux.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/linux" includes="liblwjgl64.so" update="yes" />
-    <jar destfile="${webstart}/openal-linux.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/linux" includes="libopenal.so" update="yes" />
-    <jar destfile="${webstart}/openal-linux.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/linux" includes="libopenal64.so" update="yes" />
-    <jar destfile="${webstart}/jinput-linux.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/linux" includes="libjinput-linux.so" update="yes" />
-    <jar destfile="${webstart}/jinput-linux.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/linux" includes="libjinput-linux64.so" update="yes" />
-    <signjar jar="${webstart}/lwjgl-linux.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${webstart}/openal-linux.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${webstart}/jinput-linux.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-
-    <!-- Jar (eventually) and sign Mac native libraries -->
-    <jar destfile="${webstart}/lwjgl-mac.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/macosx" includes="liblwjgl.jnilib" update="yes" />
-    <jar destfile="${webstart}/jinput-mac.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/macosx" includes="libjinput-osx.jnilib" update="yes" />
-    <jar destfile="${webstart}/openal-mac.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/macosx" includes="openal.dylib" update="yes" />
-
-    <signjar jar="${webstart}/lwjgl-mac.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${webstart}/openal-mac.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${webstart}/jinput-mac.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-
-    <!-- Jar (eventually) and sign Solaris native libraries -->
-    <jar destfile="${webstart}/lwjgl-solaris.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/solaris" includes="liblwjgl.so" update="yes" />
-    <jar destfile="${webstart}/openal-solaris.jar" duplicate="fail"
-         basedir="lib/lwjgl/native/solaris" includes="libopenal.so" update="yes" />
-
-    <signjar jar="${webstart}/lwjgl-solaris.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="${webstart}/openal-solaris.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-  	
-    <!-- Sign the lwjgl jar -->
-    <signjar jar="lib/lwjgl/lwjgl.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="lib/lwjgl/lwjgl_util.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="lib/jorbis/jorbis-0.0.17.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-    <signjar jar="lib/lwjgl/jinput.jar" alias="jme" keystore="${webstart}/${keyStore}" storepass="${storepass}" />
-  </target>
-
-  <target name="nightly" depends="webdist-all, webdist-nativelibs, webdist-test">
-    <echo>${libs}/*.jar</echo>
-    <zip zipfile="${release}/jME.zip">
-      <zipfileset dir="${libs}" prefix="lib">
-        <include name="*.jar" />
-        <include name="*.dll" />
-        <include name="*.so" />
-        <include name="*.*lib" />
-      </zipfileset>
-      <fileset dir="${release}">
-        <include name="*.jar" />
-      </fileset>
-    </zip>
-    <zip zipfile="${release}/src.zip">
-      <zipfileset dir="${src}" prefix="src" excludes="**/.*/**"/>
-    </zip>
-    <!--        <mkdir dir="ftp"/>-->
-    <!--        <copy todir="ftp">-->
-    <ftp server="${ftphost}" userid="${ftpuser}" password="${ftppassword}" remotedir="nightly">
-      <fileset dir="${webstart}">
-        <include name="*.jar" />
-        <include name="*.jnlp" />
-      </fileset>
-      <fileset dir="${libs}">
-        <include name="*.jar" />
-      </fileset>
-      <fileset dir="${release}">
-        <include name="*.jar" />
-        <include name="jME.zip" />
-        <include name="src.zip" />
-      </fileset>
-    </ftp>
-    <!--        </copy>-->
-  </target>
-	
-	<!-- puts jme3 jars, libs and javadoc in a dated zip file -->
-	    <target name="deploy-hudson" depends="dist-all, doc">
-	        <!-- create date in the format MM-dd-yyyy -->
-	        <tstamp>
-	          <format property="date" pattern="MM-dd-yyyy" locale="en,US"/>
-	        </tstamp>
-	        <property name="jme2zip" value="jME2_${date}.zip"/>
-
-		   <!-- make zip file -->
-	        <zip destfile="${jme2zip}">
-			<fileset dir=".">
-			   	<include name="target/*.jar"/>
-			   	<include name="lib/**/*.*"/>
-				<include name="data/doc/**/*.*"/>
-			</fileset>
-		   	</zip>
-	    	<copy file="${jme2zip}" toDir="/var/www/nightly" overwrite="true" failonerror="true" verbose="true"/>
-	    </target>
-	
-	<target name="sign-jars" depends="dist-all" description="sign JARs for JNLP distribution">
-		<signjar jar="${jars}/jme-audio.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-awt.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-collada.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-editors.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-effects.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-font.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-gamestates.jar"		alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-ogrexml.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-model.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-scene.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-terrain.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-xml.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme-swt.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="${jars}/jme.jar"					alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/jogl/gluegen-rt.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/jogl/jogl.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/junit/junit-4.1.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/jorbis/jorbis-0.0.17.jar"		alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/lwjgl/jinput.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/lwjgl/lwjgl_util_applet.jar"	alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/lwjgl/lwjgl_util.jar"			alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/lwjgl/lwjgl.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/swt/linux/swt.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/swt/macosx-carbon/swt.jar"		alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/swt/macosx-cocoa/swt_fake.jar"	alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-		<signjar jar="lib/swt/windows/swt.jar"				alias="jmonkeyengine" keystore="${keystore}" storepass="${keypass}" />
-	</target>
-
-  <target name="-gen-rtlogprops" unless="_rtlogprops.present">
-    <copy file="logging-template.properties" tofile="logging.properties"/>
-  </target>
 </project>

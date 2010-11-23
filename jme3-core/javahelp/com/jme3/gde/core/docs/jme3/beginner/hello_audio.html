@@ -1,0 +1,277 @@
+
+
+
+<h1><a name="hello_audio" id="hello_audio">Hello Audio</a></h1>
+<div class="level1">
+
+<p>
+
+Previous: <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_terrain.html" class="wikilink1" title="jme3:beginner:hello_terrain">Hello Terrain</a>,
+Next: <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_effects.html" class="wikilink1" title="jme3:beginner:hello_effects">Hello Effects</a>
+</p>
+
+<p>
+
+This tutorial explains how to add 3D sound to a game, and how to trigger when sounds are to be played. We will use an Audio Listener, an Audio Renderer, and Audio Nodes.
+
+</p>
+
+</div>
+<!-- SECTION "Hello Audio" [1-252] -->
+<h2><a name="sample_code" id="sample_code">Sample Code</a></h2>
+<div class="level2">
+<pre class="code java"><span class="kw1">package</span> <span class="co2">jme3test.helloworld</span>;
+&nbsp;
+<span class="kw1">import</span> <span class="co2">com.jme3.app.SimpleApplication</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.audio.AudioNode</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.controls.ActionListener</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.controls.MouseButtonTrigger</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.material.Material</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.math.ColorRGBA</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.math.Vector3f</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.Geometry</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.shape.Box</span>;
+&nbsp;
+<span class="co3">/** Sample 11 - playing 3D audio. */</span>
+<span class="kw1">public</span> <span class="kw1">class</span> HelloAudio <span class="kw1">extends</span> SimpleApplication <span class="br0">&#123;</span>
+&nbsp;
+  <span class="kw1">private</span> AudioNode audio_gun;
+  <span class="kw1">private</span> AudioNode audio_nature;
+  <span class="kw1">private</span> Geometry player;
+&nbsp;
+  <span class="kw1">public</span> <span class="kw1">static</span> <span class="kw4">void</span> main<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#91;</span><span class="br0">&#93;</span> args<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    HelloAudio app <span class="sy0">=</span> <span class="kw1">new</span> HelloAudio<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    app.<span class="me1">start</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+  @Override
+  <span class="kw1">public</span> <span class="kw4">void</span> simpleInitApp<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    flyCam.<span class="me1">setMoveSpeed</span><span class="br0">&#40;</span><span class="nu0">40</span><span class="br0">&#41;</span>;
+&nbsp;
+    <span class="co3">/** just a blue box floating in space */</span>
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Abox+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span>Vector3f.<span class="me1">ZERO</span>, <span class="nu0">1</span>, <span class="nu0">1</span>, <span class="nu0">1</span><span class="br0">&#41;</span>;
+    player <span class="sy0">=</span> <span class="kw1">new</span> Geometry<span class="br0">&#40;</span><span class="st0">&quot;Player&quot;</span>, box1<span class="br0">&#41;</span>;
+    Material mat1 <span class="sy0">=</span> <span class="kw1">new</span> Material<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Common/MatDefs/Misc/SolidColor.j3md&quot;</span><span class="br0">&#41;</span>;
+    mat1.<span class="me1">setColor</span><span class="br0">&#40;</span><span class="st0">&quot;m_Color&quot;</span>, ColorRGBA.<span class="me1">Blue</span><span class="br0">&#41;</span>;
+    player.<span class="me1">setMaterial</span><span class="br0">&#40;</span>mat1<span class="br0">&#41;</span>;
+    rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>player<span class="br0">&#41;</span>;
+&nbsp;
+    <span class="co3">/** custom init methods, see below */</span>
+    initKeys<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    initAudio<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** We create two audio nodes. */</span>
+  <span class="kw1">private</span> <span class="kw4">void</span> initAudio<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    <span class="coMULTI">/* gun shot sound is to be triggered by a mouse click. */</span>
+    audio_gun <span class="sy0">=</span> <span class="kw1">new</span> AudioNode<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Sound/Effects/Gun.wav&quot;</span>, <span class="kw2">false</span><span class="br0">&#41;</span>;
+    audio_gun.<span class="me1">setLooping</span><span class="br0">&#40;</span><span class="kw2">false</span><span class="br0">&#41;</span>;
+    audio_gun.<span class="me1">setVolume</span><span class="br0">&#40;</span><span class="nu0">2</span><span class="br0">&#41;</span>;
+&nbsp;
+    <span class="coMULTI">/* nature sound - keeps playing in a loop. */</span>
+    audio_nature <span class="sy0">=</span> <span class="kw1">new</span> AudioNode<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Sound/Environment/Nature.ogg&quot;</span>, <span class="kw2">false</span><span class="br0">&#41;</span>;
+    audio_nature.<span class="me1">setLooping</span><span class="br0">&#40;</span><span class="kw2">true</span><span class="br0">&#41;</span>;
+    audio_nature.<span class="me1">setPositional</span><span class="br0">&#40;</span><span class="kw2">true</span><span class="br0">&#41;</span>;
+    audio_nature.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span>Vector3f.<span class="me1">ZERO</span>.<span class="me1">clone</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    audio_nature.<span class="me1">setVolume</span><span class="br0">&#40;</span><span class="nu0">3</span><span class="br0">&#41;</span>;
+    audioRenderer.<span class="me1">playSource</span><span class="br0">&#40;</span>audio_nature<span class="br0">&#41;</span>; <span class="co1">// play continuously!</span>
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** Declaring the &quot;Shoot&quot; action, and
+   *  mapping it to a trigger (mouse click). */</span>
+  <span class="kw1">private</span> <span class="kw4">void</span> initKeys<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span>, <span class="kw1">new</span> MouseButtonTrigger<span class="br0">&#40;</span>0<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    inputManager.<span class="me1">addListener</span><span class="br0">&#40;</span>actionListener, <span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** Defining the &quot;Shoot&quot; action: Play a gun sound. */</span>
+  <span class="kw1">private</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aactionlistener+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    @Override
+    <span class="kw1">public</span> <span class="kw4">void</span> onAction<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> name, <span class="kw4">boolean</span> keyPressed, <span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+      <span class="kw1">if</span> <span class="br0">&#40;</span>name.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span> <span class="sy0">&amp;&amp;</span> <span class="sy0">!</span>keyPressed<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        audioRenderer.<span class="me1">playSource</span><span class="br0">&#40;</span>audio_gun<span class="br0">&#41;</span>; <span class="co1">// play once!</span>
+      <span class="br0">&#125;</span>
+    <span class="br0">&#125;</span>
+  <span class="br0">&#125;</span>;
+&nbsp;
+  <span class="co3">/** Move the listener with the a camera - for 3D audio. */</span>
+  @Override
+  <span class="kw1">public</span> <span class="kw4">void</span> simpleUpdate<span class="br0">&#40;</span><span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    listener.<span class="me1">setLocation</span><span class="br0">&#40;</span>cam.<span class="me1">getLocation</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    listener.<span class="me1">setRotation</span><span class="br0">&#40;</span>cam.<span class="me1">getRotation</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+<span class="br0">&#125;</span></pre>
+<p>
+When you run the sample, you should see a blue cube, and hear nature ambient sounds. When you click you hear a loud shot.
+</p>
+
+</div>
+<!-- SECTION "Sample Code" [253-2986] -->
+<h2><a name="understanding_the_code_sample" id="understanding_the_code_sample">Understanding the Code Sample</a></h2>
+<div class="level2">
+
+<p>
+
+In the game&#039;s <code>initSampleApp()</code> method, we create a simple blue cube geometry called <code>player</code> and attach it to the scene – it&#039;s just sample content so you see something when running the audio sample.
+</p>
+
+<p>
+From <code>initSampleApp()</code>, we initialize the game by calling the two custom methods <code>initKeys()</code> and <code>initAudio()</code>. You could call the lines of code in these two methods directly from <code>initSampleApp()</code>; we simply moved them into extra methods to keep the code more readable.
+</p>
+
+<p>
+Let&#039;s look at <code>initKeys()</code>: As we learned in previous tutorials, we use jme&#039;s <code>inputManager</code> to respond to user input. We add a mapping for a left mouse button click, and we name this new action <code>Shoot</code>. 
+</p>
+<pre class="code java"><span class="co3">/** Declaring the &quot;Shoot&quot; action and mapping to a trigger. */</span>
+  <span class="kw1">private</span> <span class="kw4">void</span> initKeys<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    <span class="co1">// click to shoot</span>
+    inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span>, <span class="kw1">new</span> MouseButtonTrigger<span class="br0">&#40;</span>0<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    inputManager.<span class="me1">addListener</span><span class="br0">&#40;</span>actionListener, <span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span></pre>
+<p>
+Setting up the ActionListener should also be familiar from previous tutorials. We declare that, when the trigger (the mouse button) is pressed and released, we want to play a gun sound.
+</p>
+<pre class="code java">  <span class="co3">/** Defining the &quot;Shoot&quot; action: play a sound. */</span>
+  <span class="kw1">private</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aactionlistener+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    @Override
+    <span class="kw1">public</span> <span class="kw4">void</span> onAction<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> name, <span class="kw4">boolean</span> keyPressed, <span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+      <span class="kw1">if</span> <span class="br0">&#40;</span>name.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span> <span class="sy0">&amp;&amp;</span> <span class="sy0">!</span>keyPressed<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        audioRenderer.<span class="me1">playSource</span><span class="br0">&#40;</span>audio_gun<span class="br0">&#41;</span>;
+      <span class="br0">&#125;</span>
+    <span class="br0">&#125;</span>
+  <span class="br0">&#125;</span>;</pre>
+<p>
+Finally we use the <code>simpleUpdate()</code> loop to keep the <code>listener</code> moving with the camera. More about that below. 
+</p>
+
+<p>
+Next we have a closer look at <code>initAudio()</code> to learn how to use the <code>AudioRenderer</code> and <code>AudioNode</code>s.
+</p>
+
+</div>
+<!-- SECTION "Understanding the Code Sample" [2987-4733] -->
+<h2><a name="audionodes" id="audionodes">AudioNodes</a></h2>
+<div class="level2">
+
+<p>
+
+Using audio is quite simple. Save your audio files into your <code>assets/Sound</code> directory. jME3 supports both Ogg Vorbis (.ogg) and Wave (.wav) files.
+</p>
+
+<p>
+For each sound you create an audio node. A sound node can be used like any node in the jME scene graph. We create one node for a gunshot sound, and one for a nature sound.
+</p>
+<pre class="code java">  <span class="kw1">private</span> AudioNode audio_gun;
+  <span class="kw1">private</span> AudioNode audio_nature;</pre>
+<p>
+Look at <code>initAudio()</code>: Here we initialize the sound objects and set some parameters.
+</p>
+<pre class="code">    audio_gun = new AudioNode(assetManager, &quot;Sound/Effects/Gun.wav&quot;, false);
+    audio_nature = new AudioNode(assetManager, &quot;Sound/Environment/Nature.ogg&quot;, true);</pre>
+
+<p>
+These two lines create new sound nodes from the given audio files in the assetManager. The Boolean parameter specifies whether you want to stream the sound or not. The nature sound is quite long, so we set this to true because we want to stream it.
+</p>
+
+<p>
+In the next lines we specify that we want the gunshot sound to play only <em>once</em> (do not loop) and we specify its volume on a scale of 1 to 10.
+</p>
+<pre class="code java">    audio_gun.<span class="me1">setLooping</span><span class="br0">&#40;</span><span class="kw2">false</span><span class="br0">&#41;</span>;
+    audio_gun.<span class="me1">setVolume</span><span class="br0">&#40;</span><span class="nu0">4</span><span class="br0">&#41;</span>;</pre>
+<p>
+The nature sound is different: We want it to loop <em>continuously</em> as background sound. We also make it a positional sound and give the node an explicit translation (Vector3f.ZERO stands for <code>0.0f,0.0f,0.0f</code>). Since jME supports 3D audio, you will be able to hear this sound coming from a particular direction. 
+</p>
+<pre class="code java">    audio_nature.<span class="me1">setLooping</span><span class="br0">&#40;</span><span class="kw2">true</span><span class="br0">&#41;</span>;
+    audio_nature.<span class="me1">setPositional</span><span class="br0">&#40;</span><span class="kw2">true</span><span class="br0">&#41;</span>;
+    audio_nature.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span><span class="kw1">new</span> Vector3f.<span class="me1">ZERO</span>.<span class="me1">clone</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    audio_nature.<span class="me1">setVolume</span><span class="br0">&#40;</span><span class="nu0">3</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span></pre>
+</div>
+<!-- SECTION "AudioNodes" [4734-6417] -->
+<h2><a name="triggering_audio" id="triggering_audio">Triggering Audio</a></h2>
+<div class="level2">
+
+<p>
+
+The two sounds are used differently:
+</p>
+<ul>
+<li class="level1"><div class="li"> The gunshot is situational. We want to play it only once, right when it is triggered.</div>
+<ul>
+<li class="level2"><div class="li"> This is why we made it <code>setLooping(false)</code></div>
+</li>
+</ul>
+</li>
+<li class="level1"><div class="li"> The nature sound is a background noise. We want it to start playing and loop on as long as the game runs.</div>
+<ul>
+<li class="level2"><div class="li"> This is why we made it <code>setLooping(true)</code></div>
+</li>
+</ul>
+</li>
+</ul>
+
+<p>
+
+So every sound knows whether it loops or not. The actual <code>play</code> command is the same for both files:
+</p>
+<pre class="code java">    audioRenderer.<span class="me1">playSource</span><span class="br0">&#40;</span>audio_nature<span class="br0">&#41;</span>;
+...
+    <span class="me1">audioRenderer</span>.<span class="me1">playSource</span><span class="br0">&#40;</span>audio_gun<span class="br0">&#41;</span>;</pre>
+<p>
+The only difference is where they are called: 
+</p>
+<ul>
+<li class="level1"><div class="li"> We start playing the background nature sound right after we have created it, in the initAudio() method. </div>
+</li>
+<li class="level1"><div class="li"> The gunshot sound, however, is triggered situationally, as part of the <code>Shoot</code> input action that we defined.</div>
+</li>
+</ul>
+
+</div>
+<!-- SECTION "Triggering Audio" [6418-7269] -->
+<h2><a name="d_audio_listener" id="d_audio_listener">3D Audio Listener</a></h2>
+<div class="level2">
+
+<p>
+
+To keep up the 3D audio effect, jME needs to know the position of the sound source, and the position of the listener. This is why we use the <code>simpleUpdate()</code> method to move the listener with the camera.
+</p>
+<pre class="code java">   <span class="kw1">public</span> <span class="kw4">void</span> simpleUpdate<span class="br0">&#40;</span><span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    listener.<span class="me1">setLocation</span><span class="br0">&#40;</span>cam.<span class="me1">getLocation</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    listener.<span class="me1">setRotation</span><span class="br0">&#40;</span>cam.<span class="me1">getRotation</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span></pre>
+<p>
+Note that in this example, we defined the nature sound as coming from a certain position, but not the gunshot sound. This means the gunshot can be heard everywhere with the same volume.
+</p>
+
+<p>
+In a game with moving enemies you would probably make the audio_gun node positional too, and move it to the location of the shooting enemy before playing it – this way a player with stereo speakers could hear from which direction the gunshot is coming. Equally, you may have game levels where you want one background sound to play globally, in this case, you would not make the audio_nature a positional sound.
+</p>
+
+<p>
+In short, you must choose in every situation whether you want a sound to be global or positional.
+</p>
+
+</div>
+<!-- SECTION "3D Audio Listener" [7270-8359] -->
+<h2><a name="conclusion" id="conclusion">Conclusion</a></h2>
+<div class="level2">
+
+<p>
+
+You now know how to add two types of sound to your game: global sounds and positional sounds. You can play sounds in two ways: Either as loop or just once. You also learned to use sound files that are in either .ogg or .wav format.
+</p>
+
+<p>
+Tip: jME&#039;s Audio implementation also supports more advanced effects such as reverberation and the Doppler effect. Find out more about these from the sample code included in the jme3test directory.
+</p>
+
+<p>
+Want some fire and explosions to go with your sounds? Read on to learn more about <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_effects.html" class="wikilink1" title="jme3:beginner:hello_effects">effects</a>.
+
+</p>
+
+</div>
+<!-- SECTION "Conclusion" [8360-] -->
+<p><em><a href="http://jmonkeyengine.org/wiki/doku.php/jme3:beginner:hello_audio?do=export_xhtmlbody">view online version</a></em></p>

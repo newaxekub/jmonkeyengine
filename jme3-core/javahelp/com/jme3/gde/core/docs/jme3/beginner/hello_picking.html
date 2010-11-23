@@ -1,0 +1,454 @@
+
+
+
+<h1><a name="getting_started_with_jme3_8_-_hello_picking" id="getting_started_with_jme3_8_-_hello_picking">Getting Started with JME3 (8) - Hello Picking</a></h1>
+<div class="level1">
+
+<p>
+
+Previous: <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_animation.html" class="wikilink1" title="jme3:beginner:hello_animation">Hello Animation</a>,
+Next: <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_collision.html" class="wikilink1" title="jme3:beginner:hello_collision">Hello Collision</a>
+</p>
+
+<p>
+Common interactions in games include shooting, picking up objects, and opening doors. 
+</p>
+
+<p>
+From an implementation point of view, these apparently different interactions are very similar: The user first aims and selects a target in the 3D scene, and then triggers an action on it. We call that picking.
+</p>
+
+<p>
+You can pick something by either pressing a key on the keyboard, or by clicking with the mouse. In either case, you identify the target by aiming a ray (a straight line) into the scene. This method to implement picking is called <em>ray casting</em>.
+</p>
+
+<p>
+<img src="nbdocs:/com/jme3/gde/core/docs/jme3/beginner/beginner-picking.png">
+</p>
+
+<p>
+This tutorial relies on what you have learned in the <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_input_system.html" class="wikilink1" title="jme3:beginner:hello_input_system">Hello Input</a> tutorial.
+</p>
+
+</div>
+<!-- SECTION "Getting Started with JME3 (8) - Hello Picking" [1-808] -->
+<h2><a name="sample_code" id="sample_code">Sample Code</a></h2>
+<div class="level2">
+<pre class="code java"><span class="kw1">package</span> <span class="co2">jme3test.helloworld</span>;
+&nbsp;
+<span class="kw1">import</span> <span class="co2">com.jme3.app.SimpleApplication</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.collision.CollisionResult</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.collision.CollisionResults</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.font.BitmapText</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.KeyInput</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.controls.ActionListener</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.controls.KeyTrigger</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.input.controls.MouseButtonTrigger</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.material.Material</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.math.ColorRGBA</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.math.Ray</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.math.Vector3f</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.Geometry</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.Node</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.shape.Box</span>;
+<span class="kw1">import</span> <span class="co2">com.jme3.scene.shape.Sphere</span>;
+&nbsp;
+<span class="co3">/** Sample 8 - how to let the user pick (select) objects in the scene 
+ * using the mouse or key presses. Can be used for shooting, opening doors, etc. */</span>
+<span class="kw1">public</span> <span class="kw1">class</span> HelloPicking <span class="kw1">extends</span> SimpleApplication <span class="br0">&#123;</span>
+&nbsp;
+  <span class="kw1">public</span> <span class="kw1">static</span> <span class="kw4">void</span> main<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#91;</span><span class="br0">&#93;</span> args<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    HelloPicking app <span class="sy0">=</span> <span class="kw1">new</span> HelloPicking<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    app.<span class="me1">start</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+  Node shootables;
+  Geometry mark;
+&nbsp;
+  @Override
+  <span class="kw1">public</span> <span class="kw4">void</span> simpleInitApp<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    initCrossHairs<span class="br0">&#40;</span><span class="br0">&#41;</span>; <span class="co1">// a &quot;+&quot; in the middle of the screen to help aiming</span>
+    initKeys<span class="br0">&#40;</span><span class="br0">&#41;</span>;       <span class="co1">// load custom key mappings</span>
+    initMark<span class="br0">&#40;</span><span class="br0">&#41;</span>;       <span class="co1">// a red sphere to mark the hit</span>
+&nbsp;
+    <span class="co3">/** create four colored boxes and a floor to shoot at: */</span>
+    shootables <span class="sy0">=</span> <span class="kw1">new</span> Node<span class="br0">&#40;</span><span class="st0">&quot;Shootables&quot;</span><span class="br0">&#41;</span>;
+    rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>shootables<span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;a Dragon&quot;</span>,    <span class="sy0">-</span>2f, 0f, 1f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;a tin can&quot;</span>,    1f,<span class="sy0">-</span>2f, 0f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;the Sheriff&quot;</span>,  0f, 1f,<span class="sy0">-</span>2f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;the Deputy&quot;</span>,   1f, 0f,<span class="sy0">-</span>4f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeFloor<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** Declaring the &quot;Shoot&quot; action and mapping to its triggers. */</span>
+  <span class="kw1">private</span> <span class="kw4">void</span> initKeys<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span>,
+      <span class="kw1">new</span> KeyTrigger<span class="br0">&#40;</span>KeyInput.<span class="me1">KEY_SPACE</span><span class="br0">&#41;</span>, <span class="co1">// trigger 1: spacebar</span>
+      <span class="kw1">new</span> MouseButtonTrigger<span class="br0">&#40;</span>0<span class="br0">&#41;</span><span class="br0">&#41;</span>;         <span class="co1">// trigger 2: left-button click</span>
+    inputManager.<span class="me1">addListener</span><span class="br0">&#40;</span>actionListener, <span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** Defining the &quot;Shoot&quot; action: Determine what was hit and how to respond. */</span>
+  <span class="kw1">private</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aactionlistener+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    @Override
+    <span class="kw1">public</span> <span class="kw4">void</span> onAction<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> name, <span class="kw4">boolean</span> keyPressed, <span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+      <span class="kw1">if</span> <span class="br0">&#40;</span>name.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span> <span class="sy0">&amp;&amp;</span> <span class="sy0">!</span>keyPressed<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="co1">// 1. Reset results list.</span>
+        CollisionResults results <span class="sy0">=</span> <span class="kw1">new</span> CollisionResults<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+        <span class="co1">// 2. Aim the ray from cam loc to cam direction.</span>
+        Ray ray <span class="sy0">=</span> <span class="kw1">new</span> Ray<span class="br0">&#40;</span>cam.<span class="me1">getLocation</span><span class="br0">&#40;</span><span class="br0">&#41;</span>, cam.<span class="me1">getDirection</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        <span class="co1">// 3. Collect intersections between Ray and Shootables in results list.</span>
+        shootables.<span class="me1">collideWith</span><span class="br0">&#40;</span>ray, results<span class="br0">&#41;</span>;
+        <span class="co1">// 4. Print the results. </span>
+        <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Asystem+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>.<span class="me1">out</span>.<span class="me1">println</span><span class="br0">&#40;</span><span class="st0">&quot;----- Collisions? &quot;</span> <span class="sy0">+</span> results.<span class="me1">size</span><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="sy0">+</span> <span class="st0">&quot;-----&quot;</span><span class="br0">&#41;</span>;
+        <span class="kw1">for</span> <span class="br0">&#40;</span><span class="kw4">int</span> i <span class="sy0">=</span> 0; i <span class="sy0">&lt;</span> results.<span class="me1">size</span><span class="br0">&#40;</span><span class="br0">&#41;</span>; i<span class="sy0">++</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+          <span class="co1">// For each hit, we know distance, impact point, name of geometry.</span>
+          <span class="kw4">float</span> dist <span class="sy0">=</span> results.<span class="me1">getCollision</span><span class="br0">&#40;</span>i<span class="br0">&#41;</span>.<span class="me1">getDistance</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          Vector3f pt <span class="sy0">=</span> results.<span class="me1">getCollision</span><span class="br0">&#40;</span>i<span class="br0">&#41;</span>.<span class="me1">getContactPoint</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> hit <span class="sy0">=</span> results.<span class="me1">getCollision</span><span class="br0">&#40;</span>i<span class="br0">&#41;</span>.<span class="me1">getGeometry</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">getName</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Asystem+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>.<span class="me1">out</span>.<span class="me1">println</span><span class="br0">&#40;</span><span class="st0">&quot;* Collision #&quot;</span> <span class="sy0">+</span> i<span class="br0">&#41;</span>;
+          <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Asystem+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>.<span class="me1">out</span>.<span class="me1">println</span><span class="br0">&#40;</span><span class="st0">&quot;  You shot &quot;</span> <span class="sy0">+</span> hit <span class="sy0">+</span> <span class="st0">&quot; at &quot;</span> <span class="sy0">+</span> pt <span class="sy0">+</span> <span class="st0">&quot;, &quot;</span> <span class="sy0">+</span> dist <span class="sy0">+</span> <span class="st0">&quot; wu away.&quot;</span><span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span>
+        <span class="co1">// 5. Use the results (we mark the hit object)</span>
+        <span class="kw1">if</span> <span class="br0">&#40;</span>results.<span class="me1">size</span><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="sy0">&gt;</span> 0<span class="br0">&#41;</span><span class="br0">&#123;</span>
+          <span class="co1">// The closest collision point is what was truly hit:</span>
+          CollisionResult closest <span class="sy0">=</span> results.<span class="me1">getClosestCollision</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          <span class="co1">// Let's interact - we mark the hit with a red dot.</span>
+          mark.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span>closest.<span class="me1">getContactPoint</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+          rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>mark<span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="br0">&#123;</span>
+        <span class="co1">// No hits? Then remove the red mark.</span>
+          rootNode.<span class="me1">detachChild</span><span class="br0">&#40;</span>mark<span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span>
+      <span class="br0">&#125;</span>
+    <span class="br0">&#125;</span>
+  <span class="br0">&#125;</span>;
+&nbsp;
+  <span class="co3">/** A cube object for target practice */</span>
+  <span class="kw1">protected</span> Geometry makeCube<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> name, <span class="kw4">float</span> x, <span class="kw4">float</span> y, <span class="kw4">float</span> z<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Abox+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span><span class="kw1">new</span> Vector3f<span class="br0">&#40;</span>x, y, z<span class="br0">&#41;</span>, <span class="nu0">1</span>, <span class="nu0">1</span>, <span class="nu0">1</span><span class="br0">&#41;</span>;
+    Geometry cube <span class="sy0">=</span> <span class="kw1">new</span> Geometry<span class="br0">&#40;</span>name, box<span class="br0">&#41;</span>;
+    Material mat1 <span class="sy0">=</span> <span class="kw1">new</span> Material<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Common/MatDefs/Misc/SolidColor.j3md&quot;</span><span class="br0">&#41;</span>;
+    mat1.<span class="me1">setColor</span><span class="br0">&#40;</span><span class="st0">&quot;m_Color&quot;</span>, ColorRGBA.<span class="me1">randomColor</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    cube.<span class="me1">setMaterial</span><span class="br0">&#40;</span>mat1<span class="br0">&#41;</span>;
+    <span class="kw1">return</span> cube;
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** A floor to show that the &quot;shot&quot; can go through several objects. */</span>
+  <span class="kw1">protected</span> Geometry makeFloor<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Abox+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span><span class="kw1">new</span> Vector3f<span class="br0">&#40;</span>0,<span class="sy0">-</span><span class="nu0">4</span>,<span class="sy0">-</span><span class="nu0">5</span><span class="br0">&#41;</span>, <span class="nu0">15</span>,.2f,<span class="nu0">15</span><span class="br0">&#41;</span>;
+    Geometry floor <span class="sy0">=</span> <span class="kw1">new</span> Geometry<span class="br0">&#40;</span><span class="st0">&quot;the Floor&quot;</span>, box<span class="br0">&#41;</span>;
+    Material mat1 <span class="sy0">=</span> <span class="kw1">new</span> Material<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Common/MatDefs/Misc/SolidColor.j3md&quot;</span><span class="br0">&#41;</span>;
+    mat1.<span class="me1">setColor</span><span class="br0">&#40;</span><span class="st0">&quot;m_Color&quot;</span>, ColorRGBA.<span class="me1">Gray</span><span class="br0">&#41;</span>;
+    floor.<span class="me1">setMaterial</span><span class="br0">&#40;</span>mat1<span class="br0">&#41;</span>;
+    <span class="kw1">return</span> floor;
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** A red ball that marks the last spot that was &quot;hit&quot; by the &quot;shot&quot;. */</span>
+  <span class="kw1">protected</span> <span class="kw4">void</span> initMark<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    Sphere sphere <span class="sy0">=</span> <span class="kw1">new</span> Sphere<span class="br0">&#40;</span><span class="nu0">30</span>, <span class="nu0">30</span>, 0.2f<span class="br0">&#41;</span>;
+    mark <span class="sy0">=</span> <span class="kw1">new</span> Geometry<span class="br0">&#40;</span><span class="st0">&quot;BOOM!&quot;</span>, sphere<span class="br0">&#41;</span>;
+    Material mark_mat <span class="sy0">=</span> <span class="kw1">new</span> Material<span class="br0">&#40;</span>assetManager, <span class="st0">&quot;Common/MatDefs/Misc/SolidColor.j3md&quot;</span><span class="br0">&#41;</span>;
+    mark_mat.<span class="me1">setColor</span><span class="br0">&#40;</span><span class="st0">&quot;m_Color&quot;</span>, ColorRGBA.<span class="me1">Red</span><span class="br0">&#41;</span>;
+    mark.<span class="me1">setMaterial</span><span class="br0">&#40;</span>mark_mat<span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+&nbsp;
+  <span class="co3">/** A centred plus sign to help the player aim. */</span>
+  <span class="kw1">protected</span> <span class="kw4">void</span> initCrossHairs<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    guiNode.<span class="me1">detachAllChildren</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    guiFont <span class="sy0">=</span> assetManager.<span class="me1">loadFont</span><span class="br0">&#40;</span><span class="st0">&quot;Interface/Fonts/Default.fnt&quot;</span><span class="br0">&#41;</span>;
+    BitmapText ch <span class="sy0">=</span> <span class="kw1">new</span> BitmapText<span class="br0">&#40;</span>guiFont, <span class="kw2">false</span><span class="br0">&#41;</span>;
+    ch.<span class="me1">setSize</span><span class="br0">&#40;</span>guiFont.<span class="me1">getCharSet</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">getRenderedSize</span><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="sy0">*</span> <span class="nu0">2</span><span class="br0">&#41;</span>;
+    ch.<span class="me1">setText</span><span class="br0">&#40;</span><span class="st0">&quot;+&quot;</span><span class="br0">&#41;</span>; <span class="co1">// crosshairs</span>
+    ch.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span> <span class="co1">// center</span>
+      settings.<span class="me1">getWidth</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="sy0">/</span><span class="nu0">2</span> <span class="sy0">-</span> guiFont.<span class="me1">getCharSet</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">getRenderedSize</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="sy0">/</span><span class="nu0">3</span><span class="sy0">*</span><span class="nu0">2</span>,
+      settings.<span class="me1">getHeight</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="sy0">/</span><span class="nu0">2</span> <span class="sy0">+</span> ch.<span class="me1">getLineHeight</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="sy0">/</span><span class="nu0">2</span>, 0<span class="br0">&#41;</span>;
+    guiNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>ch<span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span>
+<span class="br0">&#125;</span></pre>
+<p>
+You should see four cubes floating over a gray floor, and cross-hairs. Aim the cross-hairs and click, or press the spacebar to shoot. The last hit will be marked with a red dot.
+</p>
+
+<p>
+Keep an eye on the application&#039;s output stream, it will give you more details: The name of the mesh that was hit, the coordinates of the hit, and the distance.
+</p>
+
+</div>
+<!-- SECTION "Sample Code" [809-6618] -->
+<h2><a name="understanding_the_helper_methods" id="understanding_the_helper_methods">Understanding the Helper Methods</a></h2>
+<div class="level2">
+
+<p>
+
+The methods <code>makeCube()</code>,  <code>makeFloor()</code>, <code>initMark()</code>, and <code>initCrossHairs</code>, are custom helper methods. We call them from  <code>simpleInitApp()</code> to initialize the scenegraph with sample content.
+ 
+</p>
+<ol>
+<li class="level1"><div class="li"> <code>makeCube()</code> creates simple colored boxes for “target practice”. </div>
+</li>
+<li class="level1"><div class="li"> <code>makeFloor()</code> creates a gray floor node for “target practice”. </div>
+</li>
+<li class="level1"><div class="li"> <code>initMark()</code> creates a red sphere (“mark”). We will use it later to mark the spot that was hit. </div>
+<ul>
+<li class="level2"><div class="li"> Note that the mark is not attached and therefor not visible at the start.</div>
+</li>
+</ul>
+</li>
+<li class="level1"><div class="li"> <code>initCrossHairs()</code> creates simple cross-hairs by printing a ”+” sign in the middle of the screen. </div>
+<ul>
+<li class="level2"><div class="li"> Note that the cross-hairs are attached to the <code>guiNode</code>, not to the <code>rootNode</code>.</div>
+</li>
+</ul>
+</li>
+</ol>
+
+<p>
+
+In this example, we attached all “shootable” objects to one custom node, <code>Shootables</code>. This is an optimization so the engine only has to calculate intersections with objects we are actually interested in.  The <code>Shootables</code> node is attached to the <code>rootNode</code> as usual.
+</p>
+
+</div>
+<!-- SECTION "Understanding the Helper Methods" [6619-7665] -->
+<h2><a name="understanding_ray_casting_for_hit_testing" id="understanding_ray_casting_for_hit_testing">Understanding Ray Casting for Hit Testing</a></h2>
+<div class="level2">
+
+<p>
+
+Our goal is to determine which box the user “shot” (picked). In general, we want to determine which mesh the user has selected by aiming the cross-hairs at it. Mathematically, we draw a line from the camera and see whether it intersects with objects in the 3D scene. This line is called a ray.
+</p>
+
+<p>
+Here is our simple ray casting algorithm for picking objects:
+
+</p>
+<ol>
+<li class="level1"><div class="li"> Reset the results list.</div>
+</li>
+<li class="level1"><div class="li"> Cast a ray from cam location into the cam direction.</div>
+</li>
+<li class="level1"><div class="li"> Collect all intersections between the ray and <code>Shootable</code> nodes in the <code>results</code> list.</div>
+</li>
+<li class="level1"><div class="li"> Use the results list to determine what was hit:</div>
+<ol>
+<li class="level2"><div class="li"> For each hit, JME reports its distance from the camera, impact point, and the name of the mesh.</div>
+</li>
+<li class="level2"><div class="li"> Sort the results by distance.</div>
+</li>
+<li class="level2"><div class="li"> Take the closest result, it is the mesh that was hit.</div>
+</li>
+</ol>
+</li>
+</ol>
+
+</div>
+<!-- SECTION "Understanding Ray Casting for Hit Testing" [7666-8510] -->
+<h2><a name="implementing_hit_testing" id="implementing_hit_testing">Implementing Hit Testing</a></h2>
+<div class="level2">
+
+</div>
+<!-- SECTION "Implementing Hit Testing" [8511-8548] -->
+<h3><a name="loading_the_scene" id="loading_the_scene">Loading the scene</a></h3>
+<div class="level3">
+
+<p>
+
+First initialize some shootable nodes and attach them to the scene. You will use the <code>mark</code> object later.
+</p>
+<pre class="code java">  Node shootables;
+  Geometry mark;
+&nbsp;
+  @Override
+  <span class="kw1">public</span> <span class="kw4">void</span> simpleInitApp<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    initCrossHairs<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    initKeys<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+    initMark<span class="br0">&#40;</span><span class="br0">&#41;</span>; 
+    shootables <span class="sy0">=</span> <span class="kw1">new</span> Node<span class="br0">&#40;</span><span class="st0">&quot;Shootables&quot;</span><span class="br0">&#41;</span>;
+    rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>shootables<span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;a Dragon&quot;</span>,    <span class="sy0">-</span>2f, 0f, 1f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;a tin can&quot;</span>,    1f,<span class="sy0">-</span>2f, 0f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;the Sheriff&quot;</span>,  0f, 1f,<span class="sy0">-</span>2f<span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeCube<span class="br0">&#40;</span><span class="st0">&quot;the Deputy&quot;</span>,   1f, 0f, <span class="sy0">-</span><span class="nu0">4</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    shootables.<span class="me1">attachChild</span><span class="br0">&#40;</span>makeFloor<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span></pre>
+</div>
+<!-- SECTION "Loading the scene" [8549-9230] -->
+<h3><a name="setting_up_the_input_listener" id="setting_up_the_input_listener">Setting Up the Input Listener</a></h3>
+<div class="level3">
+
+<p>
+
+Next you declare the shooting action. It can be triggered by clicking or by pressing the space bar. The <code>initKeys()</code> method is called from <code>simpleInitApp()</code> to set up input mappings.
+</p>
+<pre class="code java">  <span class="co3">/** Declaring the &quot;Shoot&quot; action and its triggers. */</span>
+  <span class="kw1">private</span> <span class="kw4">void</span> initKeys<span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    inputManager.<span class="me1">addMapping</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span>,
+      <span class="kw1">new</span> KeyTrigger<span class="br0">&#40;</span>KeyInput.<span class="me1">KEY_SPACE</span><span class="br0">&#41;</span>, <span class="co1">// trigger 1: spacebar</span>
+      <span class="kw1">new</span> MouseButtonTrigger<span class="br0">&#40;</span>0<span class="br0">&#41;</span><span class="br0">&#41;</span>;         <span class="co1">// trigger 2: left-button click</span>
+    inputManager.<span class="me1">addListener</span><span class="br0">&#40;</span>actionListener, <span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span>;
+  <span class="br0">&#125;</span></pre>
+</div>
+<!-- SECTION "Setting Up the Input Listener" [9231-9799] -->
+<h3><a name="defining_the_picking_action" id="defining_the_picking_action">Defining the Picking Action</a></h3>
+<div class="level3">
+
+<p>
+
+Finally we implement the ActionListener that responds to the Shoot trigger with an action. It follows the ray casting algorithm described above:
+
+</p>
+<ol>
+<li class="level1"><div class="li"> For every click or press of the spacebar, the <code>Shoot</code> action is triggered.</div>
+</li>
+<li class="level1"><div class="li"> The action casts a ray and determines intersections with shootable objects (= ray casting).</div>
+</li>
+<li class="level1"><div class="li"> For any target that has been hit, it prints name, distance, and coordinates of the hit.</div>
+</li>
+<li class="level1"><div class="li"> Finally it attaches a red mark to the closest result, to highlight the spot that was actually hit.</div>
+</li>
+<li class="level1"><div class="li"> When nothing was hit, the results list is empty, and the red mark is removed.</div>
+</li>
+</ol>
+
+<p>
+
+Note how it prints a lot of output to show you which hits were registered. 
+</p>
+<pre class="code java">  <span class="co3">/** Defining the &quot;Shoot&quot; action: Determine what was hit and how to respond. */</span>
+  <span class="kw1">private</span> <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Aactionlistener+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+    @Override
+    <span class="kw1">public</span> <span class="kw4">void</span> onAction<span class="br0">&#40;</span><object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> name, <span class="kw4">boolean</span> keyPressed, <span class="kw4">float</span> tpf<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+      <span class="kw1">if</span> <span class="br0">&#40;</span>name.<span class="me1">equals</span><span class="br0">&#40;</span><span class="st0">&quot;Shoot&quot;</span><span class="br0">&#41;</span> <span class="sy0">&amp;&amp;</span> <span class="sy0">!</span>keyPressed<span class="br0">&#41;</span> <span class="br0">&#123;</span>
+        <span class="co1">// 1. Reset results list.</span>
+        CollisionResults results <span class="sy0">=</span> <span class="kw1">new</span> CollisionResults<span class="br0">&#40;</span><span class="br0">&#41;</span>;
+        <span class="co1">// 2. Aim the ray from cam loc to cam direction.</span>
+        Ray ray <span class="sy0">=</span> <span class="kw1">new</span> Ray<span class="br0">&#40;</span>cam.<span class="me1">getLocation</span><span class="br0">&#40;</span><span class="br0">&#41;</span>, cam.<span class="me1">getDirection</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+        <span class="co1">// 3. Collect intersections between Ray and Shootables in results list.</span>
+        shootables.<span class="me1">collideWith</span><span class="br0">&#40;</span>ray, results<span class="br0">&#41;</span>;
+        <span class="co1">// 4. Print results.</span>
+        <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Asystem+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>.<span class="me1">out</span>.<span class="me1">println</span><span class="br0">&#40;</span><span class="st0">&quot;----- Collisions? &quot;</span> <span class="sy0">+</span> results.<span class="me1">size</span><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="sy0">+</span> <span class="st0">&quot;-----&quot;</span><span class="br0">&#41;</span>;
+        <span class="kw1">for</span> <span class="br0">&#40;</span><span class="kw4">int</span> i <span class="sy0">=</span> 0; i <span class="sy0">&lt;</span> results.<span class="me1">size</span><span class="br0">&#40;</span><span class="br0">&#41;</span>; i<span class="sy0">++</span><span class="br0">&#41;</span> <span class="br0">&#123;</span>
+          <span class="co1">// For each hit, we know distance, impact point, name of geometry.</span>
+          <span class="kw4">float</span> dist <span class="sy0">=</span> results.<span class="me1">getCollision</span><span class="br0">&#40;</span>i<span class="br0">&#41;</span>.<span class="me1">getDistance</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          Vector3f pt <span class="sy0">=</span> results.<span class="me1">getCollision</span><span class="br0">&#40;</span>i<span class="br0">&#41;</span>.<span class="me1">getContactPoint</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Astring+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object> hit <span class="sy0">=</span> results.<span class="me1">getCollision</span><span class="br0">&#40;</span>i<span class="br0">&#41;</span>.<span class="me1">getGeometry</span><span class="br0">&#40;</span><span class="br0">&#41;</span>.<span class="me1">getName</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Asystem+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>.<span class="me1">out</span>.<span class="me1">println</span><span class="br0">&#40;</span><span class="st0">&quot;* Collision #&quot;</span> <span class="sy0">+</span> i<span class="br0">&#41;</span>;
+          <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer"><param name="content" value="http://www.google.com/search?hl=en&amp;q=allinurl%3Asystem+java.sun.com&amp;btnI=I%27m%20Feeling%20Lucky"><param name="text" value="<html><u></u></html>"><param name="textColor" value="blue"></object>.<span class="me1">out</span>.<span class="me1">println</span><span class="br0">&#40;</span><span class="st0">&quot;  You shot &quot;</span> <span class="sy0">+</span> hit <span class="sy0">+</span> <span class="st0">&quot; at &quot;</span> <span class="sy0">+</span> pt <span class="sy0">+</span> <span class="st0">&quot;, &quot;</span> <span class="sy0">+</span> dist <span class="sy0">+</span> <span class="st0">&quot; wu away.&quot;</span><span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span>
+        <span class="co1">// 5. Use the results (we mark the hit object)</span>
+        <span class="kw1">if</span> <span class="br0">&#40;</span>results.<span class="me1">size</span><span class="br0">&#40;</span><span class="br0">&#41;</span> <span class="sy0">&gt;</span> 0<span class="br0">&#41;</span><span class="br0">&#123;</span>
+          <span class="co1">// The closest collision point is what was truly hit:</span>
+          CollisionResult closest <span class="sy0">=</span> results.<span class="me1">getClosestCollision</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;
+          mark.<span class="me1">setLocalTranslation</span><span class="br0">&#40;</span>closest.<span class="me1">getWorldContactPoint</span><span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+          <span class="co1">// Let's interact - we mark the hit with a red dot.</span>
+          rootNode.<span class="me1">attachChild</span><span class="br0">&#40;</span>mark<span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span> <span class="kw1">else</span> <span class="br0">&#123;</span>
+        <span class="co1">// No hits? Then remove the red mark.</span>
+          rootNode.<span class="me1">detachChild</span><span class="br0">&#40;</span>mark<span class="br0">&#41;</span>;
+        <span class="br0">&#125;</span>
+      <span class="br0">&#125;</span>
+    <span class="br0">&#125;</span>
+  <span class="br0">&#125;</span>;</pre>
+<p>
+Tip: Notice how you use the provided method <code>results.getClosestCollision().getContactPoint()</code> to determine the <em>closest</em> hit&#039;s location. If your game includes a “weapon” or “spell” that can hit multiple targets, you would instead loop over the list of results, and interact with each of them. 
+</p>
+
+</div>
+<!-- SECTION "Defining the Picking Action" [9800-12563] -->
+<h2><a name="exercises" id="exercises">Exercises</a></h2>
+<div class="level2">
+
+<p>
+
+After a hit was registered, the closest object is identified as target, and marked with a red dot. 
+Modify the code sample to solve these exercises:
+</p>
+
+</div>
+<!-- SECTION "Exercises" [12564-12736] -->
+<h3><a name="magic_spell" id="magic_spell">Magic Spell</a></h3>
+<div class="level3">
+
+<p>
+
+Change the color of the closest clicked target! <br/>
+ Here are some tips:
+</p>
+<ol>
+<li class="level1"><div class="li"> Go to the line where the closest target is indentified, and add you changes after that.</div>
+</li>
+<li class="level1"><div class="li"> To change an object&#039;s color, you must first know its node. Identify the node by identifying the target&#039;s name.</div>
+<ul>
+<li class="level2"><div class="li"> Use <code>rootNode.getChild(closest.getGeometry().getName())</code></div>
+</li>
+</ul>
+</li>
+<li class="level1"><div class="li"> Create a new color material and set the node&#039;s Material to this color.</div>
+<ul>
+<li class="level2"><div class="li"> Look inside the <code>makeCube()</code> method for an example of how to set random colors.</div>
+</li>
+</ul>
+</li>
+</ol>
+
+</div>
+<!-- SECTION "Magic Spell" [12737-13265] -->
+<h3><a name="shoot_at_a_character" id="shoot_at_a_character">Shoot at a Character</a></h3>
+<div class="level3">
+
+<p>
+
+Shooting boxes isn&#039;t very exciting – can you add code that loads and positions a model in the scene, and shoot at it?
+</p>
+<ul>
+<li class="level1"><div class="li"> Tip: You can use <code>Spatial golem = assetManager.loadModel(“Models/Oto/Oto.mesh.xml”);</code> from jme3-test-data.</div>
+</li>
+<li class="level1"><div class="li"> Are the results reported correctly? Did you update the model info? Try: <pre class="code java">    golem.<span class="me1">setModelBound</span><span class="br0">&#40;</span><span class="kw1">new</span> BoundingBox<span class="br0">&#40;</span><span class="br0">&#41;</span><span class="br0">&#41;</span>;
+    golem.<span class="me1">updateModelBound</span><span class="br0">&#40;</span><span class="br0">&#41;</span>;</pre></div>
+</li>
+</ul>
+
+<p>
+    
+P.S. if you translate your golems position you could try .getWorldContactPoint() instead of .getContactPoint() in the onAction() method.
+</p>
+
+</div>
+<!-- SECTION "Shoot at a Character" [13266-13841] -->
+<h3><a name="pick_up_into_inventory" id="pick_up_into_inventory">Pick up into Inventory</a></h3>
+<div class="level3">
+
+<p>
+
+When you click once, the closest target should now be detached from the scene; when you click a second time, reattach the target at the location that you have clicked! Here are some tips:
+</p>
+<ol>
+<li class="level1"><div class="li"> Create an inventory node to store the detached nodes. </div>
+</li>
+<li class="level1"><div class="li"> The inventory node does not need to be attached to the rootNode. </div>
+</li>
+</ol>
+
+</div>
+<!-- SECTION "Pick up into Inventory" [13842-14193] -->
+<h2><a name="conclusion" id="conclusion">Conclusion</a></h2>
+<div class="level2">
+
+<p>
+
+You have learned how to use ray casting to solve the task of determining what object a user selected on the screen. You learned that this can be used for a variety of interactions, such as shooting, opening, picking up items, etc. 
+</p>
+
+<p>
+Use your imagination from here: In your game, you could replace the red mark with a particle emitter, add an explosion effect and sound, and then calculate the new score after each hit – etc. (Audio and Particle Emitters are covered later in this tutorial series.) Or, instead of treating it as a shot, you can trigger any action on the selected object: You could remove the object and put it into the inventory, or trigger an animation on it and open a door or crate – etc.
+</p>
+
+<p>
+Now, would it not be nice if those targets and the floor were solid objects? Let&#039;s continue with <a href="/com/jme3/gde/core/docs/jme3/beginner/hello_collision.html" class="wikilink1" title="jme3:beginner:hello_collision">Collision Detection</a>.
+
+</p>
+
+</div>
+<!-- SECTION "Conclusion" [14194-] -->
+<p><em><a href="http://jmonkeyengine.org/wiki/doku.php/jme3:beginner:hello_picking?do=export_xhtmlbody">view online version</a></em></p>
