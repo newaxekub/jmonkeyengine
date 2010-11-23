@@ -1,0 +1,23 @@
+MaterialDef Fade {
+
+    MaterialParameters {
+        Texture2D m_Texture
+        Texture2D m_DepthTexture
+        Vector4 m_FogColor;
+        Float m_FogDensity;
+        Float m_FogDistance;
+    }
+
+    Technique {
+        VertexShader GLSL100:   Common/MatDefs/Post/Post.vert
+        FragmentShader GLSL100: Common/MatDefs/Post/Fog.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix           
+        }
+    }
+
+    Technique FixedFunc {
+    }
+
+}

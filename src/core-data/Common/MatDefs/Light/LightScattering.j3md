@@ -1,0 +1,24 @@
+MaterialDef Light Scattering {
+ MaterialParameters {
+        Texture2D m_Texture
+        Texture2D m_DepthTexture       
+        Vector3 m_LightPosition
+        Int m_NbSamples
+        Float m_BlurStart
+        Float m_BlurWidth
+        Float m_LightDensity
+        Boolean m_Display
+    }
+
+    Technique {
+        VertexShader GLSL100:   Common/MatDefs/Light/LightScattering.vert
+        FragmentShader GLSL100: Common/MatDefs/Light/LightScattering.frag
+
+        WorldParameters {
+            WorldViewProjectionMatrix
+        }
+    }
+
+    Technique FixedFunc {
+    }
+}
